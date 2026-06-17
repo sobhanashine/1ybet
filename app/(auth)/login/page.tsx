@@ -39,8 +39,9 @@ export default function LoginPage() {
       <div className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-gradient-to-br from-surface to-surface-2 p-7 shadow-2xl ring-1 ring-white/10">
         <div className="pointer-events-none absolute -top-20 left-1/2 h-44 w-44 -translate-x-1/2 rounded-full bg-pitch-500/20 blur-3xl" />
         <div className="relative mb-6 text-center">
-          <div className="mx-auto mb-3 grid h-16 w-16 place-items-center rounded-2xl bg-pitch-500/15 text-3xl shadow-[0_0_30px_-6px_var(--color-pitch-500)] ring-1 ring-pitch-500/30">
-            ⚽️
+          <div className="mx-auto mb-3 h-16 w-16 overflow-hidden rounded-2xl border border-white/10 shadow-[0_0_30px_-6px_var(--color-pitch-500)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icon.svg" alt="1ybet Logo" className="h-full w-full object-cover" />
           </div>
           <h1 className="text-xl font-extrabold text-ink">{t.appName}</h1>
           <p className="mt-1 text-sm text-muted">{t.tagline}</p>
