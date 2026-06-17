@@ -5,6 +5,7 @@ import { getMatchWithPrediction, isLocked } from "@/lib/matches";
 import { getMatchPredictionStats } from "@/lib/match-stats";
 import { teamFa, teamFlag } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
+import { ArrowRight } from "lucide-react";
 import {
   toPersianDigits,
   formatTime,
@@ -93,8 +94,9 @@ export default async function MatchDetailPage({
 
   return (
     <div className="space-y-5">
-      <Link href="/" className="text-xs text-pitch-600">
-        ‹ {t.common.back}
+      <Link href="/" className="inline-flex items-center gap-1 text-xs font-bold text-pitch-600 hover:text-pitch-700 transition">
+        <ArrowRight className="h-3.5 w-3.5" />
+        {t.common.back}
       </Link>
 
       {/* match header */}

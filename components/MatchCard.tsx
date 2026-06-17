@@ -7,6 +7,7 @@ import { teamFa, teamFlag } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
 import { formatTime, toPersianDigits } from "@/lib/format";
 import type { MatchWithPrediction } from "@/lib/matches";
+import { Clock, Lock, Check, BarChart3 } from "lucide-react";
 
 type Props = { match: MatchWithPrediction; locked: boolean; isNext?: boolean };
 
@@ -246,8 +247,9 @@ export default function MatchCard({ match, locked, isNext }: Props) {
           )}
         </div>
         <div className="flex items-center gap-2 text-muted">
-          <span className="font-semibold" suppressHydrationWarning>
-            🕒 {toPersianDigits(formatTime(match.kickoffAt))}
+          <span className="flex items-center gap-1 font-semibold" suppressHydrationWarning>
+            <Clock className="h-3.5 w-3.5 opacity-70" />
+            {toPersianDigits(formatTime(match.kickoffAt))}
           </span>
         </div>
       </div>
@@ -388,7 +390,7 @@ export default function MatchCard({ match, locked, isNext }: Props) {
                   : "border-white/10 bg-white/5 text-muted"
               }`}
             >
-              🔒{" "}
+              <Lock className="h-3 w-3" />
               {match.predHome != null
                 ? t.match.predictionSaved
                 : t.match.predictionMissed}
@@ -421,7 +423,8 @@ export default function MatchCard({ match, locked, isNext }: Props) {
                 </span>
               ) : saved ? (
                 <span className="flex items-center gap-1 text-pitch-700 font-extrabold justify-center">
-                  ✓ {t.common.save}
+                  <Check className="h-3.5 w-3.5" />
+                  {t.common.save}
                 </span>
               ) : (
                 t.match.save
@@ -435,10 +438,11 @@ export default function MatchCard({ match, locked, isNext }: Props) {
 
       <Link
         href={`/match/${match.id}`}
-        className="mt-3 flex items-center justify-center gap-1 border-t border-white/5 pt-3 text-[11px] font-bold text-muted transition hover:text-pitch-700"
+        className="mt-3 flex items-center justify-center gap-1.5 border-t border-white/5 pt-3 text-[11px] font-bold text-muted transition hover:text-pitch-700"
       >
-        📊 {t.match.details}
-        <span aria-hidden>›</span>
+        <BarChart3 className="h-3.5 w-3.5" />
+        {t.match.details}
+        <span aria-hidden className="mr-0.5">›</span>
       </Link>
     </div>
   );
