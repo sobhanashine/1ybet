@@ -16,9 +16,9 @@ export default function LoginPage() {
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tg = (window as any).Telegram?.WebApp;
     if (tg && tg.initData) {
-      setError("");
       startTransition(async () => {
         const res = await loginViaTelegram(tg.initData);
         if (res.ok) {

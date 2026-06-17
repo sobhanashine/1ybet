@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { t } from "@/lib/i18n";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import TelegramProvider from "@/components/TelegramProvider";
 
 const vazir = Vazirmatn({
   variable: "--font-vazir",
@@ -41,6 +42,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col text-ink">
         {children}
+        <TelegramProvider />
         <ServiceWorkerRegister />
       </body>
     </html>

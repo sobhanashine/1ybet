@@ -1,4 +1,5 @@
 import "server-only";
+import { createHmac } from "crypto";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import { eq } from "drizzle-orm";
@@ -112,7 +113,6 @@ export function verifyTelegramHash(initData: string, botToken: string): boolean 
       .sort()
       .join("\n");
 
-    const { createHmac } = require("crypto");
     const secretKey = createHmac("sha256", "WebAppData")
       .update(botToken)
       .digest();
