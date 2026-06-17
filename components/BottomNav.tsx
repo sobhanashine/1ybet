@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Home, Swords, Trophy, Users, User } from "lucide-react";
 import { t } from "@/lib/i18n";
 
 const ITEMS = [
-  { href: "/", label: t.nav.home, icon: "🏠" },
-  { href: "/bracket", label: t.nav.bracket, icon: "🏟️" },
-  { href: "/leaderboard", label: t.nav.leaderboard, icon: "🏆" },
-  { href: "/groups", label: t.nav.groups, icon: "👥" },
-  { href: "/profile", label: t.nav.profile, icon: "👤" },
+  { href: "/", label: t.nav.home, Icon: Home },
+  { href: "/bracket", label: t.nav.bracket, Icon: Swords },
+  { href: "/leaderboard", label: t.nav.leaderboard, Icon: Trophy },
+  { href: "/groups", label: t.nav.groups, Icon: Users },
+  { href: "/profile", label: t.nav.profile, Icon: User },
 ];
 
 export default function BottomNav() {
@@ -22,6 +23,7 @@ export default function BottomNav() {
             item.href === "/"
               ? pathname === "/"
               : pathname.startsWith(item.href);
+          const { Icon } = item;
           return (
             <li key={item.href} className="flex-1">
               <Link
@@ -33,9 +35,11 @@ export default function BottomNav() {
                 {active && (
                   <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-pitch-500 shadow-[0_0_10px_0_var(--color-pitch-500)]" />
                 )}
-                <span className={`text-lg transition ${active ? "drop-shadow-[0_0_8px_var(--color-pitch-500)]" : ""}`}>
-                  {item.icon}
-                </span>
+                <Icon
+                  className={`h-5 w-5 transition ${active ? "drop-shadow-[0_0_8px_var(--color-pitch-500)]" : ""}`}
+                  strokeWidth={active ? 2.4 : 2}
+                  aria-hidden
+                />
                 <span>{item.label}</span>
               </Link>
             </li>

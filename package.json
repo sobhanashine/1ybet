@@ -19,6 +19,7 @@
     "drizzle-orm": "^0.45.2",
     "jalaliday": "^3.1.1",
     "jose": "^6.2.3",
+    "lucide-react": "^1.20.0",
     "next": "16.2.9",
     "postgres": "^3.4.9",
     "react": "19.2.4",
