@@ -12,6 +12,7 @@ import {
 } from "./bracket";
 
 const ROUND_TO_STAGE: Partial<Record<BracketRound, (typeof matches.stage.enumValues)[number]>> = {
+  LAST_32: "LAST_32",
   LAST_16: "LAST_16",
   QUARTER_FINAL: "QUARTER_FINAL",
   SEMI_FINAL: "SEMI_FINAL",

@@ -59,7 +59,7 @@ export default async function H2HPage({
     return <p className="text-sm text-muted">{t.common.error}</p>;
   }
 
-  const stages = ["GROUP", "LAST_16", "QUARTER_FINAL", "SEMI_FINAL", "FINAL"];
+  const stages = ["GROUP", "LAST_32", "LAST_16", "QUARTER_FINAL", "SEMI_FINAL", "FINAL"];
 
   return (
     <div className="space-y-4">

@@ -25,7 +25,7 @@ export default function BracketEditor({ pool, initial, locked }: Props) {
     for (const r of BRACKET_ROUNDS) out[r] = new Set(initial[r] ?? []);
     return out;
   });
-  const [activeRound, setActiveRound] = useState<BracketRound>("LAST_16");
+  const [activeRound, setActiveRound] = useState<BracketRound>(BRACKET_ROUNDS[0]);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();

@@ -6,7 +6,10 @@
 //
 // A pick/result is stored as one row with slot = `${round}#${teamCode}`.
 
+// World Cup 2026 is a 48-team tournament (12 groups of 4): the knockout
+// stage begins with a Round of 32, not the Round of 16.
 export type BracketRound =
+  | "LAST_32"
   | "LAST_16"
   | "QUARTER_FINAL"
   | "SEMI_FINAL"
@@ -14,6 +17,7 @@ export type BracketRound =
   | "CHAMPION";
 
 export const BRACKET_ROUNDS: BracketRound[] = [
+  "LAST_32",
   "LAST_16",
   "QUARTER_FINAL",
   "SEMI_FINAL",
@@ -21,8 +25,9 @@ export const BRACKET_ROUNDS: BracketRound[] = [
   "CHAMPION",
 ];
 
-// Escalating per-round bonus (deeper runs worth more).
+// Escalating per-round bonus (deeper runs worth more) — Fibonacci ladder.
 export const ROUND_BONUS: Record<BracketRound, number> = {
+  LAST_32: 3,
   LAST_16: 5,
   QUARTER_FINAL: 8,
   SEMI_FINAL: 13,
@@ -32,6 +37,7 @@ export const ROUND_BONUS: Record<BracketRound, number> = {
 
 // How many teams the user picks for each round (the size of that round).
 export const ROUND_PICKS: Record<BracketRound, number> = {
+  LAST_32: 32,
   LAST_16: 16,
   QUARTER_FINAL: 8,
   SEMI_FINAL: 4,
@@ -40,6 +46,7 @@ export const ROUND_PICKS: Record<BracketRound, number> = {
 };
 
 export const ROUND_LABEL_FA: Record<BracketRound, string> = {
+  LAST_32: "یک‌شانزدهم نهایی",
   LAST_16: "یک‌هشتم نهایی",
   QUARTER_FINAL: "یک‌چهارم نهایی",
   SEMI_FINAL: "نیمه‌نهایی",

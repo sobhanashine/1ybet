@@ -14,7 +14,7 @@ A premium, fully Persian (RTL layout), installable PWA and **Telegram Mini App**
 ## 📸 Core Features
 
 * ⚽️ **Match Score Predictions**: Submit scorelines for every group-stage and knockout fixture, with cards auto-locking at kickoff.
-* 🏟️ **Dynamic Bracket Progression**: Interactive select-and-advance knockout bracket prediction grid with scaling stage rewards (5 / 8 / 13 / 21 / 34 for each round reached).
+* 🏟️ **Dynamic Bracket Progression**: Interactive select-and-advance knockout bracket prediction grid with scaling stage rewards (3 / 5 / 8 / 13 / 21 / 34 for each round reached, from the Round of 32 up to champion).
 * 🏆 **Granular Scoring Metric**: Rewarding statistical prediction accuracy (floor scoring ensures active participation yields points):
   - **10 Points**: Exact score prediction.
   - **7 Points**: Correct goal difference (including a correct draw).
