@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-17T09:07:00Z",
+  "title": "Design System: 1ybet",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Pitch Green", "canonical": "oklch(53% 0.15 165)" },
+      "primary-hover": { "role": "primary", "displayName": "Deep Pitch", "canonical": "oklch(43% 0.12 165)" },
+      "neutral-bg": { "role": "neutral", "displayName": "Off-white Turf", "canonical": "oklch(97% 0.01 165)" },
+      "neutral-surface": { "role": "neutral", "displayName": "Stadium White", "canonical": "#ffffff" },
+      "ink": { "role": "neutral", "displayName": "Dark Ink", "canonical": "oklch(18% 0.02 165)" },
+      "muted": { "role": "neutral", "displayName": "Muted Slate", "canonical": "oklch(56% 0.03 165)" },
+      "gold": { "role": "accent", "displayName": "Gold Accent", "canonical": "oklch(78% 0.20 85)" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Bold", "purpose": "Scoreboard titles and large scores." },
+      "body": { "displayName": "Body Vazir", "purpose": "Prose, descriptions, and user listings." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Smooth, snappy transitions for active buttons and navigation items." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Score Box Input",
+      "kind": "input",
+      "refersTo": "input-score",
+      "description": "Standard input box for predicting match goals.",
+      "html": "<input type=\"number\" min=\"0\" max=\"99\" class=\"ds-score-input\" value=\"2\" />",
+      "css": ".ds-score-input { height: 44px; width: 48px; border-radius: 8px; border: 1px solid #aee0c9; background: #f2faf6; text-align: center; font-size: 18px; font-weight: 700; outline: none; transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1); } .ds-score-input:focus { border-color: #0f7b5a; }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Save buttons and interactive primary actions.",
+      "html": "<button class=\"ds-btn-primary\">ثبت پیش‌بینی</button>",
+      "css": ".ds-btn-primary { background: #0f7b5a; color: #ffffff; padding: 8px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: #0c6249; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Tactical Turf",
+    "overview": "The Tactical Turf design system is structured like a football playbook. It values absolute clarity, functional space, and sharp UI precision. Every fixture list, leaderboard, and badge collection is laid out with deliberate statistical alignment. The design uses a sporty, pitch-inspired theme that balances warm, off-white pitch greens with bold, high-contrast typography, evoking the spirit of the stadium while maintaining the highest standard of daily usability.",
+    "keyCharacteristics": [
+      "RTL-First Layouts: Seamlessly aligned for Persian script, ensuring text flows naturally and number inputs don't flip awkwardly.",
+      "Pitch-Green Accents: Deep green is used functionally to signify actions, correct predictions, and status.",
+      "Sporty Precision: Grid layouts and tabular numerals align match data and scores cleanly."
+    ],
+    "rules": [
+      { "name": "The Pitch Presence Rule", "body": "Green is reserved for primary actions, success/correct predictions, and active navigation indicators. It must never be used for passive backgrounds or secondary styling.", "section": "colors" },
+      { "name": "The Tabular Alignment Rule", "body": "All numeric values, scores, and fixture rankings must utilize tabular numbers (font-feature-settings: 'ss01') and remain center-aligned or LTR to avoid orientation flipping in Persian RTL context.", "section": "typography" },
+      { "name": "The Flat-At-Rest Rule", "body": "Card components and input containers must remain flat at rest with a simple border or thin ring, only lifting via elevation/shadow on hover or active interaction to prevent visual clutter.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use font-feature-settings: \"ss01\" on numeric score listings to keep digits aligned in tabular columns.",
+      "Do ensure all main Persian body text has at least a 4.5:1 contrast ratio against the background.",
+      "Do use input type number with text alignment centered and direction forced to ltr for score inputs."
+    ],
+    "donts": [
+      "Don't use neon/purple gradients or generic SaaS card shapes.",
+      "Don't use side-stripe borders or left/right accent stripes on fixture lists or leaderboard cards.",
+      "Don't use scale/rotation transitions on image overlays or card pictures on hover."
+    ]
+  }
+}
