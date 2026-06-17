@@ -1,4 +1,4 @@
-# ⚽️ 1ybet · پیش‌بینی جام جهانی ۲۰۲۶
+# ⚽️ 1ybet · World Cup 2026 Predictor
 
 [![Next.js](https://img.shields.io/badge/Next.js-16--Turbopack-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev)
@@ -7,7 +7,7 @@
 [![Drizzle ORM](https://img.shields.io/badge/Drizzle_ORM-v0.45-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black)](https://orm.drizzle.team)
 [![Telegram WebApp](https://img.shields.io/badge/Telegram_Mini_App-Active-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://core.telegram.org/bots/webapps)
 
-A premium, fully Persian (RTL), installable PWA and **Telegram Mini App** where users predict World Cup 2026 match scores, fill dynamic knockout brackets, earn achievements/badges, climb high-contrast leaderboards, and compete in private leagues.
+A premium, fully Persian (RTL layout), installable PWA and **Telegram Mini App** where users predict World Cup 2026 match scores, fill dynamic knockout brackets, earn achievements/badges, climb high-contrast leaderboards, and compete in private leagues.
 
 ---
 
@@ -23,7 +23,7 @@ A premium, fully Persian (RTL), installable PWA and **Telegram Mini App** where 
   - **2 Points**: Participation points (floor margin — no zero).
 * 👥 **Private Leagues**: Build or join customized mini-competitions with friends using shareable invitation codes.
 * 🏟️ **Dynamic Bracket Progression**: Interactive select-and-advance knockout bracket prediction grid with scaling stage rewards.
-* 🛠️ **Full Admin Control panel**: Manual result overrides, API synchronization triggers, and push notification broadcast tools.
+* 🛠️ **Full Admin Control Panel**: Manual result overrides, API synchronization triggers, and push notification broadcast tools.
 
 ---
 
