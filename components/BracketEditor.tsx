@@ -9,7 +9,7 @@ import {
   ROUND_BONUS,
   type BracketRound,
 } from "@/lib/bracket";
-import { teamFa } from "@/lib/teams-fa";
+import { teamFa, teamFlag } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
 import { toPersianDigits } from "@/lib/format";
 
@@ -88,7 +88,10 @@ export default function BracketEditor({ pool, initial, locked }: Props) {
                         : "bg-white text-ink ring-1 ring-black/10 disabled:opacity-40"
                     }`}
                   >
-                    {teamFa(team)}
+                    <span className="flex items-center gap-1 select-none">
+                      <span>{teamFlag(team)}</span>
+                      <span>{teamFa(team)}</span>
+                    </span>
                   </button>
                 );
               })}

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { submitPrediction } from "@/app/actions/predictions";
 import { isLocked } from "@/lib/time";
-import { teamFa } from "@/lib/teams-fa";
+import { teamFa, teamFlag } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
 import { formatTime, toPersianDigits } from "@/lib/format";
 import type { MatchWithPrediction } from "@/lib/matches";
@@ -66,13 +66,16 @@ export default function MatchCard({ match }: Props) {
       </div>
 
       <div className="flex items-center justify-between gap-2">
-        <span className="flex-1 truncate text-start text-sm font-semibold text-ink">
-          {teamFa(match.homeTeam)}
-        </span>
+        <div className="flex flex-1 items-center gap-1.5 min-w-0">
+          <span className="text-base leading-none select-none">{teamFlag(match.homeTeam)}</span>
+          <span className="truncate text-sm font-semibold text-ink">
+            {teamFa(match.homeTeam)}
+          </span>
+        </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           {finished ? (
-            <div className="flex items-center gap-2 rounded-lg bg-pitch-50 px-3 py-1 text-lg font-black text-pitch-700">
+            <div className="flex items-center gap-2 rounded-lg bg-pitch-50 px-3 py-1 text-lg font-black text-pitch-700 font-feature-ss01">
               <span>{toPersianDigits(match.homeScore ?? 0)}</span>
               <span className="text-xs font-normal opacity-60">{t.match.vs}</span>
               <span>{toPersianDigits(match.awayScore ?? 0)}</span>
@@ -86,9 +89,12 @@ export default function MatchCard({ match }: Props) {
           )}
         </div>
 
-        <span className="flex-1 truncate text-end text-sm font-semibold text-ink">
-          {teamFa(match.awayTeam)}
-        </span>
+        <div className="flex flex-1 items-center justify-end gap-1.5 min-w-0">
+          <span className="truncate text-sm font-semibold text-ink">
+            {teamFa(match.awayTeam)}
+          </span>
+          <span className="text-base leading-none select-none">{teamFlag(match.awayTeam)}</span>
+        </div>
       </div>
 
       {/* prediction / result footer */}

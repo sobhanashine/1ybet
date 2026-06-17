@@ -65,10 +65,10 @@ export default async function H2HPage({
     <div className="space-y-4">
       <h1 className="text-lg font-bold">{t.groups.compare}</h1>
 
-      <div className="grid grid-cols-3 items-center gap-2 rounded-2xl bg-pitch-500 p-4 text-white">
-        <span className="truncate text-center font-bold">{a.displayName}</span>
-        <span className="text-center text-xs opacity-80">{t.match.vs}</span>
-        <span className="truncate text-center font-bold">{b.displayName}</span>
+      <div className="grid grid-cols-3 items-center gap-2 rounded-2xl bg-white p-4 text-ink ring-1 ring-black/5">
+        <span className="truncate text-center font-bold text-sm text-pitch-700">{a.displayName}</span>
+        <span className="text-center text-xs text-muted font-medium">{t.match.vs}</span>
+        <span className="truncate text-center font-bold text-sm text-pitch-700">{b.displayName}</span>
       </div>
 
       <div className="rounded-2xl bg-white px-4 ring-1 ring-black/5">
