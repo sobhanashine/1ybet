@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getLeaderboard, type Scope } from "@/lib/leaderboard";
+import { maybeAutoSync } from "@/lib/auto-sync";
 import { t } from "@/lib/i18n";
 import { toPersianDigits } from "@/lib/format";
 
@@ -43,6 +44,7 @@ export default async function LeaderboardPage({
   searchParams: Promise<SP>;
 }) {
   const sp = await searchParams;
+  await maybeAutoSync();
   const user = await getCurrentUser();
   const scope = scopeFrom(sp);
   const rows = await getLeaderboard(scope);
