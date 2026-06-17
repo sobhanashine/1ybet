@@ -81,6 +81,9 @@ export default function NotificationToggle({
 
       <div>
         <label className="mb-1 block text-xs text-muted">{t.profile.email}</label>
+        <p className="mb-2 text-[11px] leading-5 text-muted">
+          قبل از شروع بازی‌هایی که پیش‌بینی نکرده‌ای برات ایمیل یادآوری می‌فرستیم.
+        </p>
         <div className="flex gap-2">
           <input
             dir="ltr"
