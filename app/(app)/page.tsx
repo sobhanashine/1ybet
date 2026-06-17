@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth";
 import { getMatchesWithPredictions, isLocked, type MatchWithPrediction } from "@/lib/matches";
 import { getLeaderboard } from "@/lib/leaderboard";
+import { maybeAutoSync } from "@/lib/auto-sync";
 import MatchCard from "@/components/MatchCard";
 import EmailReminderBanner from "@/components/EmailReminderBanner";
 import { t } from "@/lib/i18n";
@@ -20,6 +21,10 @@ function groupByDay(ms: MatchWithPrediction[]) {
 export default async function HomePage() {
   const user = await getCurrentUser();
   if (!user) return null;
+
+  // Pull fresh results & score predictions if a match has finished since the
+  // last load — so scores and rank update without depending on an external cron.
+  await maybeAutoSync();
 
   const [leaderboard, allMatches] = await Promise.all([
     getLeaderboard({ kind: "total" }),
