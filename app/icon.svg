@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#0b1410"/>
+  <circle cx="256" cy="232" r="130" fill="none" stroke="#16e07f" stroke-width="10" opacity="0.9"/>
+  <circle cx="256" cy="232" r="120" fill="#ffffff"/>
+  <path d="M256 144l34 25-13 40h-42l-13-40z" fill="#14201b"/>
+  <path d="M376 232l-13 40-34-10 5-42 34-12z" fill="#14201b"/>
+  <path d="M136 232l13 40 34-10-5-42-34-12z" fill="#14201b"/>
+  <path d="M205 320l51 0 16 38-42 24-41-24z" fill="#14201b"/>
+  <text x="256" y="438" font-family="Vazirmatn, Tahoma, sans-serif" font-size="92" font-weight="700" fill="#f5c518" text-anchor="middle">۲۶</text>
+</svg>
