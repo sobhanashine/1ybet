@@ -50,7 +50,9 @@ function pointsExpr(scope: Scope) {
   }
   const { from, to } =
     scope.kind === "daily" ? dayRange(scope.date) : weekRange(scope.date);
-  return sql<number>`coalesce(sum(case when ${matches.kickoffAt} >= ${from} and ${matches.kickoffAt} < ${to} then ${predictions.points} else 0 end), 0)::int`;
+  // postgres-js doesn't serialize a JS Date passed as a raw sql`` parameter,
+  // so bind ISO strings (compared against the timestamptz column).
+  return sql<number>`coalesce(sum(case when ${matches.kickoffAt} >= ${from.toISOString()} and ${matches.kickoffAt} < ${to.toISOString()} then ${predictions.points} else 0 end), 0)::int`;
 }
 
 function predictedExpr() {

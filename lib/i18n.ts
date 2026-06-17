@@ -49,7 +49,7 @@ export const fa = {
   },
 
   stage: {
-    GROUP: "مرحله گروهی",
+    GROUP: "گروهی",
     LAST_32: "یک‌شانزدهم نهایی",
     LAST_16: "یک‌هشتم نهایی",
     QUARTER_FINAL: "یک‌چهارم نهایی",
