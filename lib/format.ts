@@ -36,16 +36,28 @@ function tehran(date: Date | string) {
   }).calendar("jalali");
 }
 
-/** e.g. "۲۵ خرداد" */
+const FA_WEEKDAYS = [
+  "یکشنبه",
+  "دوشنبه",
+  "سه‌شنبه",
+  "چهارشنبه",
+  "پنجشنبه",
+  "جمعه",
+  "شنبه",
+];
+
+/** e.g. "شنبه، ۲۵ خرداد" */
 export function formatJalaliDate(date: Date | string): string {
   const d = tehran(date);
-  return `${toPersianDigits(d.date())} ${FA_MONTHS[d.month()]}`;
+  const weekday = FA_WEEKDAYS[dayjs(date).tz(TIMEZONE).day()];
+  return `${weekday}، ${toPersianDigits(d.date())} ${FA_MONTHS[d.month()]}`;
 }
 
-/** e.g. "۲۵ خرداد ۱۴۰۵" */
+/** e.g. "شنبه، ۲۵ خرداد ۱۴۰۵" */
 export function formatJalaliDateFull(date: Date | string): string {
   const d = tehran(date);
-  return `${toPersianDigits(d.date())} ${FA_MONTHS[d.month()]} ${toPersianDigits(
+  const weekday = FA_WEEKDAYS[dayjs(date).tz(TIMEZONE).day()];
+  return `${weekday}، ${toPersianDigits(d.date())} ${FA_MONTHS[d.month()]} ${toPersianDigits(
     d.year(),
   )}`;
 }
