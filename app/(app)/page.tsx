@@ -85,7 +85,7 @@ export default async function HomePage() {
         ) : (
           days.map(([day, ms]) => (
             <section key={day} className="space-y-3">
-              <h3 className="text-sm font-semibold text-pitch-600 px-1">
+              <h3 className="text-sm font-semibold text-pitch-600 px-1" suppressHydrationWarning>
                 {formatJalaliDate(ms[0].kickoffAt)}
               </h3>
               <div className="space-y-3">

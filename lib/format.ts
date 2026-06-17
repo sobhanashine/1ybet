@@ -49,14 +49,14 @@ const FA_WEEKDAYS = [
 /** e.g. "شنبه، ۲۵ خرداد" */
 export function formatJalaliDate(date: Date | string): string {
   const d = tehran(date);
-  const weekday = FA_WEEKDAYS[dayjs(date).tz(TIMEZONE).day()];
+  const weekday = FA_WEEKDAYS[d.day()];
   return `${weekday}، ${toPersianDigits(d.date())} ${FA_MONTHS[d.month()]}`;
 }
 
 /** e.g. "شنبه، ۲۵ خرداد ۱۴۰۵" */
 export function formatJalaliDateFull(date: Date | string): string {
   const d = tehran(date);
-  const weekday = FA_WEEKDAYS[dayjs(date).tz(TIMEZONE).day()];
+  const weekday = FA_WEEKDAYS[d.day()];
   return `${weekday}، ${toPersianDigits(d.date())} ${FA_MONTHS[d.month()]} ${toPersianDigits(
     d.year(),
   )}`;
