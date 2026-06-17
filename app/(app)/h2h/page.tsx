@@ -2,10 +2,11 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getCompareStats, getMatchComparison, type Pick } from "@/lib/h2h";
 import { getLeaderboard } from "@/lib/leaderboard";
-import { teamFa, teamFlag } from "@/lib/teams-fa";
+import { teamFa } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
 import { toPersianDigits, formatTime } from "@/lib/format";
 import ComparePicker, { type PickablePlayer } from "@/components/ComparePicker";
+import TeamFlag from "@/components/TeamFlag";
 
 export const dynamic = "force-dynamic";
 
@@ -154,13 +155,8 @@ export default async function H2HPage({
               >
                 {/* match header: teams + result */}
                 <div className="mb-2 flex items-center justify-center gap-2 text-xs">
-                  <span className="flex items-center gap-1 font-bold text-ink">
-                    {m.homeFlag ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={m.homeFlag} alt="" className="h-3.5 w-auto" />
-                    ) : (
-                      <span>{teamFlag(m.homeTeam)}</span>
-                    )}
+                  <span className="flex items-center gap-1.5 font-bold text-ink">
+                    <TeamFlag teamName={m.homeTeam} flagUrl={m.homeFlag} className="h-3.5 w-auto max-w-[20px] object-contain rounded-sm shadow-sm" />
                     {teamFa(m.homeTeam)}
                   </span>
                   <span className="font-feature-ss01 font-extrabold text-pitch-700">
@@ -168,14 +164,9 @@ export default async function H2HPage({
                       ? `${toPersianDigits(m.homeScore ?? 0)} - ${toPersianDigits(m.awayScore ?? 0)}`
                       : toPersianDigits(formatTime(m.kickoffAt))}
                   </span>
-                  <span className="flex items-center gap-1 font-bold text-ink">
+                  <span className="flex items-center gap-1.5 font-bold text-ink">
                     {teamFa(m.awayTeam)}
-                    {m.awayFlag ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={m.awayFlag} alt="" className="h-3.5 w-auto" />
-                    ) : (
-                      <span>{teamFlag(m.awayTeam)}</span>
-                    )}
+                    <TeamFlag teamName={m.awayTeam} flagUrl={m.awayFlag} className="h-3.5 w-auto max-w-[20px] object-contain rounded-sm shadow-sm" />
                   </span>
                 </div>
                 {/* the two picks side by side */}

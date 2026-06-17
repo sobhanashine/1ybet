@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getMatchWithPrediction, isLocked } from "@/lib/matches";
 import { getMatchPredictionStats } from "@/lib/match-stats";
-import { teamFa, teamFlag } from "@/lib/teams-fa";
+import { teamFa } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
 import { ArrowRight } from "lucide-react";
+import TeamFlag from "@/components/TeamFlag";
 import {
   toPersianDigits,
   formatTime,
@@ -24,12 +25,7 @@ function TeamBadge({
   return (
     <div className="flex flex-1 flex-col items-center gap-2 text-center">
       <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-pitch-50/5">
-        {flag ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={flag} alt={team} className="h-7 w-auto object-contain" />
-        ) : (
-          <span className="text-3xl">{teamFlag(team)}</span>
-        )}
+        <TeamFlag teamName={team} flagUrl={flag} className="h-7 w-auto max-w-[36px] object-contain rounded-sm shadow-sm" />
       </div>
       <span className="text-sm font-extrabold leading-tight text-ink">
         {teamFa(team)}

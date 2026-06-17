@@ -3,11 +3,12 @@
 import { useState, useTransition, useRef, useEffect } from "react";
 import Link from "next/link";
 import { submitPrediction } from "@/app/actions/predictions";
-import { teamFa, teamFlag } from "@/lib/teams-fa";
+import { teamFa } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
 import { formatTime, toPersianDigits } from "@/lib/format";
 import type { MatchWithPrediction } from "@/lib/matches";
 import { Clock, Lock, Check, BarChart3 } from "lucide-react";
+import TeamFlag from "@/components/TeamFlag";
 
 type Props = { match: MatchWithPrediction; locked: boolean; isNext?: boolean };
 
@@ -259,12 +260,7 @@ export default function MatchCard({ match, locked, isNext }: Props) {
         {/* Home Team */}
         <div className="flex flex-col items-center text-center">
           <div className="h-10 w-10 flex items-center justify-center mb-2 overflow-hidden rounded-xl bg-pitch-50/5 transition-transform duration-300 group-hover:scale-110 select-none">
-            {match.homeFlag ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={match.homeFlag} alt={match.homeTeam} className="h-6 w-auto object-contain" />
-            ) : (
-              <span className="text-2xl">{teamFlag(match.homeTeam)}</span>
-            )}
+            <TeamFlag teamName={match.homeTeam} flagUrl={match.homeFlag} className="h-6 w-auto max-w-[28px] object-contain rounded-sm shadow-sm" />
           </div>
           <span className="text-sm font-extrabold text-ink leading-tight truncate max-w-[110px]">
             {teamFa(match.homeTeam)}
@@ -328,12 +324,7 @@ export default function MatchCard({ match, locked, isNext }: Props) {
         {/* Away Team */}
         <div className="flex flex-col items-center text-center">
           <div className="h-10 w-10 flex items-center justify-center mb-2 overflow-hidden rounded-xl bg-pitch-50/5 transition-transform duration-300 group-hover:scale-110 select-none">
-            {match.awayFlag ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={match.awayFlag} alt={match.awayTeam} className="h-6 w-auto object-contain" />
-            ) : (
-              <span className="text-2xl">{teamFlag(match.awayTeam)}</span>
-            )}
+            <TeamFlag teamName={match.awayTeam} flagUrl={match.awayFlag} className="h-6 w-auto max-w-[28px] object-contain rounded-sm shadow-sm" />
           </div>
           <span className="text-sm font-extrabold text-ink leading-tight truncate max-w-[110px]">
             {teamFa(match.awayTeam)}

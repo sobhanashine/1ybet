@@ -9,7 +9,8 @@ import {
   ROUND_BONUS,
   type BracketRound,
 } from "@/lib/bracket";
-import { teamFa, teamFlag } from "@/lib/teams-fa";
+import { teamFa } from "@/lib/teams-fa";
+import TeamFlag from "@/components/TeamFlag";
 import { t } from "@/lib/i18n";
 import { toPersianDigits } from "@/lib/format";
 
@@ -222,9 +223,9 @@ export default function BracketEditor({ pool, initial, locked }: Props) {
                 {active && (
                   <span className="absolute left-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-pitch-500 shadow-[0_0_8px_var(--color-pitch-500)] animate-pulse" />
                 )}
-                <span className="block text-3xl mb-1.5 transition-transform duration-300 group-hover:scale-110">
-                  {teamFlag(team)}
-                </span>
+                <div className="flex justify-center mb-1.5 transition-transform duration-300 group-hover:scale-110">
+                  <TeamFlag teamName={team} className="h-8 w-auto max-w-[38px] object-contain rounded-sm shadow-sm" />
+                </div>
                 <span className="block text-xs font-extrabold truncate w-full">
                   {teamFa(team)}
                 </span>

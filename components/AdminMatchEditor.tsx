@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { saveMatchResult } from "@/app/actions/admin";
-import { teamFa, teamFlag } from "@/lib/teams-fa";
+import { teamFa } from "@/lib/teams-fa";
+import TeamFlag from "@/components/TeamFlag";
 import { formatJalaliDate, formatTime, toPersianDigits } from "@/lib/format";
 
 type AdminMatch = {
@@ -38,7 +39,13 @@ function Row({ match }: { match: AdminMatch }) {
   return (
     <div className="rounded-xl bg-surface p-3 ring-1 ring-white/10">
       <div className="mb-2 flex items-center justify-between text-xs text-muted">
-          {teamFlag(match.homeTeam)} {teamFa(match.homeTeam)} - {teamFa(match.awayTeam)} {teamFlag(match.awayTeam)}
+        <div className="flex items-center gap-1.5 font-semibold text-ink">
+          <TeamFlag teamName={match.homeTeam} className="h-3.5 w-auto max-w-[20px] object-contain rounded-sm shadow-sm" />
+          <span>{teamFa(match.homeTeam)}</span>
+          <span className="text-muted/40 mx-1">–</span>
+          <span>{teamFa(match.awayTeam)}</span>
+          <TeamFlag teamName={match.awayTeam} className="h-3.5 w-auto max-w-[20px] object-contain rounded-sm shadow-sm" />
+        </div>
         <span suppressHydrationWarning>
           {formatJalaliDate(match.kickoffAt)} {toPersianDigits(formatTime(match.kickoffAt))}
         </span>
