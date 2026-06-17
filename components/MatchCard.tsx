@@ -179,11 +179,16 @@ export default function MatchCard({ match, locked, isNext }: Props) {
 
   const hasPrediction = match.predHome != null || saved;
   const isUpcoming = !locked && !finished;
-  const cardBorderClass = hasPrediction
-    ? "ring-pitch-500/25 hover:ring-pitch-500/45 hover:shadow-[0_8px_30px_rgba(22,224,127,0.08)] bg-gradient-to-b from-surface/95 via-surface/98 to-pitch-50/10 shadow-[0_2px_16px_rgba(22,224,127,0.02)]"
-    : isUpcoming
-      ? "ring-amber-500/30 hover:ring-amber-500/50 hover:shadow-[0_8px_30px_rgba(245,158,11,0.08)] bg-gradient-to-b from-surface/90 to-surface-2/90"
-      : "ring-white/5 border-dashed border-white/5 bg-gradient-to-b from-surface-2/60 to-surface-2/40 opacity-70";
+  const isAwaitingResult = locked && !finished;
+  const cardBorderClass = isAwaitingResult
+    ? hasPrediction
+      ? "ring-sky-500/25 hover:ring-sky-500/45 hover:shadow-[0_8px_30px_rgba(14,165,233,0.08)] bg-gradient-to-b from-surface/95 via-surface/98 to-sky-950/10 shadow-[0_2px_16px_rgba(14,165,233,0.02)]"
+      : "ring-red-500/15 border-dashed border-red-500/5 bg-gradient-to-b from-surface-2/60 to-surface-2/40 opacity-70"
+    : hasPrediction
+      ? "ring-pitch-500/25 hover:ring-pitch-500/45 hover:shadow-[0_8px_30px_rgba(22,224,127,0.08)] bg-gradient-to-b from-surface/95 via-surface/98 to-pitch-50/10 shadow-[0_2px_16px_rgba(22,224,127,0.02)]"
+      : isUpcoming
+        ? "ring-amber-500/30 hover:ring-amber-500/50 hover:shadow-[0_8px_30px_rgba(245,158,11,0.08)] bg-gradient-to-b from-surface/90 to-surface-2/90"
+        : "ring-white/5 border-dashed border-white/5 bg-gradient-to-b from-surface-2/60 to-surface-2/40 opacity-70";
 
   return (
     <div
@@ -191,24 +196,32 @@ export default function MatchCard({ match, locked, isNext }: Props) {
       className={`group relative overflow-hidden rounded-3xl p-5 ring-1 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${cardBorderClass}`}
     >
       {/* Top accent line representing predicted/unpredicted/missed status */}
-      {hasPrediction && (
+      {isAwaitingResult ? (
+        hasPrediction ? (
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-sky-500/70 to-transparent rounded-t-3xl" />
+        ) : (
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-red-500/30 to-transparent rounded-t-3xl" />
+        )
+      ) : hasPrediction ? (
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-pitch-500/70 to-transparent rounded-t-3xl" />
-      )}
-      {!hasPrediction && isUpcoming && (
+      ) : isUpcoming ? (
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-amber-500/70 to-transparent rounded-t-3xl animate-pulse" />
-      )}
-      {!hasPrediction && !isUpcoming && (
+      ) : (
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-red-500/20 to-transparent rounded-t-3xl" />
       )}
 
       {/* Dynamic spotlight glow on card hover */}
       <div
         className={`pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full blur-3xl transition-opacity duration-300 opacity-0 group-hover:opacity-100 ${
-          hasPrediction
-            ? "bg-pitch-500/10"
-            : isUpcoming
-              ? "bg-amber-500/10"
+          isAwaitingResult
+            ? hasPrediction
+              ? "bg-sky-500/10"
               : "bg-red-500/5"
+            : hasPrediction
+              ? "bg-pitch-500/10"
+              : isUpcoming
+                ? "bg-amber-500/10"
+                : "bg-red-500/5"
         }`}
       />
 
@@ -289,7 +302,12 @@ export default function MatchCard({ match, locked, isNext }: Props) {
                   {t.match.notPredicted}
                 </div>
               )}
-              <span className="flex items-center gap-1 text-[10px] font-bold text-muted/60">
+              <span className={`flex items-center gap-1.5 text-[10px] font-bold rounded-full px-2.5 py-0.5 border ${
+                hasPrediction
+                  ? "text-sky-400/80 bg-sky-500/5 border-sky-500/10 shadow-[0_0_8px_rgba(14,165,233,0.05)]"
+                  : "text-red-400/70 bg-red-500/5 border-red-500/10"
+              }`}>
+                <span className={`h-1 w-1 rounded-full ${hasPrediction ? "bg-sky-400 animate-pulse" : "bg-red-400/70"}`} />
                 {t.match.awaitingResult}
               </span>
             </div>
