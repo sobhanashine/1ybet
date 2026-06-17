@@ -1,7 +1,10 @@
 import "server-only";
 import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { db } from "./db";
-import { matches, predictions } from "./db/schema";
+import { matches, predictions, users } from "./db/schema";
+import { sendEmail, predictionResultEmailHtml } from "./email";
+import { teamFa, teamFlag } from "./teams-fa";
+import { sendTelegramMessage } from "./telegram";
 import { fetchWorldCupMatches } from "./football-api";
 import { scorePrediction } from "./scoring";
 import { resolveBracketResults, scoreBracket } from "./bracket-server";
@@ -72,8 +75,14 @@ export async function scoreFinishedMatches(): Promise<{
 
   for (const m of finished) {
     const unscored = await db
-      .select()
+      .select({
+        prediction: predictions,
+        email: users.email,
+        displayName: users.displayName,
+        telegramId: users.telegramId,
+      })
       .from(predictions)
+      .innerJoin(users, eq(predictions.userId, users.id))
       .where(and(eq(predictions.matchId, m.id), eq(predictions.scored, false)));
 
     if (unscored.length === 0) {
@@ -88,15 +97,71 @@ export async function scoreFinishedMatches(): Promise<{
 
     for (const p of unscored) {
       const pts = scorePrediction(
-        p.predHome,
-        p.predAway,
+        p.prediction.predHome,
+        p.prediction.predAway,
         m.homeScore!,
         m.awayScore!,
       );
       await db
         .update(predictions)
         .set({ points: pts, scored: true })
-        .where(eq(predictions.id, p.id));
+        .where(eq(predictions.id, p.prediction.id));
+
+      const homeFa = teamFa(m.homeTeam);
+      const awayFa = teamFa(m.awayTeam);
+
+      if (p.telegramId) {
+        try {
+          let message = "";
+          if (pts === 10) {
+            message = "🔥 فوق‌العاده بود! نتیجه دقیق را حدس زدی و ۱۰ امتیاز کامل گرفتی!";
+          } else if (pts === 7) {
+            message = "👏 آفرین! تفاضل گل و نتیجه بازی را درست حدس زدی و ۷ امتیاز گرفتی!";
+          } else if (pts === 5) {
+            message = "👍 خوب بود! برنده بازی را درست حدس زدی و ۵ امتیاز گرفتی!";
+          } else {
+            message = "پیش‌بینی‌ات درست نبود ولی ۲ امتیاز مشارکت را گرفتی. برای بازی بعدی بیشتر تلاش کن! ⚽";
+          }
+
+          const homeFlag = teamFlag(m.homeTeam);
+          const awayFlag = teamFlag(m.awayTeam);
+          const tgMsg = `🏆 نتیجه پیش‌بینی مسابقه 🏆
+----------------------------------
+سلام ${p.displayName || "کاربر"} عزیز، بازی مورد نظر به پایان رسید و امتیاز شما محاسبه شد.
+
+⚽️ مسابقه: ${homeFlag} ${homeFa} - ${awayFa} ${awayFlag}
+🏁 نتیجه واقعی: ${m.homeScore} - ${m.awayScore}
+🔮 پیش‌بینی شما: ${p.prediction.predHome} - ${p.prediction.predAway}
+
+💎 امتیاز کسب شده: ${pts} امتیاز
+----------------------------------
+${message}`;
+          await sendTelegramMessage(p.telegramId, tgMsg);
+        } catch (err) {
+          console.error("Failed to send prediction result Telegram message:", err);
+        }
+      } else if (p.email) {
+        try {
+          const html = predictionResultEmailHtml({
+            displayName: p.displayName || "کاربر",
+            homeTeam: m.homeTeam,
+            awayTeam: m.awayTeam,
+            homeScore: m.homeScore!,
+            awayScore: m.awayScore!,
+            predHome: p.prediction.predHome,
+            predAway: p.prediction.predAway,
+            points: pts,
+          });
+          await sendEmail(
+            p.email,
+            `🏆 نتیجه پیش‌بینی مسابقه ${homeFa} - ${awayFa}`,
+            html,
+          );
+        } catch (err) {
+          console.error("Failed to send prediction result email:", err);
+        }
+      }
+
       predictionsScored++;
     }
 

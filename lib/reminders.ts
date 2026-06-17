@@ -10,7 +10,8 @@ import {
 } from "./db/schema";
 import { sendPushToUser } from "./push";
 import { sendEmail } from "./email";
-import { teamFa } from "./teams-fa";
+import { sendTelegramMessage } from "./telegram";
+import { teamFa, teamFlag } from "./teams-fa";
 import { formatTime } from "./format";
 import { APP_URL } from "./config";
 
@@ -48,7 +49,7 @@ export function reminderEmailHtml(opts: {
 async function claim(
   userId: number,
   matchId: number,
-  channel: "push" | "email",
+  channel: "push" | "email" | "telegram",
 ): Promise<boolean> {
   const res = await db
     .insert(reminderLog)
@@ -75,7 +76,7 @@ export async function runReminders(): Promise<{ reminders: number }> {
     );
   if (upcoming.length === 0) return { reminders: 0 };
 
-  // candidate users: have an email or a push subscription
+  // candidate users: have an email, push subscription, or telegramId
   const emailUsers = await db
     .select({ id: users.id, email: users.email })
     .from(users)
@@ -83,13 +84,22 @@ export async function runReminders(): Promise<{ reminders: number }> {
   const pushUsers = await db
     .selectDistinct({ id: pushSubscriptions.userId })
     .from(pushSubscriptions);
+  const tgUsers = await db
+    .select({ id: users.id, telegramId: users.telegramId })
+    .from(users)
+    .where(isNotNull(users.telegramId));
 
-  const candidates = new Map<number, { email: string | null; push: boolean }>();
+  const candidates = new Map<number, { email: string | null; push: boolean; telegramId: string | null }>();
   for (const u of emailUsers)
-    candidates.set(u.id, { email: u.email, push: false });
+    candidates.set(u.id, { email: u.email, push: false, telegramId: null });
   for (const u of pushUsers) {
-    const c = candidates.get(u.id) ?? { email: null, push: false };
+    const c = candidates.get(u.id) ?? { email: null, push: false, telegramId: null };
     c.push = true;
+    candidates.set(u.id, c);
+  }
+  for (const u of tgUsers) {
+    const c = candidates.get(u.id) ?? { email: null, push: false, telegramId: null };
+    c.telegramId = u.telegramId;
     candidates.set(u.id, c);
   }
   if (candidates.size === 0) return { reminders: 0 };
@@ -108,6 +118,8 @@ export async function runReminders(): Promise<{ reminders: number }> {
 
     const home = teamFa(m.homeTeam);
     const away = teamFa(m.awayTeam);
+    const homeFlag = teamFlag(m.homeTeam);
+    const awayFlag = teamFlag(m.awayTeam);
     const time = formatTime(m.kickoffAt);
     const title = "⏰ یادآوری پیش‌بینی";
     const body = `${home} - ${away} ساعت ${time}`;
@@ -119,7 +131,18 @@ export async function runReminders(): Promise<{ reminders: number }> {
         await sendPushToUser(userId, { title, body, url: "/" });
         reminders++;
       }
-      if (c.email && (await claim(userId, m.id, "email"))) {
+      if (c.telegramId && (await claim(userId, m.id, "telegram"))) {
+        const tgMsg = `⏰ یادآوری پیش‌بینی مسابقه ⏰
+----------------------------------
+هنوز بازی زیر را پیش‌بینی نکرده‌ای! کمتر از یک ساعت تا شروع مسابقه باقی مانده است.
+
+⚽️ مسابقه: ${homeFlag} ${home} - ${away} ${awayFlag}
+🕒 ساعت شروع: ${time}
+
+همین حالا وارد برنامه شو و پیش‌بینی خودت رو ثبت کن!`;
+        await sendTelegramMessage(c.telegramId, tgMsg);
+        reminders++;
+      } else if (c.email && (await claim(userId, m.id, "email"))) {
         await sendEmail(c.email, title, reminderEmailHtml({ home, away, time }));
         reminders++;
       }

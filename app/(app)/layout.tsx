@@ -4,6 +4,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { logout } from "@/app/actions/auth";
 import BottomNav from "@/components/BottomNav";
 import { t } from "@/lib/i18n";
+import { getPollResults, PRIZE_POOL_POLL } from "@/lib/polls";
+import StickyWidget from "@/components/StickyWidget";
 
 export default async function AppLayout({
   children,
@@ -13,6 +15,10 @@ export default async function AppLayout({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (!user.displayName) redirect("/onboarding");
+
+  const pollResults = await getPollResults(PRIZE_POOL_POLL, user.id);
+  const initialHasVoted = pollResults.myChoice !== null;
+  const initialHasEmail = !!user.email;
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-1 flex-col">
@@ -53,6 +59,8 @@ export default async function AppLayout({
       </header>
 
       <main className="flex-1 px-4 py-4">{children}</main>
+
+      <StickyWidget initialHasVoted={initialHasVoted} initialHasEmail={initialHasEmail} />
 
       <BottomNav />
     </div>
