@@ -199,7 +199,7 @@ export default function MatchCard({ match, locked, isNext }: Props) {
       <div className="grid grid-cols-3 items-center py-2">
         {/* Home Team */}
         <div className="flex flex-col items-center text-center">
-          <div className="h-10 w-10 flex items-center justify-center mb-2 overflow-hidden rounded-xl bg-pitch-50/5 border border-white/5 transition-transform duration-300 group-hover:scale-110 select-none">
+          <div className="h-10 w-10 flex items-center justify-center mb-2 overflow-hidden rounded-xl bg-pitch-50/5 transition-transform duration-300 group-hover:scale-110 select-none">
             {match.homeFlag ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={match.homeFlag} alt={match.homeTeam} className="h-6 w-auto object-contain" />
@@ -248,7 +248,7 @@ export default function MatchCard({ match, locked, isNext }: Props) {
 
         {/* Away Team */}
         <div className="flex flex-col items-center text-center">
-          <div className="h-10 w-10 flex items-center justify-center mb-2 overflow-hidden rounded-xl bg-pitch-50/5 border border-white/5 transition-transform duration-300 group-hover:scale-110 select-none">
+          <div className="h-10 w-10 flex items-center justify-center mb-2 overflow-hidden rounded-xl bg-pitch-50/5 transition-transform duration-300 group-hover:scale-110 select-none">
             {match.awayFlag ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={match.awayFlag} alt={match.awayTeam} className="h-6 w-auto object-contain" />
