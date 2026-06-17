@@ -5,7 +5,7 @@ name: Sync results & reminders
 #   CRON_SECRET  must match the deployed CRON_SECRET env var
 on:
   schedule:
-    - cron: "*/20 * * * *" # every 20 minutes (GitHub may delay under load)
+    - cron: "*/5 * * * *" # every 5 minutes (GitHub may delay under load)
   workflow_dispatch: {}
 
 jobs:
