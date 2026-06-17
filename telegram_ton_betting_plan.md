@@ -13,18 +13,18 @@ To ensure a high-performance experience with instant game results, we propose a 
 
 ```mermaid
 graph TD
-    subgraph Telegram Client
+    subgraph "Telegram Client"
         TG[Telegram Chat Bot] -->|Open Mini App| TMA[Telegram Mini App - Next.js]
         TMA -->|Connect Wallet| TC[TonConnect UI / Tonkeeper]
     end
 
-    subgraph Backend Server (Next.js & Node)
+    subgraph "Backend Server (Next.js & Node)"
         TMA -->|Verify session via initData| API[Backend REST API / Actions]
         API -->|Read/Write state| DB[(Drizzle DB)]
         API -->|Initiate withdraw / Send TX| TON_SDK[TON SDK & Hot Wallet]
     end
 
-    subgraph Blockchain (TON Testnet/Mainnet)
+    subgraph "Blockchain (TON Testnet/Mainnet)"
         TC -->|Send Deposit TX| TON_NET((TON Blockchain))
         TON_SDK -->|Transfer TON| TON_NET
         SCAN[TON Indexer / API Listener] -->|Verify Deposits| TON_NET
