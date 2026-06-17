@@ -135,9 +135,24 @@ export async function rescoreMatch(matchId: number): Promise<number> {
 export async function runSync(): Promise<SyncSummary> {
   const { fetched, upserted } = await upsertFromApi();
   const { matchesScored, predictionsScored } = await scoreFinishedMatches();
-  await resolveBracketResults();
-  const bracketScored = await scoreBracket();
-  const { badgesAwarded } = await updateStreaksAndBadges();
+
+  // Bracket and badge scoring are best-effort: a failure here must NOT abort the
+  // request or mask the match predictions we already scored and committed above
+  // (otherwise the sync reports failure and the latest results look unscored).
+  let bracketScored = 0;
+  let badgesAwarded = 0;
+  try {
+    await resolveBracketResults();
+    bracketScored = await scoreBracket();
+  } catch (e) {
+    console.error("Bracket scoring failed:", e instanceof Error ? e.message : e);
+  }
+  try {
+    ({ badgesAwarded } = await updateStreaksAndBadges());
+  } catch (e) {
+    console.error("Badge update failed:", e instanceof Error ? e.message : e);
+  }
+
   return {
     fetched,
     upserted,
