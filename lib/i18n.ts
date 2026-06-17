@@ -46,6 +46,22 @@ export const fa = {
     upcoming: "بازی‌های پیش رو",
     finished: "تمام‌شده",
     live: "در حال انجام",
+    awaitingResult: "در انتظار نتیجه",
+    predictionSaved: "پیش‌بینی شما ثبت شد",
+    predictionMissed: "فرصت پیش‌بینی تمام شد",
+    details: "جزئیات و آمار",
+  },
+
+  matchStats: {
+    title: "آمار بازی",
+    crowd: "نظر جمعی هواداران",
+    win: "برد",
+    draw: "مساوی",
+    topScores: "محبوب‌ترین نتایج",
+    avgGoals: "میانگین گل پیش‌بینی‌شده",
+    predictors: "نفر پیش‌بینی کرده‌اند",
+    lockedHint: "برای جلوگیری از تأثیرگذاری، آمار پس از بسته شدن پیش‌بینی‌ها نمایش داده می‌شود",
+    noPredictions: "هنوز پیش‌بینی‌ای برای این بازی ثبت نشده است",
   },
 
   stage: {
@@ -89,6 +105,20 @@ export const fa = {
     predictions: "پیش‌بینی‌ها",
     exact: "نتایج دقیق",
     accuracy: "دقت",
+  },
+
+  // prize-pool poll
+  poll: {
+    prizeTitle: "صندوق جایزه قهرمانی 🏆",
+    prizeQuestion:
+      "اگر هر نفر ۱۰۰ هزار تومان بپردازد، کل مبلغ در پایان تورنمنت به نفر اول جدول می‌رسد. شما پایه‌اید؟",
+    yes: "بله، پایه‌ام",
+    no: "نه، فعلاً نه",
+    yesShare: "موافق",
+    noShare: "مخالف",
+    voters: "نفر رأی داده‌اند",
+    thanks: "ممنون! رأی شما ثبت شد ✅",
+    changeVote: "تغییر رأی",
   },
 
   // bracket

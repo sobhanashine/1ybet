@@ -2,8 +2,10 @@ import { getCurrentUser } from "@/lib/auth";
 import { getMatchesWithPredictions, isLocked, type MatchWithPrediction } from "@/lib/matches";
 import { getLeaderboard } from "@/lib/leaderboard";
 import { maybeAutoSync } from "@/lib/auto-sync";
+import { getPollResults, PRIZE_POOL_POLL } from "@/lib/polls";
 import MatchCard from "@/components/MatchCard";
 import EmailReminderBanner from "@/components/EmailReminderBanner";
+import PollCard from "@/components/PollCard";
 import { t } from "@/lib/i18n";
 import { toPersianDigits, formatJalaliDate, tehranDayKey } from "@/lib/format";
 
@@ -26,9 +28,10 @@ export default async function HomePage() {
   // last load — so scores and rank update without depending on an external cron.
   await maybeAutoSync();
 
-  const [leaderboard, allMatches] = await Promise.all([
+  const [leaderboard, allMatches, pollResults] = await Promise.all([
     getLeaderboard({ kind: "total" }),
     getMatchesWithPredictions(user.id),
+    getPollResults(PRIZE_POOL_POLL, user.id),
   ]);
 
   const userRow = leaderboard.find((r) => r.userId === user.id);
@@ -68,6 +71,9 @@ export default async function HomePage() {
 
       {/* Promote the email-reminder opt-in to users who haven't added an email */}
       <EmailReminderBanner hasEmail={!!user.email} />
+
+      {/* Gauge appetite for a paid winner-takes-all prize pool */}
+      <PollCard initial={pollResults} />
 
       <div className="space-y-6">
         <h2 className="text-xs font-bold text-pitch-600 tracking-wider uppercase px-1">{t.nav.fixtures}</h2>

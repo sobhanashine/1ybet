@@ -121,6 +121,20 @@ export const bracketResults = pgTable("bracket_results", {
   teamCode: text("team_code").notNull(),
 });
 
+// --- polls (one vote per user per poll) ---
+export const pollVotes = pgTable(
+  "poll_votes",
+  {
+    pollKey: text("poll_key").notNull(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    choice: text("choice").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.pollKey, t.userId] })],
+);
+
 // --- streaks & badges ---
 export const badges = pgTable("badges", {
   id: serial("id").primaryKey(),
