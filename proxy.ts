@@ -8,6 +8,13 @@ const PUBLIC_PATHS = ["/login", "/offline"];
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // Telegram webhook: must be publicly reachable so Telegram can POST updates.
+  // The route handler authenticates the bot token / initData itself, so it does
+  // not need a session cookie (and must not be redirected to /login).
+  if (pathname.startsWith("/api/webhook")) {
+    return NextResponse.next();
+  }
+
   // Cron endpoints: protected by a shared-secret header.
   if (pathname.startsWith("/api/cron")) {
     const secret = req.headers.get("x-cron-secret");
