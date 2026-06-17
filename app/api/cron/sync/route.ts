@@ -5,7 +5,12 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 function authorized(req: NextRequest): boolean {
-  return req.headers.get("x-cron-secret") === process.env.CRON_SECRET;
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return false;
+  // GitHub Action sends a custom header; Vercel Cron sends `Authorization: Bearer`.
+  if (req.headers.get("x-cron-secret") === secret) return true;
+  if (req.headers.get("authorization") === `Bearer ${secret}`) return true;
+  return false;
 }
 
 async function handle(req: NextRequest) {
