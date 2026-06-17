@@ -32,7 +32,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" className={`${vazir.variable} h-full antialiased`}>
+    // The Telegram WebApp SDK (loaded beforeInteractive) injects --tg-viewport-*
+    // CSS vars onto <html> before hydration, which React would flag as an
+    // attribute mismatch. suppressHydrationWarning silences that for the root el.
+    <html
+      lang="fa"
+      dir="rtl"
+      className={`${vazir.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
       <head>
         {/* Load Telegram WebApp SDK before interactive scripts */}
         <Script
