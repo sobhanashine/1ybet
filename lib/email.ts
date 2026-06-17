@@ -18,9 +18,17 @@ export async function sendEmail(
   if (!resend) return false;
   const from = process.env.RESEND_FROM ?? "onboarding@resend.dev";
   try {
-    await resend.emails.send({ from, to, subject, html });
+    // The Resend SDK does NOT throw on API errors (e.g. recipient not allowed on
+    // the free sender) — it returns them in `error`. Check it explicitly.
+    const { data, error } = await resend.emails.send({ from, to, subject, html });
+    if (error) {
+      console.error("Resend send error:", error.name, "-", error.message);
+      return false;
+    }
+    if (data?.id) console.log("Resend accepted message id:", data.id);
     return true;
-  } catch {
+  } catch (e) {
+    console.error("Resend threw:", e instanceof Error ? e.message : String(e));
     return false;
   }
 }
