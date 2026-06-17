@@ -433,15 +433,13 @@ export default function MatchCard({ match, locked, isNext }: Props) {
 
       {error && <p className="mt-2.5 text-xs text-red-400 font-bold text-center">{error}</p>}
 
-      {(locked || finished) && (
-        <Link
-          href={`/match/${match.id}`}
-          className="mt-3 flex items-center justify-center gap-1 border-t border-white/5 pt-3 text-[11px] font-bold text-muted transition hover:text-pitch-700"
-        >
-          📊 {t.match.details}
-          <span aria-hidden>›</span>
-        </Link>
-      )}
+      <Link
+        href={`/match/${match.id}`}
+        className="mt-3 flex items-center justify-center gap-1 border-t border-white/5 pt-3 text-[11px] font-bold text-muted transition hover:text-pitch-700"
+      >
+        📊 {t.match.details}
+        <span aria-hidden>›</span>
+      </Link>
     </div>
   );
 }
