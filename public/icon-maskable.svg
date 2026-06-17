@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#0f7b5a"/>
+  <circle cx="256" cy="240" r="96" fill="#ffffff"/>
+  <path d="M256 168l27 20-10 32h-34l-10-32z" fill="#14201b"/>
+  <text x="256" y="392" font-family="Vazirmatn, Tahoma, sans-serif" font-size="76" font-weight="700" fill="#e6b400" text-anchor="middle">۲۶</text>
+</svg>

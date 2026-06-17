@@ -1,0 +1,28 @@
+name: Sync results & reminders
+
+# Free external scheduler. Add repo secrets:
+#   APP_URL      e.g. https://your-app.vercel.app
+#   CRON_SECRET  must match the deployed CRON_SECRET env var
+on:
+  schedule:
+    - cron: "*/20 * * * *" # every 20 minutes (GitHub may delay under load)
+  workflow_dispatch: {}
+
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync results & score predictions
+        run: |
+          curl -fsS -X POST "$APP_URL/api/cron/sync" \
+            -H "x-cron-secret: $CRON_SECRET"
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      - name: Send deadline reminders
+        run: |
+          curl -fsS -X POST "$APP_URL/api/cron/reminders" \
+            -H "x-cron-secret: $CRON_SECRET" || true
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
