@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef, useEffect } from "react";
+import Link from "next/link";
 import { submitPrediction } from "@/app/actions/predictions";
 import { teamFa, teamFlag } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
@@ -187,11 +188,6 @@ export default function MatchCard({ match, locked, isNext }: Props) {
           <span className="font-semibold" suppressHydrationWarning>
             🕒 {toPersianDigits(formatTime(match.kickoffAt))}
           </span>
-          {locked && !finished && (
-            <span className="rounded-full bg-white/5 border border-white/10 px-2 py-0.5 text-[10px] font-bold text-muted flex items-center gap-1">
-              🔒 {t.match.locked}
-            </span>
-          )}
         </div>
       </div>
 
@@ -220,12 +216,30 @@ export default function MatchCard({ match, locked, isNext }: Props) {
               <span className="text-xs font-normal opacity-50">{t.match.vs}</span>
               <span>{toPersianDigits(match.awayScore ?? 0)}</span>
             </div>
+          ) : locked ? (
+            // Prediction window closed, awaiting kickoff/result: read-only.
+            <div className="flex flex-col items-center gap-1.5 select-none">
+              {match.predHome != null ? (
+                <div className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-2xl font-black text-ink/85 shadow-inner font-feature-ss01">
+                  <span>{toPersianDigits(match.predHome)}</span>
+                  <span className="text-xs font-normal opacity-40">{t.match.vs}</span>
+                  <span>{toPersianDigits(match.predAway ?? 0)}</span>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-2.5 text-xs font-bold text-muted/70">
+                  {t.match.notPredicted}
+                </div>
+              )}
+              <span className="flex items-center gap-1 text-[10px] font-bold text-muted/60">
+                {t.match.awaitingResult}
+              </span>
+            </div>
           ) : (
             <div className="flex items-center gap-2">
-              <ScoreBox 
-                value={home} 
-                onChange={setHome} 
-                disabled={locked} 
+              <ScoreBox
+                value={home}
+                onChange={setHome}
+                disabled={locked}
                 onEnter={save}
                 onComplete={() => {
                   const inputs = containerRef.current?.querySelectorAll("input");
@@ -236,9 +250,9 @@ export default function MatchCard({ match, locked, isNext }: Props) {
                 }}
               />
               <span className="text-[10px] font-black text-muted/60 select-none">{t.match.vs}</span>
-              <ScoreBox 
-                value={away} 
-                onChange={setAway} 
+              <ScoreBox
+                value={away}
+                onChange={setAway}
                 disabled={locked}
                 onEnter={save}
               />
@@ -303,19 +317,18 @@ export default function MatchCard({ match, locked, isNext }: Props) {
             })()}
           </div>
         ) : locked ? (
-          <div className="flex w-full items-center justify-between text-xs">
-            <span className="text-muted font-medium">
-              {t.match.yourPrediction}:{" "}
-              {match.predHome != null ? (
-                <span className="font-extrabold text-ink font-feature-ss01 bg-white/5 px-2 py-1 rounded-lg border border-white/5">
-                  {toPersianDigits(match.predHome)} - {toPersianDigits(match.predAway ?? 0)}
-                </span>
-              ) : (
-                <span className="italic opacity-60">{t.match.notPredicted}</span>
-              )}
-            </span>
-            <span className="text-muted text-[10px] font-bold bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg flex items-center gap-1">
-              🔒 {t.match.locked}
+          <div className="flex w-full items-center justify-center">
+            <span
+              className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[11px] font-bold ${
+                match.predHome != null
+                  ? "border-pitch-500/20 bg-pitch-500/5 text-pitch-700"
+                  : "border-white/10 bg-white/5 text-muted"
+              }`}
+            >
+              🔒{" "}
+              {match.predHome != null
+                ? t.match.predictionSaved
+                : t.match.predictionMissed}
             </span>
           </div>
         ) : (
@@ -356,6 +369,16 @@ export default function MatchCard({ match, locked, isNext }: Props) {
       </div>
 
       {error && <p className="mt-2.5 text-xs text-red-400 font-bold text-center">{error}</p>}
+
+      {(locked || finished) && (
+        <Link
+          href={`/match/${match.id}`}
+          className="mt-3 flex items-center justify-center gap-1 border-t border-white/5 pt-3 text-[11px] font-bold text-muted transition hover:text-pitch-700"
+        >
+          📊 {t.match.details}
+          <span aria-hidden>›</span>
+        </Link>
+      )}
     </div>
   );
 }

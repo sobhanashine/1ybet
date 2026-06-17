@@ -133,7 +133,21 @@ export async function rescoreMatch(matchId: number): Promise<number> {
 
 /** Full sync: pull from API, score matches, then resolve & score the bracket. */
 export async function runSync(): Promise<SyncSummary> {
-  const { fetched, upserted } = await upsertFromApi();
+  // Pulling fresh fixtures/results from the API is best-effort: if it fails
+  // (rate limit, outage, missing/invalid key) we must STILL score the finished
+  // matches already in the DB — e.g. results an admin entered by hand.
+  // Otherwise one flaky API call leaves every prediction unscored.
+  let fetched = 0;
+  let upserted = 0;
+  try {
+    ({ fetched, upserted } = await upsertFromApi());
+  } catch (e) {
+    console.error(
+      "API upsert failed (continuing to score local results):",
+      e instanceof Error ? e.message : e,
+    );
+  }
+
   const { matchesScored, predictionsScored } = await scoreFinishedMatches();
 
   // Bracket and badge scoring are best-effort: a failure here must NOT abort the

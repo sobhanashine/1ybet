@@ -2,7 +2,7 @@ import "server-only";
 import { and, eq, gt, lt, isNull, or, ne } from "drizzle-orm";
 import { db } from "./db";
 import { matches } from "./db/schema";
-import { runSync } from "./sync";
+import { runSync, scoreFinishedMatches } from "./sync";
 
 // Best-effort, in-process throttle so concurrent requests on a warm serverless
 // instance don't all kick off a sync at once. Resets on cold start, which is
@@ -54,14 +54,18 @@ export async function maybeAutoSync(): Promise<void> {
     return;
   }
   try {
-    if (!process.env.FOOTBALL_DATA_API_KEY) return; // can't sync without a key
     if (!(await hasPendingWork())) {
       lastRun = Date.now();
       return;
     }
+    const hasKey = !!process.env.FOOTBALL_DATA_API_KEY;
     inFlight = (async () => {
       try {
-        await runSync();
+        // With an API key we pull fresh results and score; without one we can
+        // still score finished matches already in the DB (e.g. admin-entered),
+        // so the leaderboard self-updates regardless of the external API.
+        if (hasKey) await runSync();
+        else await scoreFinishedMatches();
       } catch (e) {
         console.error("auto-sync failed:", e instanceof Error ? e.message : e);
       } finally {

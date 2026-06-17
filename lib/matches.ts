@@ -40,6 +40,37 @@ export async function getMatchesWithPredictions(
   }));
 }
 
+/** A single match with the given user's prediction (if any). */
+export async function getMatchWithPrediction(
+  matchId: number,
+  userId: number,
+): Promise<MatchWithPrediction | null> {
+  const [row] = await db
+    .select({
+      match: matches,
+      predHome: predictions.predHome,
+      predAway: predictions.predAway,
+      points: predictions.points,
+      predScored: predictions.scored,
+    })
+    .from(matches)
+    .leftJoin(
+      predictions,
+      and(eq(predictions.matchId, matches.id), eq(predictions.userId, userId)),
+    )
+    .where(eq(matches.id, matchId))
+    .limit(1);
+
+  if (!row) return null;
+  return {
+    ...row.match,
+    predHome: row.predHome,
+    predAway: row.predAway,
+    points: row.points,
+    predScored: row.predScored,
+  };
+}
+
 /** Matches kicking off within [from, to], with the user's prediction. */
 export async function getMatchesInWindow(
   userId: number,
