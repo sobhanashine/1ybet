@@ -9,7 +9,7 @@ const ITEMS = [
   { href: "/", label: t.nav.home, Icon: Home },
   { href: "/bracket", label: t.nav.bracket, Icon: Swords },
   { href: "/leaderboard", label: t.nav.leaderboard, Icon: Trophy },
-  { href: "/groups", label: t.nav.groups, Icon: Users },
+  { href: "/h2h", label: t.nav.compare, Icon: Users },
   { href: "/profile", label: t.nav.profile, Icon: User },
 ];
 

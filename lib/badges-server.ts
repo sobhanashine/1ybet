@@ -1,5 +1,5 @@
 import "server-only";
-import { asc, eq, like, and, gt, sql } from "drizzle-orm";
+import { asc, eq, like, and, gt } from "drizzle-orm";
 import { db } from "./db";
 import {
   users,
@@ -8,7 +8,6 @@ import {
   badges,
   userBadges,
   bracketPicks,
-  groupMembers,
 } from "./db/schema";
 import { tehranDayKey } from "./format";
 import { POINTS } from "./scoring";
@@ -100,9 +99,6 @@ export async function updateStreaksAndBadges(): Promise<{
     .where(and(like(bracketPicks.slot, "CHAMPION#%"), gt(bracketPicks.points, 0)));
   for (const r of champWinners) wantBadge(r.userId, "bracket_master");
 
-  // group_winner: rank 1 (by total points) in a group with >=2 members
-  await awardGroupWinners(wantBadge);
-
   let badgesAwarded = 0;
   for (const a of award) {
     const res = await db
@@ -114,42 +110,4 @@ export async function updateStreaksAndBadges(): Promise<{
   }
 
   return { streaksUpdated, badgesAwarded };
-}
-
-async function awardGroupWinners(
-  wantBadge: (userId: number, code: string) => void,
-) {
-  const memberRows = await db
-    .select({ groupId: groupMembers.groupId, userId: groupMembers.userId })
-    .from(groupMembers);
-  const byGroup = new Map<number, number[]>();
-  for (const r of memberRows) {
-    (byGroup.get(r.groupId) ?? byGroup.set(r.groupId, []).get(r.groupId)!).push(
-      r.userId,
-    );
-  }
-
-  // total prediction points per user
-  const sums = await db
-    .select({
-      userId: predictions.userId,
-      total: sql<number>`coalesce(sum(${predictions.points}), 0)::int`,
-    })
-    .from(predictions)
-    .groupBy(predictions.userId);
-  const pointMap = new Map<number, number>(sums.map((r) => [r.userId, r.total]));
-
-  for (const [, members] of byGroup) {
-    if (members.length < 2) continue;
-    let topUser = members[0];
-    let topPts = pointMap.get(topUser) ?? 0;
-    for (const u of members) {
-      const p = pointMap.get(u) ?? 0;
-      if (p > topPts) {
-        topPts = p;
-        topUser = u;
-      }
-    }
-    if (topPts > 0) wantBadge(topUser, "group_winner");
-  }
 }

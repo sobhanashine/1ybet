@@ -39,12 +39,6 @@ export const BADGE_CATALOG: BadgeDef[] = [
     icon: "🏆",
   },
   {
-    code: "group_winner",
-    titleFa: "قهرمان گروه",
-    descFa: "صدرنشین یکی از گروه‌های شما",
-    icon: "👑",
-  },
-  {
     code: "bracket_master",
     titleFa: "استاد جدول",
     descFa: "قهرمان جام را درست پیش‌بینی کرد",
