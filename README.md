@@ -25,7 +25,8 @@ A premium, fully Persian (RTL layout), installable PWA and **Telegram Mini App**
 * ⚔️ **Head-to-Head**: Compare your predictions and points against any other player.
 * 🥇 **Leaderboards & Badges**: High-contrast global rankings plus an achievement/badge catalog.
 * 💎 **Telegram Mini App Integration**: Runs the *same* Next.js app inside a Telegram Bot WebApp with auto-login via `initData` HMAC hash verification and mobile viewport optimization (`expand()`). Accounts are linked by phone, so web and Telegram share one identity.
-* 🔔 **Push & Email Reminders**: VAPID Web Push notifications plus optional Resend email reminders before matches kick off.
+* 🔔 **Multi-Channel Notifications (Telegram & Email)**: Real-time match results and prediction score updates (detailing final scores, predicted scores, points earned, and flag emojis next to team names) sent via Telegram Bot messages to linked users, or falling back to optional Resend email. Upcoming match reminders are also sent 1 hour before kickoff if a user's prediction is missing.
+* 📬 **Sticky Engagement Widget**: A floating interactive widget prompting users to participate in the prize-pool poll, followed by email/notification setup. The widget automatically disappears once both steps are completed or if manually dismissed.
 * 🗓️ **Jalali Date System**: Dates render as Shamsi (Jalali) with Persian digits in the `Asia/Tehran` timezone (Sat–Fri week).
 * 🎨 **RTL-First "Tactical Turf" Theme**: Energy-packed pitch-green accents tailored for optimal Persian readability utilizing the premium `Vazirmatn` font.
 * 🛠️ **Full Admin Control Panel**: Manual result overrides, API synchronization triggers, and push notification broadcast tools.
