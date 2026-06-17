@@ -51,7 +51,7 @@ graph TD
         APP -->|Reminder emails| MAIL[Resend]
     end
 
-    subgraph "Scheduled Jobs (GitHub Actions, ~20 min)"
+    subgraph "Scheduled Jobs (GitHub Actions, ~5 min)"
         CRON[Cron Runner] -->|x-cron-secret| SYNC["/api/cron/sync"]
         CRON -->|x-cron-secret| REM["/api/cron/reminders"]
         SYNC -->|Fetch fixtures & results| FD[football-data.org API]
@@ -70,7 +70,7 @@ Everything is designed to deploy on free tiers:
 * **Database**: Supabase Postgres (managed serverless pool)
 * **Football Feed**: [football-data.org](https://www.football-data.org) API key
 * **Notifications**: VAPID Web Push + optional Resend Email SMTP
-* **Synchronizer Cron**: GitHub Actions workflow runner every ~20 mins
+* **Synchronizer Cron**: GitHub Actions workflow runner every ~5 mins
 
 ---
 
