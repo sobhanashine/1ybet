@@ -88,9 +88,8 @@ export default async function MatchDetailPage({
 
   const finished = match.status === "FINISHED";
   const locked = isLocked(match.kickoffAt);
-  // Only reveal the crowd distribution once predictions are closed, so it can't
-  // nudge people toward the popular pick before they commit.
-  const stats = locked ? await getMatchPredictionStats(matchId) : null;
+  // Always retrieve the crowd distribution stats, even if predictions are still open.
+  const stats = await getMatchPredictionStats(matchId);
 
   return (
     <div className="space-y-5">
