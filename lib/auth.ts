@@ -98,3 +98,70 @@ export async function upsertUserByPhone(phone: string): Promise<User> {
   const [created] = await db.insert(users).values({ phone }).returning();
   return created;
 }
+
+/** Verify Telegram WebApp initData cryptographic hash */
+export function verifyTelegramHash(initData: string, botToken: string): boolean {
+  try {
+    const params = new URLSearchParams(initData);
+    const hash = params.get("hash");
+    if (!hash) return false;
+
+    params.delete("hash");
+    const sortedPairs = Array.from(params.entries())
+      .map(([key, val]) => `${key}=${val}`)
+      .sort()
+      .join("\n");
+
+    const { createHmac } = require("crypto");
+    const secretKey = createHmac("sha256", "WebAppData")
+      .update(botToken)
+      .digest();
+
+    const calculatedHash = createHmac("sha256", secretKey)
+      .update(sortedPairs)
+      .digest("hex");
+
+    return calculatedHash === hash;
+  } catch {
+    return false;
+  }
+}
+
+/** Upsert a user by Telegram ID, linking or auto-registering them */
+export async function upsertUserByTelegram(
+  telegramId: string,
+  telegramUsername: string | null,
+  displayName: string,
+): Promise<User> {
+  // 1. Check if user already exists by telegramId
+  const existingByTg = await db
+    .select()
+    .from(users)
+    .where(eq(users.telegramId, telegramId))
+    .limit(1);
+  if (existingByTg[0]) {
+    // Update username if it changed
+    if (existingByTg[0].telegramUsername !== telegramUsername) {
+      const [updated] = await db
+        .update(users)
+        .set({ telegramUsername })
+        .where(eq(users.id, existingByTg[0].id))
+        .returning();
+      return updated;
+    }
+    return existingByTg[0];
+  }
+
+  // 2. Create new user with a unique phone placeholder
+  const placeholderPhone = `tg-${telegramId}`;
+  const [created] = await db
+    .insert(users)
+    .values({
+      phone: placeholderPhone,
+      telegramId,
+      telegramUsername,
+      displayName,
+    })
+    .returning();
+  return created;
+}

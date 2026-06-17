@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { requestOtp, verifyOtp } from "@/app/actions/auth";
+import { requestOtp, verifyOtp, loginViaTelegram } from "@/app/actions/auth";
 import { t } from "@/lib/i18n";
 import { toPersianDigits } from "@/lib/format";
 
@@ -14,6 +14,22 @@ export default function LoginPage() {
   const [otpHint, setOtpHint] = useState("");
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
+
+  useEffect(() => {
+    const tg = (window as any).Telegram?.WebApp;
+    if (tg && tg.initData) {
+      setError("");
+      startTransition(async () => {
+        const res = await loginViaTelegram(tg.initData);
+        if (res.ok) {
+          tg.expand(); // Expand WebApp view to occupy maximum space
+          router.replace(res.needsOnboarding ? "/onboarding" : "/");
+        } else {
+          console.warn("Telegram auto-login failed:", res.error);
+        }
+      });
+    }
+  }, [router]);
 
   function submitPhone() {
     setError("");

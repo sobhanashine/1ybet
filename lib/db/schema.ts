@@ -39,6 +39,8 @@ export const users = pgTable("users", {
   isAdmin: boolean("is_admin").notNull().default(false),
   bestStreak: integer("best_streak").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  telegramId: text("telegram_id").unique(),
+  telegramUsername: text("telegram_username"),
 });
 
 // --- matches ---

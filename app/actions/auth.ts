@@ -63,3 +63,41 @@ export async function logout() {
   await destroySession();
   redirect("/login");
 }
+
+/** Step 4: Login via Telegram initData */
+export async function loginViaTelegram(initData: string): Promise<ActionResult & { needsOnboarding?: boolean }> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    return { ok: false, error: "تنظیمات ربات تلگرام انجام نشده است." };
+  }
+
+  const { verifyTelegramHash, upsertUserByTelegram, createSession } = await import("@/lib/auth");
+  const isValid = verifyTelegramHash(initData, token);
+  if (!isValid) {
+    return { ok: false, error: "اعتبارسنجی تلگرام ناموفق بود." };
+  }
+
+  try {
+    const params = new URLSearchParams(initData);
+    const userString = params.get("user");
+    if (!userString) return { ok: false, error: "اطلاعات کاربر یافت نشد." };
+
+    const tgUser = JSON.parse(userString) as {
+      id: number;
+      username?: string;
+      first_name: string;
+      last_name?: string;
+    };
+
+    const telegramId = String(tgUser.id);
+    const telegramUsername = tgUser.username ?? null;
+    const displayName = tgUser.first_name + (tgUser.last_name ? ` ${tgUser.last_name}` : "");
+
+    const user = await upsertUserByTelegram(telegramId, telegramUsername, displayName);
+    await createSession(user.id, user.phone);
+
+    return { ok: true, needsOnboarding: !user.displayName };
+  } catch {
+    return { ok: false, error: "خطا در پردازش اطلاعات حساب تلگرام." };
+  }
+}
