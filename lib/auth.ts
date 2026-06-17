@@ -25,11 +25,17 @@ export async function createSession(uid: number, phone: string) {
     .setExpirationTime(`${SESSION_MAX_AGE}s`)
     .sign(secretKey());
 
+  const isProd = process.env.NODE_ENV === "production";
   const store = await cookies();
   store.set(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    // Telegram Mini Apps load the site inside a cross-origin iframe (Desktop/Web
+    // clients). A SameSite=Strict/Lax cookie is dropped there, which would break
+    // the session and bounce the user back to /login. SameSite=None + Secure is
+    // required to keep the session alive inside Telegram. (Secure needs HTTPS,
+    // which Telegram requires anyway; locally we fall back to Lax over HTTP.)
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
     path: "/",
     maxAge: SESSION_MAX_AGE,
   });
@@ -127,41 +133,70 @@ export function verifyTelegramHash(initData: string, botToken: string): boolean 
   }
 }
 
-/** Upsert a user by Telegram ID, linking or auto-registering them */
-export async function upsertUserByTelegram(
-  telegramId: string,
-  telegramUsername: string | null,
-  displayName: string,
-): Promise<User> {
-  // 1. Check if user already exists by telegramId
-  const existingByTg = await db
+export type TelegramUser = { id: string; username: string | null; displayName: string };
+
+/** Parse the `user` field out of a (already hash-verified) Telegram initData string. */
+export function parseTelegramUser(initData: string): TelegramUser | null {
+  try {
+    const userString = new URLSearchParams(initData).get("user");
+    if (!userString) return null;
+    const tg = JSON.parse(userString) as {
+      id: number;
+      username?: string;
+      first_name: string;
+      last_name?: string;
+    };
+    return {
+      id: String(tg.id),
+      username: tg.username ?? null,
+      displayName: tg.first_name + (tg.last_name ? ` ${tg.last_name}` : ""),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Look up the account a Telegram identity is already linked to, if any. */
+export async function getUserByTelegramId(telegramId: string): Promise<User | null> {
+  const [u] = await db
     .select()
     .from(users)
     .where(eq(users.telegramId, telegramId))
     .limit(1);
-  if (existingByTg[0]) {
-    // Update username if it changed
-    if (existingByTg[0].telegramUsername !== telegramUsername) {
-      const [updated] = await db
-        .update(users)
-        .set({ telegramUsername })
-        .where(eq(users.id, existingByTg[0].id))
-        .returning();
-      return updated;
-    }
-    return existingByTg[0];
-  }
+  return u ?? null;
+}
 
-  // 2. Create new user with a unique phone placeholder
-  const placeholderPhone = `tg-${telegramId}`;
-  const [created] = await db
-    .insert(users)
-    .values({
-      phone: placeholderPhone,
+/**
+ * Attach a Telegram identity to an existing (phone-based) account so the two
+ * stay in sync. Idempotent and non-destructive: if the Telegram id is already
+ * linked to a different account we never move data — we return that account so
+ * the caller logs into it instead.
+ */
+export async function linkTelegramToUser(
+  userId: number,
+  telegramId: string,
+  telegramUsername: string | null,
+  fallbackDisplayName?: string,
+): Promise<User> {
+  const existingByTg = await getUserByTelegramId(telegramId);
+  if (existingByTg && existingByTg.id !== userId) return existingByTg;
+
+  const [target] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  const [updated] = await db
+    .update(users)
+    .set({
       telegramId,
       telegramUsername,
-      displayName,
+      // Pre-fill a display name from Telegram only if the account has none yet,
+      // letting Telegram users skip the onboarding name prompt.
+      displayName: target?.displayName ?? fallbackDisplayName ?? null,
     })
+    .where(eq(users.id, userId))
     .returning();
-  return created;
+  return updated;
 }

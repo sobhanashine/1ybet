@@ -8,10 +8,14 @@ import {
   createSession,
   destroySession,
   getCurrentUser,
+  getUserByTelegramId,
   isValidOtp,
   isValidPhone,
+  linkTelegramToUser,
   normalizePhone,
+  parseTelegramUser,
   upsertUserByPhone,
+  verifyTelegramHash,
 } from "@/lib/auth";
 import { OTP_CODE } from "@/lib/config";
 import { t } from "@/lib/i18n";
@@ -30,11 +34,30 @@ export async function requestOtp(phone: string): Promise<ActionResult> {
 export async function verifyOtp(
   phone: string,
   code: string,
+  telegramInitData?: string,
 ): Promise<ActionResult & { needsOnboarding?: boolean }> {
   if (!isValidPhone(phone)) return { ok: false, error: t.auth.invalidPhone };
   if (!isValidOtp(code)) return { ok: false, error: t.auth.invalidOtp };
 
-  const user = await upsertUserByPhone(normalizePhone(phone));
+  let user = await upsertUserByPhone(normalizePhone(phone));
+
+  // When the OTP step is part of a Telegram link, re-verify initData server-side
+  // and attach the Telegram identity to this (web) account so both stay in sync.
+  if (telegramInitData) {
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    if (token && verifyTelegramHash(telegramInitData, token)) {
+      const tgUser = parseTelegramUser(telegramInitData);
+      if (tgUser) {
+        user = await linkTelegramToUser(
+          user.id,
+          tgUser.id,
+          tgUser.username,
+          tgUser.displayName,
+        );
+      }
+    }
+  }
+
   await createSession(user.id, user.phone);
 
   return { ok: true, needsOnboarding: !user.displayName };
@@ -64,40 +87,34 @@ export async function logout() {
   redirect("/login");
 }
 
-/** Step 4: Login via Telegram initData */
-export async function loginViaTelegram(initData: string): Promise<ActionResult & { needsOnboarding?: boolean }> {
+/**
+ * Step 4: Telegram Mini App entry. Verifies initData cryptographically, then:
+ *  - if the Telegram id is already linked to an account → logs in instantly;
+ *  - otherwise → asks the client to collect a phone number (needsPhoneLink) so
+ *    the Telegram identity can be merged into the matching web account.
+ */
+export async function loginViaTelegram(
+  initData: string,
+): Promise<ActionResult & { needsOnboarding?: boolean; needsPhoneLink?: boolean }> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) {
     return { ok: false, error: "تنظیمات ربات تلگرام انجام نشده است." };
   }
 
-  const { verifyTelegramHash, upsertUserByTelegram, createSession } = await import("@/lib/auth");
-  const isValid = verifyTelegramHash(initData, token);
-  if (!isValid) {
+  if (!verifyTelegramHash(initData, token)) {
     return { ok: false, error: "اعتبارسنجی تلگرام ناموفق بود." };
   }
 
-  try {
-    const params = new URLSearchParams(initData);
-    const userString = params.get("user");
-    if (!userString) return { ok: false, error: "اطلاعات کاربر یافت نشد." };
+  const tgUser = parseTelegramUser(initData);
+  if (!tgUser) return { ok: false, error: "اطلاعات کاربر یافت نشد." };
 
-    const tgUser = JSON.parse(userString) as {
-      id: number;
-      username?: string;
-      first_name: string;
-      last_name?: string;
-    };
-
-    const telegramId = String(tgUser.id);
-    const telegramUsername = tgUser.username ?? null;
-    const displayName = tgUser.first_name + (tgUser.last_name ? ` ${tgUser.last_name}` : "");
-
-    const user = await upsertUserByTelegram(telegramId, telegramUsername, displayName);
-    await createSession(user.id, user.phone);
-
-    return { ok: true, needsOnboarding: !user.displayName };
-  } catch {
-    return { ok: false, error: "خطا در پردازش اطلاعات حساب تلگرام." };
+  // Already linked → instant, password-less login.
+  const existing = await getUserByTelegramId(tgUser.id);
+  if (existing) {
+    await createSession(existing.id, existing.phone);
+    return { ok: true, needsOnboarding: !existing.displayName };
   }
+
+  // Not linked yet → client should show the phone step to merge/create the account.
+  return { ok: true, needsPhoneLink: true };
 }

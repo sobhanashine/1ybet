@@ -52,6 +52,43 @@ async function main() {
   } else {
     console.error("Error setting webhook:", data);
   }
+
+  // Make the bot's blue menu button launch the Mini App directly, so it feels
+  // like a game launcher. Pointed at /login (where Telegram auto-login runs) to
+  // avoid a proxy redirect stripping initData. (Telegram requires HTTPS here.)
+  const miniAppUrl = `${cleanUrl}/login`;
+  if (miniAppUrl.startsWith("https://")) {
+    const menuRes = await fetch(`https://api.telegram.org/bot${token}/setChatMenuButton`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        menu_button: {
+          type: "web_app",
+          text: "🎮 بازی پیش‌بینی",
+          web_app: { url: miniAppUrl },
+        },
+      }),
+    });
+    const menuData = (await menuRes.json()) as { ok: boolean; description?: string };
+    console.log(
+      menuData.ok ? "Menu button set to open the Mini App." : `Menu button error: ${menuData.description}`,
+    );
+  } else {
+    console.warn("Skipping menu button: Telegram requires an HTTPS URL (got non-https).");
+  }
+
+  // Register the /start command so it shows in the bot's command menu.
+  const cmdRes = await fetch(`https://api.telegram.org/bot${token}/setMyCommands`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      commands: [
+        { command: "start", description: "شروع و ورود به بازی پیش‌بینی جام جهانی ۲۰۲۶" },
+      ],
+    }),
+  });
+  const cmdData = (await cmdRes.json()) as { ok: boolean; description?: string };
+  console.log(cmdData.ok ? "Bot commands registered." : `Commands error: ${cmdData.description}`);
 }
 
 main().catch(console.error);

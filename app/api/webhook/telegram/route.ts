@@ -15,7 +15,10 @@ export async function POST(req: Request) {
       const text = body.message.text.trim();
 
       if (text === "/start") {
-        // Construct the WebApp URL dynamically based on the request host header.
+        // Launch the Mini App at /login. Telegram appends initData as a URL
+        // fragment (#tgWebAppData=…); pointing straight at /login avoids a proxy
+        // redirect that could strip that fragment and break auto-login. The login
+        // page instant-logs-in linked users and forwards them into the game.
         const host = req.headers.get("host") || "";
         const protocol = host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https";
         const webAppUrl = `${protocol}://${host}/login`;

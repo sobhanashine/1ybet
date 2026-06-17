@@ -13,16 +13,22 @@ export default function LoginPage() {
   const [code, setCode] = useState("");
   const [otpHint, setOtpHint] = useState("");
   const [error, setError] = useState("");
+  const [tgInitData, setTgInitData] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tg = (window as any).Telegram?.WebApp;
     if (tg && tg.initData) {
+      tg.ready?.();
+      tg.expand?.(); // Expand WebApp view to occupy maximum space
       startTransition(async () => {
         const res = await loginViaTelegram(tg.initData);
-        if (res.ok) {
-          tg.expand(); // Expand WebApp view to occupy maximum space
+        if (res.ok && res.needsPhoneLink) {
+          // First Telegram launch: collect phone to link/merge the web account.
+          setTgInitData(tg.initData);
+          setStep("phone");
+        } else if (res.ok) {
           router.replace(res.needsOnboarding ? "/onboarding" : "/");
         } else {
           console.warn("Telegram auto-login failed:", res.error);
@@ -44,7 +50,7 @@ export default function LoginPage() {
   function submitOtp() {
     setError("");
     startTransition(async () => {
-      const res = await verifyOtp(phone, code);
+      const res = await verifyOtp(phone, code, tgInitData ?? undefined);
       if (!res.ok) return setError(res.error ?? t.common.error);
       router.replace(res.needsOnboarding ? "/onboarding" : "/");
     });
@@ -65,6 +71,11 @@ export default function LoginPage() {
 
         {step === "phone" ? (
           <div className="space-y-4">
+            {tgInitData && (
+              <div className="rounded-xl bg-pitch-500/10 px-4 py-3 text-center text-sm text-ink">
+                برای همگام‌سازی حساب تلگرام با وب‌سایت، شمارهٔ موبایل خود را وارد کنید.
+              </div>
+            )}
             <label className="block">
               <span className="mb-1 block text-sm text-muted">
                 {t.auth.phoneLabel}
