@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getMatchesWithPredictions } from "@/lib/matches";
 import { getLeaderboard } from "@/lib/leaderboard";
-import { isUpcoming } from "@/lib/time";
+import { isUpcoming, isLocked } from "@/lib/time";
 import MatchCard from "@/components/MatchCard";
 import { t } from "@/lib/i18n";
 import { toPersianDigits } from "@/lib/format";
@@ -29,26 +29,27 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-5">
-      {/* Tactical Turf Welcome Stats Card */}
-      <div className="rounded-2xl bg-white p-5 ring-1 ring-black/5 transition-all duration-200 hover:ring-black/10">
-        <div className="mb-4">
-          <span className="text-xs font-semibold text-muted">{t.auth.welcome}</span>
-          <h1 className="text-xl font-bold text-ink mt-0.5">{user.displayName} 👋</h1>
+      {/* Welcome / stats card */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface to-surface-2 p-5 ring-1 ring-white/10">
+        <div className="pointer-events-none absolute -top-16 -left-10 h-40 w-40 rounded-full bg-pitch-500/15 blur-3xl" />
+        <div className="relative mb-4">
+          <span className="text-xs font-semibold text-pitch-700">{t.auth.welcome}</span>
+          <h1 className="mt-0.5 text-2xl font-extrabold text-ink">{user.displayName} 👋</h1>
         </div>
-        <div className="grid grid-cols-3 gap-2 divide-x divide-x-reverse divide-black/5 border-t border-black/5 pt-4">
+        <div className="relative grid grid-cols-3 gap-2 divide-x divide-x-reverse divide-white/10 border-t border-white/10 pt-4">
           <div className="text-center">
-            <span className="block text-[10px] font-semibold text-muted mb-1">{t.profile.totalPoints}</span>
-            <span className="text-2xl font-black text-pitch-600 font-feature-ss01">{toPersianDigits(totalPoints)}</span>
+            <span className="mb-1 block text-[10px] font-semibold text-muted">{t.profile.totalPoints}</span>
+            <span className="text-2xl font-black text-pitch-700 font-feature-ss01">{toPersianDigits(totalPoints)}</span>
           </div>
           <div className="text-center">
-            <span className="block text-[10px] font-semibold text-muted mb-1">{t.leaderboard.title}</span>
-            <span className="text-2xl font-black text-pitch-600 font-feature-ss01">
-              {userRank > 0 ? `${toPersianDigits(userRank)}` : "—"}
+            <span className="mb-1 block text-[10px] font-semibold text-muted">{t.leaderboard.title}</span>
+            <span className="text-2xl font-black text-pitch-700 font-feature-ss01">
+              {userRank > 0 ? toPersianDigits(userRank) : "—"}
             </span>
           </div>
           <div className="text-center">
-            <span className="block text-[10px] font-semibold text-muted mb-1">پیش‌بینی‌ها</span>
-            <span className="text-2xl font-black text-pitch-600 font-feature-ss01">{toPersianDigits(totalPredicted)}</span>
+            <span className="mb-1 block text-[10px] font-semibold text-muted">پیش‌بینی‌ها</span>
+            <span className="text-2xl font-black text-pitch-700 font-feature-ss01">{toPersianDigits(totalPredicted)}</span>
           </div>
         </div>
       </div>
@@ -61,13 +62,13 @@ export default async function HomePage() {
           </Link>
         </div>
         {openMatches.length === 0 ? (
-          <div className="rounded-2xl bg-white p-6 text-center ring-1 ring-black/5">
+          <div className="rounded-2xl bg-surface p-6 text-center ring-1 ring-white/10">
             <p className="text-sm text-muted">{t.leaderboard.empty}</p>
           </div>
         ) : (
           <div className="space-y-3">
             {openMatches.map((m) => (
-              <MatchCard key={m.id} match={m} />
+              <MatchCard key={m.id} match={m} locked={isLocked(m.kickoffAt)} />
             ))}
           </div>
         )}

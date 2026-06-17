@@ -55,7 +55,7 @@ export default async function GroupDetailPage({
             <li
               key={r.userId}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${
-                me ? "bg-pitch-100 ring-1 ring-pitch-200" : "bg-white ring-1 ring-black/5"
+                me ? "bg-pitch-100 ring-1 ring-pitch-200" : "bg-surface ring-1 ring-white/10"
               }`}
             >
               <span

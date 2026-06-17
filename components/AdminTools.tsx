@@ -23,20 +23,20 @@ export default function AdminTools() {
         <button
           onClick={() => run(triggerSync)}
           disabled={pending}
-          className="flex-1 rounded-xl bg-pitch-500 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+          className="flex-1 rounded-xl bg-pitch-500 py-2.5 text-sm font-semibold text-[#08140e] disabled:opacity-50"
         >
           همگام‌سازی نتایج
         </button>
         <button
           onClick={() => run(triggerReminders)}
           disabled={pending}
-          className="flex-1 rounded-xl bg-pitch-600 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+          className="flex-1 rounded-xl bg-pitch-600 py-2.5 text-sm font-semibold text-[#08140e] disabled:opacity-50"
         >
           ارسال یادآوری‌ها
         </button>
       </div>
 
-      <div className="space-y-2 rounded-2xl bg-white p-4 ring-1 ring-black/5">
+      <div className="space-y-2 rounded-2xl bg-surface p-4 ring-1 ring-white/10">
         <p className="text-sm font-semibold">اطلاعیه همگانی</p>
         <input
           value={title}
@@ -54,7 +54,7 @@ export default function AdminTools() {
         <button
           onClick={() => run(() => broadcast(title, body))}
           disabled={pending}
-          className="w-full rounded-xl bg-gold py-2 text-sm font-semibold text-ink disabled:opacity-50"
+          className="w-full rounded-xl bg-gold py-2 text-sm font-semibold text-[#1a1400] disabled:opacity-50"
         >
           ارسال اطلاعیه
         </button>

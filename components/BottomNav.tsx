@@ -16,7 +16,7 @@ const ITEMS = [
 export default function BottomNav() {
   const pathname = usePathname();
   return (
-    <nav className="sticky bottom-0 z-20 border-t border-black/5 bg-white/95 backdrop-blur">
+    <nav className="sticky bottom-0 z-20 border-t border-white/10 bg-surface/85 backdrop-blur">
       <ul className="mx-auto flex max-w-md items-stretch justify-between px-2">
         {ITEMS.map((item) => {
           const active =
@@ -27,11 +27,16 @@ export default function BottomNav() {
             <li key={item.href} className="flex-1">
               <Link
                 href={item.href}
-                className={`flex flex-col items-center gap-0.5 py-2 text-xs transition ${
-                  active ? "text-pitch-600" : "text-muted hover:text-ink"
+                className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] transition ${
+                  active ? "text-pitch-700" : "text-muted hover:text-ink"
                 }`}
               >
-                <span className="text-lg">{item.icon}</span>
+                {active && (
+                  <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-pitch-500 shadow-[0_0_10px_0_var(--color-pitch-500)]" />
+                )}
+                <span className={`text-lg transition ${active ? "drop-shadow-[0_0_8px_var(--color-pitch-500)]" : ""}`}>
+                  {item.icon}
+                </span>
                 <span>{item.label}</span>
               </Link>
             </li>

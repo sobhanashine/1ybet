@@ -1,5 +1,5 @@
 import { getCurrentUser } from "@/lib/auth";
-import { getMatchesWithPredictions, type MatchWithPrediction } from "@/lib/matches";
+import { getMatchesWithPredictions, isLocked, type MatchWithPrediction } from "@/lib/matches";
 import MatchCard from "@/components/MatchCard";
 import { t } from "@/lib/i18n";
 import { formatJalaliDate, tehranDayKey } from "@/lib/format";
@@ -37,7 +37,7 @@ export default async function FixturesPage() {
           </h2>
           <div className="space-y-3">
             {ms.map((m) => (
-              <MatchCard key={m.id} match={m} />
+              <MatchCard key={m.id} match={m} locked={isLocked(m.kickoffAt)} />
             ))}
           </div>
         </section>

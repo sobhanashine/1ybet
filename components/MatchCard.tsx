@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { submitPrediction } from "@/app/actions/predictions";
 import { isLocked } from "@/lib/time";
 import { teamFa, teamFlag } from "@/lib/teams-fa";
@@ -8,39 +8,123 @@ import { t } from "@/lib/i18n";
 import { formatTime, toPersianDigits } from "@/lib/format";
 import type { MatchWithPrediction } from "@/lib/matches";
 
-type Props = { match: MatchWithPrediction };
+type Props = { match: MatchWithPrediction; locked: boolean };
 
 function ScoreBox({
   value,
   onChange,
   disabled,
+  onComplete,
+  onEnter,
 }: {
   value: string;
   onChange: (v: string) => void;
   disabled?: boolean;
+  onComplete?: () => void;
+  onEnter?: () => void;
 }) {
+  const handleInputChange = (val: string) => {
+    // Sanitize input to only keep digits (English and Persian)
+    const clean = val.replace(/[^\d۰-۹]/g, "");
+    if (clean === "") {
+      onChange("۰");
+      return;
+    }
+    // Convert to English digits first to do slice to max 2 digits
+    const englishDigits = clean.replace(/[۰-۹]/g, (d) => {
+      const mapping: Record<string, string> = {
+        "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
+        "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9"
+      };
+      return mapping[d] ?? d;
+    }).slice(0, 2);
+
+    // Convert back to Persian digits
+    const persian = englishDigits.replace(/[0-9]/g, (d) => {
+      const mapping = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+      return mapping[Number(d)];
+    });
+
+    onChange(persian);
+
+    if (persian.length >= 1 && onComplete) {
+      setTimeout(onComplete, 50);
+    }
+  };
+
+  const toEnglishNumber = (val: string) => {
+    const cleanDigits = val.replace(/[۰-۹]/g, (d) => {
+      const mapping: Record<string, string> = {
+        "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
+        "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9"
+      };
+      return mapping[d] ?? d;
+    });
+    return Number(cleanDigits) || 0;
+  };
+
+  const handleIncrement = () => {
+    if (disabled) return;
+    const num = toEnglishNumber(value);
+    if (num < 99) {
+      onChange(toPersianDigits(num + 1));
+    }
+  };
+
+  const handleDecrement = () => {
+    if (disabled) return;
+    const num = toEnglishNumber(value);
+    if (num > 0) {
+      onChange(toPersianDigits(num - 1));
+    }
+  };
+
   return (
-    <input
-      type="number"
-      min={0}
-      max={99}
-      value={value}
-      disabled={disabled}
-      onChange={(e) => onChange(e.target.value)}
-      className="h-11 w-12 rounded-lg border border-pitch-200 bg-pitch-50 text-center text-lg font-bold outline-none transition-all duration-200 focus:border-pitch-500 focus:ring-1 focus:ring-pitch-500 disabled:opacity-70"
-    />
+    <div className="flex flex-col items-center gap-1 select-none">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={handleIncrement}
+        className="flex h-6 w-6 items-center justify-center rounded-full border border-pitch-200/20 bg-pitch-50/5 text-ink hover:bg-pitch-500/20 hover:text-pitch-700 active:scale-90 transition disabled:opacity-20 disabled:pointer-events-none text-[10px] font-bold shadow-sm"
+      >
+        ＋
+      </button>
+      <input
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={toPersianDigits(value)}
+        disabled={disabled}
+        onFocus={(e) => e.target.select()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && onEnter) {
+            onEnter();
+          }
+        }}
+        onChange={(e) => handleInputChange(e.target.value)}
+        className="h-12 w-12 rounded-2xl border border-pitch-200/20 bg-pitch-50/5 text-center text-xl font-extrabold text-ink outline-none transition-all duration-200 focus:border-pitch-500 focus:bg-pitch-500/10 focus:ring-4 focus:ring-pitch-500/20 disabled:opacity-40 font-feature-ss01 hover:scale-105"
+      />
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={handleDecrement}
+        className="flex h-6 w-6 items-center justify-center rounded-full border border-pitch-200/20 bg-pitch-50/5 text-ink hover:bg-pitch-500/20 hover:text-pitch-700 active:scale-90 transition disabled:opacity-20 disabled:pointer-events-none text-[10px] font-bold shadow-sm"
+      >
+        －
+      </button>
+    </div>
   );
 }
 
-export default function MatchCard({ match }: Props) {
-  const locked = isLocked(match.kickoffAt);
+export default function MatchCard({ match, locked }: Props) {
   const finished = match.status === "FINISHED";
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [home, setHome] = useState(
-    match.predHome != null ? String(match.predHome) : "",
+    match.predHome != null ? toPersianDigits(match.predHome) : "۰",
   );
   const [away, setAway] = useState(
-    match.predAway != null ? String(match.predAway) : "",
+    match.predAway != null ? toPersianDigits(match.predAway) : "۰",
   );
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -50,7 +134,22 @@ export default function MatchCard({ match }: Props) {
     setError("");
     setSaved(false);
     startTransition(async () => {
-      const res = await submitPrediction(match.id, Number(home), Number(away));
+      const homeDigits = home.replace(/[۰-۹]/g, (d) => {
+        const mapping: Record<string, string> = {
+          "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
+          "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9"
+        };
+        return mapping[d] ?? d;
+      });
+      const awayDigits = away.replace(/[۰-۹]/g, (d) => {
+        const mapping: Record<string, string> = {
+          "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
+          "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9"
+        };
+        return mapping[d] ?? d;
+      });
+
+      const res = await submitPrediction(match.id, Number(homeDigits), Number(awayDigits));
       if (!res.ok) return setError(res.error ?? t.common.error);
       setSaved(true);
     });
@@ -59,106 +158,183 @@ export default function MatchCard({ match }: Props) {
   const canSave = !locked && home !== "" && away !== "" && !pending;
 
   return (
-    <div className="rounded-2xl bg-white p-4 ring-1 ring-black/5 transition-all duration-200 hover:ring-black/10">
-      <div className="mb-3 flex items-center justify-between text-xs text-muted">
-        <span className="font-medium">{match.groupName ? `گروه ${match.groupName}` : ""}</span>
-        <span className="font-medium">{toPersianDigits(formatTime(match.kickoffAt))}</span>
+    <div ref={containerRef} className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-surface to-surface-2/95 p-5 ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-pitch-500/5 hover:ring-pitch-500/30">
+      {/* Dynamic spotlight glow on card hover */}
+      <div className="pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full bg-pitch-500/5 blur-3xl transition-opacity duration-300 opacity-0 group-hover:opacity-100" />
+
+      {/* Header Row */}
+      <div className="mb-4 flex items-center justify-between text-xs">
+        {match.groupName ? (
+          <span className="flex items-center gap-1.5 rounded-full border border-pitch-500/20 bg-pitch-500/5 px-2.5 py-0.5 font-bold text-pitch-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-pitch-500 animate-pulse" />
+            گروه {match.groupName}
+          </span>
+        ) : (
+          <span />
+        )}
+        <div className="flex items-center gap-2 text-muted">
+          <span className="font-semibold" suppressHydrationWarning>
+            🕒 {toPersianDigits(formatTime(match.kickoffAt))}
+          </span>
+          {locked && !finished && (
+            <span className="rounded-full bg-white/5 border border-white/10 px-2 py-0.5 text-[10px] font-bold text-muted flex items-center gap-1">
+              🔒 {t.match.locked}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-1 items-center gap-1.5 min-w-0">
-          <span className="text-base leading-none select-none">{teamFlag(match.homeTeam)}</span>
-          <span className="truncate text-sm font-semibold text-ink">
+      {/* Grid Match Center */}
+      <div className="grid grid-cols-3 items-center py-2">
+        {/* Home Team */}
+        <div className="flex flex-col items-center text-center">
+          <span className="text-4xl select-none mb-2 transition-transform duration-300 group-hover:scale-110">
+            {teamFlag(match.homeTeam)}
+          </span>
+          <span className="text-sm font-extrabold text-ink leading-tight truncate max-w-[110px]">
             {teamFa(match.homeTeam)}
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        {/* Score Center */}
+        <div className="flex flex-col items-center justify-center">
           {finished ? (
-            <div className="flex items-center gap-2 rounded-lg bg-pitch-50 px-3 py-1 text-lg font-black text-pitch-700 font-feature-ss01">
+            <div className="flex items-center gap-2.5 rounded-2xl bg-pitch-500/5 border border-pitch-500/20 px-4 py-2 text-2xl font-black text-pitch-700 shadow-inner font-feature-ss01 select-none">
               <span>{toPersianDigits(match.homeScore ?? 0)}</span>
-              <span className="text-xs font-normal opacity-60">{t.match.vs}</span>
+              <span className="text-xs font-normal opacity-50">{t.match.vs}</span>
               <span>{toPersianDigits(match.awayScore ?? 0)}</span>
             </div>
           ) : (
-            <>
-              <ScoreBox value={home} onChange={setHome} disabled={locked} />
-              <span className="text-xs font-medium text-muted">{t.match.vs}</span>
-              <ScoreBox value={away} onChange={setAway} disabled={locked} />
-            </>
+            <div className="flex items-center gap-2">
+              <ScoreBox 
+                value={home} 
+                onChange={setHome} 
+                disabled={locked} 
+                onEnter={save}
+                onComplete={() => {
+                  const inputs = containerRef.current?.querySelectorAll("input");
+                  if (inputs && inputs[1]) {
+                    inputs[1].focus();
+                    inputs[1].select();
+                  }
+                }}
+              />
+              <span className="text-[10px] font-black text-muted/60 select-none">{t.match.vs}</span>
+              <ScoreBox 
+                value={away} 
+                onChange={setAway} 
+                disabled={locked}
+                onEnter={save}
+              />
+            </div>
           )}
         </div>
 
-        <div className="flex flex-1 items-center justify-end gap-1.5 min-w-0">
-          <span className="truncate text-sm font-semibold text-ink">
+        {/* Away Team */}
+        <div className="flex flex-col items-center text-center">
+          <span className="text-4xl select-none mb-2 transition-transform duration-300 group-hover:scale-110">
+            {teamFlag(match.awayTeam)}
+          </span>
+          <span className="text-sm font-extrabold text-ink leading-tight truncate max-w-[110px]">
             {teamFa(match.awayTeam)}
           </span>
-          <span className="text-base leading-none select-none">{teamFlag(match.awayTeam)}</span>
         </div>
       </div>
 
-      {/* prediction / result footer */}
-      <div className="mt-3 flex items-center justify-between border-t border-black/5 pt-3">
+      {/* Prediction / Result Footer */}
+      <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-4">
         {finished ? (
           <div className="flex w-full items-center justify-between text-xs">
-            <span className="text-muted">
+            <span className="text-muted font-medium">
               {t.match.yourPrediction}:{" "}
               {match.predHome != null ? (
-                <span className="font-semibold text-ink">
+                <span className="font-extrabold text-ink font-feature-ss01 bg-white/5 px-2 py-1 rounded-lg border border-white/5">
                   {toPersianDigits(match.predHome)} - {toPersianDigits(match.predAway ?? 0)}
                 </span>
               ) : (
-                t.match.notPredicted
+                <span className="italic opacity-60">{t.match.notPredicted}</span>
               )}
             </span>
             {match.predHome != null && (() => {
               const pts = match.points ?? 0;
-              let badgeClass = "bg-pitch-100 text-pitch-700";
+              let badgeClass = "bg-white/5 text-muted border border-white/10";
               let text = `${toPersianDigits(pts)} ${t.match.points}`;
-              
+
               if (pts === 10) {
-                badgeClass = "bg-amber-100 text-amber-800 ring-1 ring-amber-200/50";
+                badgeClass = "bg-gradient-to-r from-amber-500/10 to-yellow-500/10 text-gold border border-gold/30 shadow-[0_0_12px_rgba(245,197,24,0.15)]";
                 text = `🌟 ${toPersianDigits(pts)} ${t.match.points}`;
               } else if (pts === 7) {
-                badgeClass = "bg-pitch-100 text-pitch-700 ring-1 ring-pitch-200/30";
+                badgeClass = "bg-gradient-to-r from-pitch-500/15 to-emerald-500/15 text-pitch-700 border border-pitch-500/30 shadow-[0_0_12px_rgba(22,224,127,0.1)]";
+                text = `🔥 ${toPersianDigits(pts)} ${t.match.points}`;
               } else if (pts === 5) {
-                badgeClass = "bg-pitch-50 text-pitch-600";
+                badgeClass = "bg-pitch-500/10 text-pitch-700 border border-pitch-500/20";
+                text = `👍 ${toPersianDigits(pts)} ${t.match.points}`;
               } else if (pts === 2) {
-                badgeClass = "bg-black/5 text-muted";
+                badgeClass = "bg-white/5 text-muted border border-white/10";
+              } else if (pts === 0) {
+                badgeClass = "bg-red-500/10 text-red-400 border border-red-500/20";
               }
               return (
-                <span className={`rounded-full px-2 py-0.5 font-bold text-[10px] ${badgeClass}`}>
+                <span className={`rounded-full px-3 py-1 font-extrabold text-[10px] tracking-wide ${badgeClass}`}>
                   {text}
                 </span>
               );
             })()}
           </div>
         ) : locked ? (
-          <span className="text-xs text-muted flex items-center gap-1 font-medium">
-            <span>🔒</span>
-            <span>{t.match.locked}</span>
-          </span>
+          <div className="flex w-full items-center justify-between text-xs">
+            <span className="text-muted font-medium">
+              {t.match.yourPrediction}:{" "}
+              {match.predHome != null ? (
+                <span className="font-extrabold text-ink font-feature-ss01 bg-white/5 px-2 py-1 rounded-lg border border-white/5">
+                  {toPersianDigits(match.predHome)} - {toPersianDigits(match.predAway ?? 0)}
+                </span>
+              ) : (
+                <span className="italic opacity-60">{t.match.notPredicted}</span>
+              )}
+            </span>
+            <span className="text-muted text-[10px] font-bold bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg flex items-center gap-1">
+              🔒 {t.match.locked}
+            </span>
+          </div>
         ) : (
-          <button
-            onClick={save}
-            disabled={!canSave}
-            className="rounded-lg bg-pitch-500 px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:bg-pitch-600 focus-visible:ring-2 focus-visible:ring-pitch-500 focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {pending ? (
-              <span className="flex items-center gap-1">
-                <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                {t.common.loading}
+          <div className="flex flex-col items-center justify-center gap-3 w-full">
+            {match.predHome != null && !saved && (
+              <span className="text-xs text-muted font-medium">
+                {t.match.yourPrediction}:{" "}
+                <span className="font-extrabold text-ink font-feature-ss01 bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
+                  {toPersianDigits(match.predHome)} - {toPersianDigits(match.predAway ?? 0)}
+                </span>
               </span>
-            ) : saved ? (
-              "✓ " + t.common.save
-            ) : (
-              t.match.save
             )}
-          </button>
+
+            <button
+              onClick={save}
+              disabled={!canSave}
+              className={`w-full max-w-[200px] rounded-xl py-2.5 text-xs font-bold shadow-md transition-all duration-300 cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-center flex items-center justify-center ${
+                saved
+                  ? "bg-pitch-500/10 text-pitch-700 border border-pitch-500/30 shadow-none"
+                  : "bg-gradient-to-r from-pitch-500 to-pitch-600 text-[#08140e] hover:shadow-[0_4px_12px_rgba(22,224,127,0.25)] hover:from-pitch-600 hover:to-pitch-700"
+              }`}
+            >
+              {pending ? (
+                <span className="flex items-center gap-1.5 justify-center">
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#08140e] border-t-transparent" />
+                  {t.common.loading}
+                </span>
+              ) : saved ? (
+                <span className="flex items-center gap-1 text-pitch-700 font-extrabold justify-center">
+                  ✓ {t.common.save}
+                </span>
+              ) : (
+                t.match.save
+              )}
+            </button>
+          </div>
         )}
       </div>
 
-      {error && <p className="mt-2 text-xs text-red-600 font-medium">{error}</p>}
+      {error && <p className="mt-2.5 text-xs text-red-400 font-bold text-center">{error}</p>}
     </div>
   );
 }

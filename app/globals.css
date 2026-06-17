@@ -1,27 +1,45 @@
 @import "tailwindcss";
 
-/* Minimal World-Cup-2026 theme: pitch green accent + warm neutrals. */
+/* Dark "stadium night" theme: deep pitch-green base, electric green accent,
+   gold for highlights. Tuned for an RTL Persian mobile PWA. */
 @theme {
   --font-sans: var(--font-vazir);
 
-  --color-pitch-50: #f2faf6;
-  --color-pitch-100: #d8f0e4;
-  --color-pitch-200: #aee0c9;
-  --color-pitch-500: #0f7b5a;
-  --color-pitch-600: #0c6249;
-  --color-pitch-700: #0a4f3b;
+  /* pitch-50/100/200 are reused across the app as subtle/elevated surfaces and
+     borders — in the dark theme they map to dark green tints. */
+  --color-pitch-50: #12201b; /* input / inset surface */
+  --color-pitch-100: #1c3a2c; /* elevated highlight (e.g. "you" row) */
+  --color-pitch-200: #2c4a3c; /* hairline borders on inset surfaces */
+  --color-pitch-500: #16e07f; /* primary accent (buttons, focus) */
+  --color-pitch-600: #11c46e; /* accent hover / pressed */
+  --color-pitch-700: #57f0a6; /* accent text on dark surfaces */
 
-  --color-ink: #14201b;
-  --color-muted: #6b7c74;
+  --color-ink: #e8f1ec; /* primary text */
+  --color-muted: #8aa89a; /* secondary text */
 
-  --color-gold: #e6b400;
+  --color-gold: #f5c518;
+
+  /* card / page surfaces */
+  --color-surface: #16211c; /* cards, header, nav */
+  --color-surface-2: #0f1915; /* deeper inset */
+  --color-base: #0b1410; /* page background */
 }
 
 html {
   font-family: var(--font-sans), system-ui, sans-serif;
+  /* render native controls (selects, scrollbars, number spinners) dark */
+  color-scheme: dark;
 }
 
 body {
+  background-color: var(--color-base);
+  /* soft floodlight glow from the top, like a night match */
+  background-image: radial-gradient(
+    130% 75% at 50% -10%,
+    rgba(22, 224, 127, 0.1),
+    transparent 60%
+  );
+  background-attachment: fixed;
   /* tabular numbers help score columns line up */
   font-feature-settings: "ss01";
 }
@@ -30,4 +48,8 @@ body {
 input[type="number"] {
   direction: ltr;
   text-align: center;
+}
+
+.font-feature-ss01 {
+  font-feature-settings: "ss01";
 }

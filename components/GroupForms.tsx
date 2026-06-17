@@ -34,7 +34,7 @@ export default function GroupForms() {
 
   return (
     <div className="space-y-3">
-      <div className="rounded-2xl bg-white p-4 ring-1 ring-black/5">
+      <div className="rounded-2xl bg-surface p-4 ring-1 ring-white/10">
         <p className="mb-2 text-sm font-semibold">{t.groups.create}</p>
         <div className="flex gap-2">
           <input
@@ -46,14 +46,14 @@ export default function GroupForms() {
           <button
             onClick={doCreate}
             disabled={pending}
-            className="rounded-xl bg-pitch-500 px-4 text-sm font-semibold text-white disabled:opacity-50"
+            className="rounded-xl bg-pitch-500 px-4 text-sm font-semibold text-[#08140e] disabled:opacity-50"
           >
             {t.groups.create}
           </button>
         </div>
       </div>
 
-      <div className="rounded-2xl bg-white p-4 ring-1 ring-black/5">
+      <div className="rounded-2xl bg-surface p-4 ring-1 ring-white/10">
         <p className="mb-2 text-sm font-semibold">{t.groups.join}</p>
         <div className="flex gap-2">
           <input
@@ -67,14 +67,14 @@ export default function GroupForms() {
           <button
             onClick={doJoin}
             disabled={pending}
-            className="rounded-xl bg-pitch-600 px-4 text-sm font-semibold text-white disabled:opacity-50"
+            className="rounded-xl bg-pitch-600 px-4 text-sm font-semibold text-[#08140e] disabled:opacity-50"
           >
             {t.groups.join}
           </button>
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
     </div>
   );
 }

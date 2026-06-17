@@ -36,10 +36,10 @@ function Row({ match }: { match: AdminMatch }) {
   }
 
   return (
-    <div className="rounded-xl bg-white p-3 ring-1 ring-black/5">
+    <div className="rounded-xl bg-surface p-3 ring-1 ring-white/10">
       <div className="mb-2 flex items-center justify-between text-xs text-muted">
           {teamFlag(match.homeTeam)} {teamFa(match.homeTeam)} - {teamFa(match.awayTeam)} {teamFlag(match.awayTeam)}
-        <span>
+        <span suppressHydrationWarning>
           {formatJalaliDate(match.kickoffAt)} {toPersianDigits(formatTime(match.kickoffAt))}
         </span>
       </div>
@@ -73,7 +73,7 @@ function Row({ match }: { match: AdminMatch }) {
         <button
           onClick={save}
           disabled={pending}
-          className="ms-auto rounded-lg bg-pitch-500 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+          className="ms-auto rounded-lg bg-pitch-500 px-3 py-1.5 text-xs font-semibold text-[#08140e] disabled:opacity-50"
         >
           {saved ? "✓" : "ذخیره"}
         </button>

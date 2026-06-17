@@ -62,7 +62,7 @@ export default function NotificationToggle({
   }
 
   return (
-    <section className="space-y-3 rounded-2xl bg-white p-4 ring-1 ring-black/5">
+    <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-white/10">
       <h2 className="text-sm font-bold text-pitch-600">
         {t.profile.enableNotifications}
       </h2>
@@ -70,7 +70,7 @@ export default function NotificationToggle({
       <button
         onClick={enablePush}
         disabled={pushState === "on"}
-        className="w-full rounded-xl bg-pitch-500 py-2.5 text-sm font-semibold text-white transition hover:bg-pitch-600 disabled:opacity-60"
+        className="w-full rounded-xl bg-pitch-500 py-2.5 text-sm font-semibold text-[#08140e] transition hover:bg-pitch-600 disabled:opacity-60"
       >
         {pushState === "on"
           ? "✓ " + t.profile.notificationsOn
@@ -93,7 +93,7 @@ export default function NotificationToggle({
           <button
             onClick={submitEmail}
             disabled={pending}
-            className="rounded-xl bg-pitch-600 px-4 text-sm font-semibold text-white disabled:opacity-50"
+            className="rounded-xl bg-pitch-600 px-4 text-sm font-semibold text-[#08140e] disabled:opacity-50"
           >
             {savedEmail ? "✓" : t.profile.save}
           </button>

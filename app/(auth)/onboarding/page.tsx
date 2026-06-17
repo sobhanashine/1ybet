@@ -23,11 +23,12 @@ export default function OnboardingPage() {
 
   return (
     <main className="flex flex-1 items-center justify-center p-6">
-      <div className="w-full max-w-sm rounded-3xl bg-white p-7 shadow-sm ring-1 ring-black/5">
-        <h1 className="mb-1 text-center text-xl font-bold text-pitch-700">
+      <div className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-gradient-to-br from-surface to-surface-2 p-7 shadow-2xl ring-1 ring-white/10">
+        <div className="pointer-events-none absolute -top-20 left-1/2 h-44 w-44 -translate-x-1/2 rounded-full bg-pitch-500/20 blur-3xl" />
+        <h1 className="relative mb-1 text-center text-xl font-extrabold text-ink">
           {t.auth.welcome} 👋
         </h1>
-        <p className="mb-6 text-center text-sm text-muted">
+        <p className="relative mb-6 text-center text-sm text-muted">
           {t.auth.nameLabel}
         </p>
         <div className="space-y-4">
@@ -48,13 +49,13 @@ export default function OnboardingPage() {
           <button
             onClick={submit}
             disabled={pending}
-            className="w-full rounded-xl bg-pitch-500 py-3 font-semibold text-white transition hover:bg-pitch-600 disabled:opacity-60"
+            className="w-full rounded-xl bg-pitch-500 py-3 font-semibold text-[#08140e] transition hover:bg-pitch-600 disabled:opacity-60"
           >
             {pending ? t.common.loading : t.auth.finish}
           </button>
         </div>
         {error && (
-          <p className="mt-4 text-center text-sm text-red-600">{error}</p>
+          <p className="mt-4 text-center text-sm text-red-400">{error}</p>
         )}
       </div>
     </main>

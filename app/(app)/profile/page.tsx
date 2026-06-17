@@ -32,13 +32,13 @@ export default async function ProfilePage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl bg-white p-4 text-center ring-1 ring-black/5">
+        <div className="rounded-2xl bg-surface p-4 text-center ring-1 ring-white/10">
           <p className="text-2xl font-bold text-pitch-600">
             {toPersianDigits(total)}
           </p>
           <p className="text-xs text-muted">{t.profile.totalPoints}</p>
         </div>
-        <div className="rounded-2xl bg-white p-4 text-center ring-1 ring-black/5">
+        <div className="rounded-2xl bg-surface p-4 text-center ring-1 ring-white/10">
           <p className="text-2xl font-bold text-gold">
             {toPersianDigits(user.bestStreak)}
           </p>
@@ -55,7 +55,7 @@ export default async function ProfilePage() {
             {earned.map((b) => (
               <div
                 key={b.code}
-                className="flex flex-col items-center gap-1 rounded-2xl bg-white p-3 text-center ring-1 ring-black/5"
+                className="flex flex-col items-center gap-1 rounded-2xl bg-surface p-3 text-center ring-1 ring-white/10"
                 title={b.descFa}
               >
                 <span className="text-2xl">{b.icon}</span>

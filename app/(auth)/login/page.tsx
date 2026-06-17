@@ -36,10 +36,13 @@ export default function LoginPage() {
 
   return (
     <main className="flex flex-1 items-center justify-center p-6">
-      <div className="w-full max-w-sm rounded-3xl bg-white p-7 shadow-sm ring-1 ring-black/5">
-        <div className="mb-6 text-center">
-          <div className="mb-2 text-3xl">⚽️</div>
-          <h1 className="text-xl font-bold text-pitch-700">{t.appName}</h1>
+      <div className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-gradient-to-br from-surface to-surface-2 p-7 shadow-2xl ring-1 ring-white/10">
+        <div className="pointer-events-none absolute -top-20 left-1/2 h-44 w-44 -translate-x-1/2 rounded-full bg-pitch-500/20 blur-3xl" />
+        <div className="relative mb-6 text-center">
+          <div className="mx-auto mb-3 grid h-16 w-16 place-items-center rounded-2xl bg-pitch-500/15 text-3xl shadow-[0_0_30px_-6px_var(--color-pitch-500)] ring-1 ring-pitch-500/30">
+            ⚽️
+          </div>
+          <h1 className="text-xl font-extrabold text-ink">{t.appName}</h1>
           <p className="mt-1 text-sm text-muted">{t.tagline}</p>
         </div>
 
@@ -62,7 +65,7 @@ export default function LoginPage() {
             <button
               onClick={submitPhone}
               disabled={pending}
-              className="w-full rounded-xl bg-pitch-500 py-3 font-semibold text-white transition hover:bg-pitch-600 disabled:opacity-60"
+              className="w-full rounded-xl bg-pitch-500 py-3 font-semibold text-[#08140e] transition hover:bg-pitch-600 disabled:opacity-60"
             >
               {pending ? t.common.loading : t.auth.sendCode}
             </button>
@@ -94,7 +97,7 @@ export default function LoginPage() {
             <button
               onClick={submitOtp}
               disabled={pending}
-              className="w-full rounded-xl bg-pitch-500 py-3 font-semibold text-white transition hover:bg-pitch-600 disabled:opacity-60"
+              className="w-full rounded-xl bg-pitch-500 py-3 font-semibold text-[#08140e] transition hover:bg-pitch-600 disabled:opacity-60"
             >
               {pending ? t.common.loading : t.auth.verify}
             </button>
@@ -112,7 +115,7 @@ export default function LoginPage() {
         )}
 
         {error && (
-          <p className="mt-4 text-center text-sm text-red-600">{error}</p>
+          <p className="mt-4 text-center text-sm text-red-400">{error}</p>
         )}
       </div>
     </main>

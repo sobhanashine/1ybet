@@ -27,7 +27,7 @@ export default async function GroupsPage() {
             <Link
               key={g.id}
               href={`/groups/${g.id}`}
-              className="flex items-center justify-between rounded-xl bg-white px-4 py-3 ring-1 ring-black/5"
+              className="flex items-center justify-between rounded-xl bg-surface px-4 py-3 ring-1 ring-white/10"
             >
               <span className="font-medium">{g.name}</span>
               <span className="text-xs text-muted">

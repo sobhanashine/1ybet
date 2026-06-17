@@ -18,7 +18,7 @@ function Row({
   fmt?: (n: number) => string;
 }) {
   return (
-    <div className="grid grid-cols-3 items-center gap-2 border-b border-black/5 py-2 text-sm last:border-0">
+    <div className="grid grid-cols-3 items-center gap-2 border-b border-white/10 py-2 text-sm last:border-0">
       <span className={`text-center font-bold ${a >= b ? "text-pitch-600" : "text-muted"}`}>
         {fmt(a)}
       </span>
@@ -65,13 +65,13 @@ export default async function H2HPage({
     <div className="space-y-4">
       <h1 className="text-lg font-bold">{t.groups.compare}</h1>
 
-      <div className="grid grid-cols-3 items-center gap-2 rounded-2xl bg-white p-4 text-ink ring-1 ring-black/5">
+      <div className="grid grid-cols-3 items-center gap-2 rounded-2xl bg-surface p-4 text-ink ring-1 ring-white/10">
         <span className="truncate text-center font-bold text-sm text-pitch-700">{a.displayName}</span>
         <span className="text-center text-xs text-muted font-medium">{t.match.vs}</span>
         <span className="truncate text-center font-bold text-sm text-pitch-700">{b.displayName}</span>
       </div>
 
-      <div className="rounded-2xl bg-white px-4 ring-1 ring-black/5">
+      <div className="rounded-2xl bg-surface px-4 ring-1 ring-white/10">
         <Row label={t.profile.totalPoints} a={a.total} b={b.total} />
         <Row label="پیش‌بینی‌ها" a={a.predicted} b={b.predicted} />
         <Row label="نتایج دقیق" a={a.exactCount} b={b.exactCount} />
@@ -85,7 +85,7 @@ export default async function H2HPage({
       </div>
 
       <h2 className="text-sm font-bold text-pitch-600">{t.leaderboard.stage}</h2>
-      <div className="rounded-2xl bg-white px-4 ring-1 ring-black/5">
+      <div className="rounded-2xl bg-surface px-4 ring-1 ring-white/10">
         {stages.map((s) => (
           <Row
             key={s}

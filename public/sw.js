@@ -1,5 +1,5 @@
 // Hand-written service worker: offline app shell + Web Push.
-const CACHE = "wc2026-v1";
+const CACHE = "wc2026-v2";
 const SHELL = ["/offline", "/icon.svg", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
@@ -31,19 +31,19 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Same-origin static assets: cache-first.
+  // Same-origin static assets: network-first, fallback to cache.
   const url = new URL(request.url);
   if (url.origin === self.location.origin && /\.(svg|png|ico|css|js|woff2?)$/.test(url.pathname)) {
     event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
-          fetch(request).then((res) => {
+      fetch(request)
+        .then((res) => {
+          if (res.ok) {
             const copy = res.clone();
             caches.open(CACHE).then((c) => c.put(request, copy));
-            return res;
-          }),
-      ),
+          }
+          return res;
+        })
+        .catch(() => caches.match(request)),
     );
   }
 });

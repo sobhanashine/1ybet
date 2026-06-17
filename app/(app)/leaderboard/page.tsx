@@ -60,8 +60,8 @@ export default async function LeaderboardPage({
             href={`/leaderboard?tab=${tab.key}`}
             className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition ${
               activeTab === tab.key
-                ? "bg-pitch-500 text-white"
-                : "bg-white text-muted ring-1 ring-black/5"
+                ? "bg-pitch-500 text-[#08140e]"
+                : "bg-surface text-muted ring-1 ring-white/10"
             }`}
           >
             {tab.label}
@@ -79,7 +79,7 @@ export default async function LeaderboardPage({
               className={`whitespace-nowrap rounded-full px-3 py-1 text-xs transition ${
                 (sp.stage ?? "GROUP") === s
                   ? "bg-pitch-100 text-pitch-700"
-                  : "bg-white text-muted ring-1 ring-black/5"
+                  : "bg-surface text-muted ring-1 ring-white/10"
               }`}
             >
               {t.stage[s]}
@@ -99,7 +99,7 @@ export default async function LeaderboardPage({
               <li
                 key={r.userId}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${
-                  me ? "bg-pitch-100 ring-1 ring-pitch-200" : "bg-white ring-1 ring-black/5"
+                  me ? "bg-pitch-100 ring-1 ring-pitch-200" : "bg-surface ring-1 ring-white/10"
                 }`}
               >
                 <span

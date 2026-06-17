@@ -70,6 +70,11 @@ const TEAMS_FA: Record<string, string> = {
   Iraq: "عراق",
   Bolivia: "بولیوی",
   Venezuela: "ونزوئلا",
+  "Bosnia-Herzegovina": "بوسنی و هرزگوین",
+  "Cape Verde Islands": "کیپ‌ورد",
+  "Congo DR": "کنگو دموکراتیک",
+  "Curaçao": "کوراسائو",
+  Haiti: "هائیتی",
 };
 
 const TEAMS_FLAG: Record<string, string> = {
@@ -142,6 +147,11 @@ const TEAMS_FLAG: Record<string, string> = {
   Iraq: "🇮🇶",
   Bolivia: "🇧🇴",
   Venezuela: "🇻🇪",
+  "Bosnia-Herzegovina": "🇧🇦",
+  "Cape Verde Islands": "🇨🇻",
+  "Congo DR": "🇨🇩",
+  "Curaçao": "🇨🇼",
+  Haiti: "🇭🇹",
 };
 
 export function teamFa(name: string | null | undefined): string {

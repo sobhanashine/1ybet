@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f7b5a",
+  themeColor: "#0b1410",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -31,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl" className={`${vazir.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-pitch-50 text-ink">
+      <body className="min-h-full flex flex-col text-ink">
         {children}
         <ServiceWorkerRegister />
       </body>
