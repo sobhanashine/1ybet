@@ -16,12 +16,14 @@ function ScoreBox({
   disabled,
   onComplete,
   onEnter,
+  hasPrediction,
 }: {
   value: string;
   onChange: (v: string) => void;
   disabled?: boolean;
   onComplete?: () => void;
   onEnter?: () => void;
+  hasPrediction?: boolean;
 }) {
   const handleInputChange = (val: string) => {
     // Sanitize input to only keep digits (English and Persian)
@@ -102,7 +104,11 @@ function ScoreBox({
           }
         }}
         onChange={(e) => handleInputChange(e.target.value)}
-        className="h-12 w-12 rounded-2xl border border-pitch-200/20 bg-pitch-50/5 text-center text-xl font-extrabold text-ink outline-none transition-all duration-200 focus:border-pitch-500 focus:bg-pitch-500/10 focus:ring-4 focus:ring-pitch-500/20 disabled:opacity-40 font-feature-ss01 hover:scale-105"
+        className={`h-12 w-12 rounded-2xl border text-center text-xl font-extrabold text-ink outline-none transition-all duration-200 focus:border-pitch-500 focus:bg-pitch-500/10 focus:ring-4 focus:ring-pitch-500/20 disabled:opacity-40 font-feature-ss01 hover:scale-105 ${
+          hasPrediction
+            ? "border-pitch-500/30 bg-pitch-500/5 focus:border-pitch-500"
+            : "border-amber-500/30 bg-amber-500/5 focus:border-amber-500 focus:ring-amber-500/20"
+        }`}
       />
       <button
         type="button"
@@ -169,21 +175,76 @@ export default function MatchCard({ match, locked, isNext }: Props) {
 
   const canSave = !locked && home !== "" && away !== "" && !pending;
 
+  const hasPrediction = match.predHome != null || saved;
+  const isUpcoming = !locked && !finished;
+  const cardBorderClass = hasPrediction
+    ? "ring-pitch-500/25 hover:ring-pitch-500/45 hover:shadow-[0_8px_30px_rgba(22,224,127,0.08)] bg-gradient-to-b from-surface/95 via-surface/98 to-pitch-50/10 shadow-[0_2px_16px_rgba(22,224,127,0.02)]"
+    : isUpcoming
+      ? "ring-amber-500/30 hover:ring-amber-500/50 hover:shadow-[0_8px_30px_rgba(245,158,11,0.08)] bg-gradient-to-b from-surface/90 to-surface-2/90"
+      : "ring-white/5 border-dashed border-white/5 bg-gradient-to-b from-surface-2/60 to-surface-2/40 opacity-70";
+
   return (
-    <div ref={containerRef} className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-surface to-surface-2/95 p-5 ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-pitch-500/5 hover:ring-pitch-500/30">
+    <div
+      ref={containerRef}
+      className={`group relative overflow-hidden rounded-3xl p-5 ring-1 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${cardBorderClass}`}
+    >
+      {/* Top accent line representing predicted/unpredicted/missed status */}
+      {hasPrediction && (
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-pitch-500/70 to-transparent rounded-t-3xl" />
+      )}
+      {!hasPrediction && isUpcoming && (
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-amber-500/70 to-transparent rounded-t-3xl animate-pulse" />
+      )}
+      {!hasPrediction && !isUpcoming && (
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-red-500/20 to-transparent rounded-t-3xl" />
+      )}
+
       {/* Dynamic spotlight glow on card hover */}
-      <div className="pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full bg-pitch-500/5 blur-3xl transition-opacity duration-300 opacity-0 group-hover:opacity-100" />
+      <div
+        className={`pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full blur-3xl transition-opacity duration-300 opacity-0 group-hover:opacity-100 ${
+          hasPrediction
+            ? "bg-pitch-500/10"
+            : isUpcoming
+              ? "bg-amber-500/10"
+              : "bg-red-500/5"
+        }`}
+      />
 
       {/* Header Row */}
       <div className="mb-4 flex items-center justify-between text-xs">
-        {match.groupName ? (
-          <span className="flex items-center gap-1.5 rounded-full border border-pitch-500/20 bg-pitch-500/5 px-2.5 py-0.5 font-bold text-pitch-700">
-            <span className="h-1.5 w-1.5 rounded-full bg-pitch-500 animate-pulse" />
-            گروه {match.groupName}
-          </span>
-        ) : (
-          <span />
-        )}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {match.groupName && (
+            <span className="rounded-full bg-white/5 px-2.5 py-0.5 font-bold text-muted border border-white/5">
+              گروه {match.groupName}
+            </span>
+          )}
+          {finished && (
+            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-bold text-muted">
+              {t.match.finished}
+            </span>
+          )}
+          {!finished && locked && (
+            <span className="rounded-full border border-red-500/10 bg-red-500/5 px-2.5 py-0.5 font-bold text-red-400">
+              {t.match.locked}
+            </span>
+          )}
+          
+          {hasPrediction ? (
+            <span className="flex items-center gap-1 rounded-full border border-pitch-500/30 bg-pitch-500/10 px-2.5 py-0.5 font-bold text-pitch-700 shadow-[0_0_8px_rgba(22,224,127,0.1)]">
+              <span className="h-1 w-1 rounded-full bg-pitch-500" />
+              پیش‌بینی‌شده
+            </span>
+          ) : (
+            <span className={`flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-bold ${
+              isUpcoming
+                ? "border-amber-500/30 bg-amber-500/10 text-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.08)] animate-pulse"
+                : "border-red-500/20 bg-red-500/5 text-red-400/70"
+            }`}>
+              <span className={`h-1 w-1 rounded-full ${isUpcoming ? "bg-amber-500 animate-pulse" : "bg-red-400/70"}`} />
+              {isUpcoming ? "ثبت‌نشده" : "پیش‌بینی‌نشده"}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2 text-muted">
           <span className="font-semibold" suppressHydrationWarning>
             🕒 {toPersianDigits(formatTime(match.kickoffAt))}
@@ -248,6 +309,7 @@ export default function MatchCard({ match, locked, isNext }: Props) {
                     inputs[1].select();
                   }
                 }}
+                hasPrediction={hasPrediction}
               />
               <span className="text-[10px] font-black text-muted/60 select-none">{t.match.vs}</span>
               <ScoreBox
@@ -255,6 +317,7 @@ export default function MatchCard({ match, locked, isNext }: Props) {
                 onChange={setAway}
                 disabled={locked}
                 onEnter={save}
+                hasPrediction={hasPrediction}
               />
             </div>
           )}
