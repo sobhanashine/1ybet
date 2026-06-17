@@ -118,6 +118,14 @@ export default async function LeaderboardPage({
                 <span className="text-sm font-bold text-pitch-700">
                   {toPersianDigits(r.points)}
                 </span>
+                {!me && (
+                  <Link
+                    href={`/h2h?b=${r.userId}`}
+                    className="rounded-lg bg-pitch-50/5 px-2 py-1 text-xs text-pitch-600 ring-1 ring-pitch-500/20"
+                  >
+                    {t.compare.compare}
+                  </Link>
+                )}
               </li>
             );
           })}

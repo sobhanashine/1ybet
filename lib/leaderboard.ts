@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { db } from "./db";
-import { users, predictions, matches, bracketPicks, groupMembers } from "./db/schema";
+import { users, predictions, matches, bracketPicks } from "./db/schema";
 import { TIMEZONE } from "./config";
 
 dayjs.extend(utc);
@@ -114,20 +114,4 @@ export async function getLeaderboard(
   return rows
     .filter((r) => r.displayName)
     .sort((a, b) => b.points - a.points || b.predicted - a.predicted);
-}
-
-export async function getGroupMemberIds(groupId: number): Promise<number[]> {
-  const rows = await db
-    .select({ userId: groupMembers.userId })
-    .from(groupMembers)
-    .where(eq(groupMembers.groupId, groupId));
-  return rows.map((r) => r.userId);
-}
-
-export async function getGroupLeaderboard(
-  groupId: number,
-  scope: Scope,
-): Promise<LeaderboardRow[]> {
-  const ids = await getGroupMemberIds(groupId);
-  return getLeaderboard(scope, ids);
 }

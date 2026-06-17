@@ -97,31 +97,6 @@ export const predictions = pgTable(
   ],
 );
 
-// --- groups ---
-export const groups = pgTable("groups", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  inviteCode: text("invite_code").notNull().unique(),
-  ownerId: integer("owner_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-export const groupMembers = pgTable(
-  "group_members",
-  {
-    groupId: integer("group_id")
-      .notNull()
-      .references(() => groups.id, { onDelete: "cascade" }),
-    userId: integer("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    joinedAt: timestamp("joined_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => [primaryKey({ columns: [t.groupId, t.userId] })],
-);
-
 // --- bracket bonus ---
 export const bracketPicks = pgTable(
   "bracket_picks",
@@ -203,4 +178,3 @@ export const reminderLog = pgTable(
 export type User = typeof users.$inferSelect;
 export type Match = typeof matches.$inferSelect;
 export type Prediction = typeof predictions.$inferSelect;
-export type Group = typeof groups.$inferSelect;

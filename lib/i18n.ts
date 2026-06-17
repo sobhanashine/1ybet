@@ -9,7 +9,7 @@ export const fa = {
     home: "خانه",
     fixtures: "بازی‌ها",
     leaderboard: "جدول امتیازات",
-    groups: "گروه‌ها",
+    compare: "مقایسه",
     bracket: "جدول حذفی",
     profile: "پروفایل",
     admin: "مدیریت",
@@ -71,18 +71,24 @@ export const fa = {
     empty: "هنوز امتیازی ثبت نشده است",
   },
 
-  // groups
-  groups: {
-    title: "گروه‌ها",
-    create: "ساخت گروه",
-    join: "عضویت با کد",
-    nameLabel: "نام گروه",
-    codeLabel: "کد دعوت",
-    inviteCode: "کد دعوت",
-    members: "اعضا",
-    myGroups: "گروه‌های من",
-    empty: "هنوز عضو هیچ گروهی نیستید",
+  // compare (head-to-head)
+  compare: {
+    title: "مقایسه بازیکنان",
     compare: "مقایسه",
+    pickOpponent: "یک بازیکن را برای مقایسه با خودتان انتخاب کنید",
+    search: "جستجوی بازیکن…",
+    noPlayers: "بازیکنی برای مقایسه وجود ندارد",
+    you: "شما",
+    matchByMatch: "بازی‌به‌بازی",
+    noCommonMatches: "هنوز بازی مشترکی برای مقایسه نیست",
+    yourPick: "پیش‌بینی شما",
+    notPredicted: "—",
+    win: "برد",
+    draw: "مساوی",
+    overall: "کلی",
+    predictions: "پیش‌بینی‌ها",
+    exact: "نتایج دقیق",
+    accuracy: "دقت",
   },
 
   // bracket
