@@ -13,42 +13,50 @@ A premium, fully Persian (RTL layout), installable PWA and **Telegram Mini App**
 
 ## 📸 Core Features
 
-* 💎 **Telegram Mini App Integration**: Ready to run as a Telegram Bot WebApp container with auto-login via `initData` cryptographical hash verification and mobile viewport height optimization (`expand()`).
-* 🎨 **RTL-First "Tactical Turf" Theme**: Energy-packed pitch-green accents tailored for optimal Persian readability utilizing the premium `Vazirmatn` font.
-* 🚀 **Auto-Scroll to Live Matches**: Automatically centers the viewport on the first upcoming or live match card as soon as the app mounts.
+* ⚽️ **Match Score Predictions**: Submit scorelines for every group-stage and knockout fixture, with cards auto-locking at kickoff.
+* 🏟️ **Dynamic Bracket Progression**: Interactive select-and-advance knockout bracket prediction grid with scaling stage rewards (5 / 8 / 13 / 21 / 34 for each round reached).
 * 🏆 **Granular Scoring Metric**: Rewarding statistical prediction accuracy (floor scoring ensures active participation yields points):
   - **10 Points**: Exact score prediction.
   - **7 Points**: Correct goal difference (including a correct draw).
   - **5 Points**: Correct winner (incorrect scoreline/margin).
   - **2 Points**: Participation points (floor margin — no zero).
+  - *Knockouts are scored on the 90-minute regulation result; bracket advancement uses the real winner including ET/penalties.*
 * 👥 **Private Leagues**: Build or join customized mini-competitions with friends using shareable invitation codes.
-* 🏟️ **Dynamic Bracket Progression**: Interactive select-and-advance knockout bracket prediction grid with scaling stage rewards.
+* ⚔️ **Head-to-Head**: Compare your predictions and points against any other player.
+* 🥇 **Leaderboards & Badges**: High-contrast global rankings plus an achievement/badge catalog.
+* 💎 **Telegram Mini App Integration**: Runs the *same* Next.js app inside a Telegram Bot WebApp with auto-login via `initData` HMAC hash verification and mobile viewport optimization (`expand()`). Accounts are linked by phone, so web and Telegram share one identity.
+* 🔔 **Push & Email Reminders**: VAPID Web Push notifications plus optional Resend email reminders before matches kick off.
+* 🗓️ **Jalali Date System**: Dates render as Shamsi (Jalali) with Persian digits in the `Asia/Tehran` timezone (Sat–Fri week).
+* 🎨 **RTL-First "Tactical Turf" Theme**: Energy-packed pitch-green accents tailored for optimal Persian readability utilizing the premium `Vazirmatn` font.
 * 🛠️ **Full Admin Control Panel**: Manual result overrides, API synchronization triggers, and push notification broadcast tools.
 
 ---
 
 ## 📐 System Architecture
 
-The project is structured to serve both standard Web browsers (PWA) and Telegram Mini App webviews seamlessly utilizing the same PostgreSQL database.
+The project serves both standard web browsers (PWA) and Telegram Mini App webviews from the **same** Next.js app, backed by a single PostgreSQL database.
 
 ```mermaid
 graph TD
-    subgraph "Telegram Client"
-        TG[Telegram Chat Bot] -->|Open Mini App| TMA[Telegram Mini App - Next.js]
-        TMA -->|Connect Wallet| TC[TonConnect UI / Tonkeeper]
+    subgraph "Clients"
+        WEB[Browser / Installable PWA]
+        TG[Telegram Bot] -->|Open Mini App| TMA[Telegram Mini App webview]
     end
 
-    subgraph "Backend Server (Next.js & Node)"
-        TMA -->|Verify session via initData| API[Backend REST API / Actions]
-        API -->|Read/Write state| DB[(Drizzle DB)]
-        API -->|Initiate withdraw / Send TX| TON_SDK[TON SDK & Hot Wallet]
+    subgraph "Next.js 16 App (Vercel)"
+        WEB --> APP[App Router · Server Actions]
+        TMA -->|Auto-login via initData HMAC| APP
+        APP -->|Read/Write| DB[(Supabase Postgres · Drizzle ORM)]
+        APP -->|Web Push| PUSH[VAPID]
+        APP -->|Reminder emails| MAIL[Resend]
     end
 
-    subgraph "Blockchain (TON Testnet/Mainnet)"
-        TC -->|Send Deposit TX| TON_NET((TON Blockchain))
-        TON_SDK -->|Transfer TON| TON_NET
-        SCAN[TON Indexer / API Listener] -->|Verify Deposits| TON_NET
-        SCAN -->|Webhooks / Polling| API
+    subgraph "Scheduled Jobs (GitHub Actions, ~20 min)"
+        CRON[Cron Runner] -->|x-cron-secret| SYNC["/api/cron/sync"]
+        CRON -->|x-cron-secret| REM["/api/cron/reminders"]
+        SYNC -->|Fetch fixtures & results| FD[football-data.org API]
+        SYNC --> DB
+        REM --> DB
     end
 ```
 
