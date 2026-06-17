@@ -85,7 +85,7 @@ export async function runReminders(): Promise<{ reminders: number }> {
       if (predicted.has(userId)) continue;
 
       if (c.push && (await claim(userId, m.id, "push"))) {
-        await sendPushToUser(userId, { title, body, url: "/fixtures" });
+        await sendPushToUser(userId, { title, body, url: "/" });
         reminders++;
       }
       if (c.email && (await claim(userId, m.id, "email"))) {

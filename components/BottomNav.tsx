@@ -6,7 +6,6 @@ import { t } from "@/lib/i18n";
 
 const ITEMS = [
   { href: "/", label: t.nav.home, icon: "🏠" },
-  { href: "/fixtures", label: t.nav.fixtures, icon: "📅" },
   { href: "/bracket", label: t.nav.bracket, icon: "🏟️" },
   { href: "/leaderboard", label: t.nav.leaderboard, icon: "🏆" },
   { href: "/groups", label: t.nav.groups, icon: "👥" },

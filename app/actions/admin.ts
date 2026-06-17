@@ -75,7 +75,7 @@ export async function saveMatchResult(
   if (status === "FINISHED") await rescoreMatch(matchId);
 
   revalidatePath("/admin");
-  revalidatePath("/fixtures");
+  revalidatePath("/");
   revalidatePath("/leaderboard");
   return { ok: true, info: "ذخیره شد" };
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, prefer-rest-params */
 import fs from "fs";
 import path from "path";
 import Module from "module";

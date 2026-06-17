@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import { submitPrediction } from "@/app/actions/predictions";
-import { isLocked } from "@/lib/time";
 import { teamFa, teamFlag } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
 import { formatTime, toPersianDigits } from "@/lib/format";
 import type { MatchWithPrediction } from "@/lib/matches";
 
-type Props = { match: MatchWithPrediction; locked: boolean };
+type Props = { match: MatchWithPrediction; locked: boolean; isNext?: boolean };
 
 function ScoreBox({
   value,
@@ -116,7 +115,7 @@ function ScoreBox({
   );
 }
 
-export default function MatchCard({ match, locked }: Props) {
+export default function MatchCard({ match, locked, isNext }: Props) {
   const finished = match.status === "FINISHED";
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -129,6 +128,18 @@ export default function MatchCard({ match, locked }: Props) {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (isNext && containerRef.current) {
+      const timer = setTimeout(() => {
+        containerRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isNext]);
 
   function save() {
     setError("");

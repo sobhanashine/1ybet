@@ -46,6 +46,5 @@ export async function submitPrediction(
     });
 
   revalidatePath("/");
-  revalidatePath("/fixtures");
   return { ok: true };
 }
