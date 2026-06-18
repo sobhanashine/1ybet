@@ -120,6 +120,9 @@ export const fa = {
     voters: "نفر رأی داده‌اند",
     thanks: "ممنون! رأی شما ثبت شد ✅",
     changeVote: "تغییر رأی",
+    adminTitle: "نتایج نظرسنجی صندوق جایزه",
+    adminEmpty: "هنوز کسی رأی نداده است.",
+    adminNoVotes: "—",
   },
 
   // bracket
