@@ -24,8 +24,8 @@ function TeamBadge({
 }) {
   return (
     <div className="flex flex-1 flex-col items-center gap-2 text-center">
-      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-pitch-50/5">
-        <TeamFlag teamName={team} flagUrl={flag} className="h-7 w-auto max-w-[36px] object-contain rounded-sm shadow-sm" />
+      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-[var(--radius-md)] border border-line bg-surface-2">
+        <TeamFlag teamName={team} flagUrl={flag} className="h-7 w-auto max-w-[36px] rounded-sm object-contain" />
       </div>
       <span className="text-sm font-extrabold leading-tight text-ink">
         {teamFa(team)}
@@ -48,19 +48,19 @@ function ShareBar({
     tone === "home"
       ? "bg-pitch-500"
       : tone === "away"
-        ? "bg-sky-500"
-        : "bg-white/40";
+        ? "bg-info"
+        : "bg-muted";
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-xs">
-        <span className="font-medium text-ink">{label}</span>
-        <span className="font-extrabold text-ink font-feature-ss01">
+        <span className="font-medium text-ink-dim">{label}</span>
+        <span className="font-extrabold text-ink tnum">
           {toPersianDigits(pct)}٪
         </span>
       </div>
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/5">
+      <div className="h-2.5 w-full overflow-hidden rounded-full border border-line bg-surface-2">
         <div
-          className={`h-full rounded-full ${barColor} transition-all`}
+          className={`h-full rounded-full ${barColor} transition-[width] duration-[var(--dur)] ease-[var(--ease-out)]`}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -90,13 +90,13 @@ export default async function MatchDetailPage({
 
   return (
     <div className="space-y-5">
-      <Link href="/" className="inline-flex items-center gap-1 text-xs font-bold text-pitch-600 hover:text-pitch-700 transition">
-        <ArrowRight className="h-3.5 w-3.5" />
+      <Link href="/" className="inline-flex items-center gap-1 text-xs font-bold text-pitch-700 transition-colors hover:text-pitch-500">
+        <ArrowRight className="h-3.5 w-3.5" aria-hidden />
         {t.common.back}
       </Link>
 
       {/* match header */}
-      <div className="rounded-3xl bg-gradient-to-b from-surface to-surface-2/95 p-5 ring-1 ring-white/10">
+      <div className="card p-5">
         <div className="mb-3 flex items-center justify-between text-xs text-muted">
           <span className="font-bold text-pitch-700">
             {match.groupName ? `گروه ${match.groupName}` : t.stage[match.stage]}
@@ -110,7 +110,7 @@ export default async function MatchDetailPage({
           <TeamBadge team={match.homeTeam} flag={match.homeFlag} />
           <div className="flex flex-col items-center">
             {finished ? (
-              <span className="font-feature-ss01 rounded-2xl border border-pitch-500/20 bg-pitch-500/5 px-4 py-2 text-2xl font-black text-pitch-700">
+              <span className="tnum rounded-[var(--radius-md)] border border-pitch-200 bg-pitch-50 px-4 py-2 text-2xl font-black text-pitch-700">
                 {toPersianDigits(match.homeScore ?? 0)} {t.match.vs}{" "}
                 {toPersianDigits(match.awayScore ?? 0)}
               </span>
@@ -122,33 +122,29 @@ export default async function MatchDetailPage({
         </div>
 
         {/* your prediction */}
-        <div className="mt-4 flex items-center justify-center gap-2 border-t border-white/10 pt-3 text-xs">
+        <div className="mt-4 flex items-center justify-center gap-2 border-t border-line pt-3 text-xs">
           <span className="text-muted">{t.match.yourPrediction}:</span>
           {match.predHome != null ? (
-            <span className="font-feature-ss01 rounded-lg border border-white/5 bg-white/5 px-2 py-1 font-extrabold text-ink">
+            <span className="tnum rounded-md border border-line bg-surface-2 px-2 py-1 font-extrabold text-ink">
               {toPersianDigits(match.predHome)} - {toPersianDigits(match.predAway ?? 0)}
             </span>
           ) : (
-            <span className="italic text-muted/60">{t.match.notPredicted}</span>
+            <span className="italic text-muted">{t.match.notPredicted}</span>
           )}
         </div>
       </div>
 
       {/* crowd stats */}
       <section className="space-y-3">
-        <h2 className="text-sm font-bold text-pitch-600">{t.matchStats.crowd}</h2>
+        <h2 className="section-label">{t.matchStats.crowd}</h2>
 
         {!stats ? (
-          <p className="rounded-2xl bg-surface p-4 text-sm text-muted ring-1 ring-white/10">
-            {t.matchStats.lockedHint}
-          </p>
+          <div className="card p-4 text-sm text-muted">{t.matchStats.lockedHint}</div>
         ) : stats.total === 0 ? (
-          <p className="rounded-2xl bg-surface p-4 text-sm text-muted ring-1 ring-white/10">
-            {t.matchStats.noPredictions}
-          </p>
+          <div className="card p-4 text-sm text-muted">{t.matchStats.noPredictions}</div>
         ) : (
           <>
-            <div className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-white/10">
+            <div className="card space-y-3 p-4">
               <ShareBar
                 label={`${t.matchStats.win} ${teamFa(match.homeTeam)}`}
                 pct={stats.home.pct}
@@ -166,7 +162,7 @@ export default async function MatchDetailPage({
             </div>
 
             {/* most common scorelines */}
-            <div className="rounded-2xl bg-surface p-4 ring-1 ring-white/10">
+            <div className="card p-4">
               <h3 className="mb-3 text-xs font-bold text-muted">
                 {t.matchStats.topScores}
               </h3>
@@ -174,9 +170,9 @@ export default async function MatchDetailPage({
                 {stats.topScores.map((s) => (
                   <div
                     key={s.label}
-                    className="flex flex-1 flex-col items-center gap-1 rounded-xl bg-white/5 py-2.5"
+                    className="flex flex-1 flex-col items-center gap-1 rounded-[var(--radius-md)] border border-line bg-surface-2 py-2.5"
                   >
-                    <span className="font-feature-ss01 text-lg font-black text-ink">
+                    <span className="tnum text-lg font-black text-ink">
                       {toPersianDigits(s.label.replace("-", " - "))}
                     </span>
                     <span className="text-[11px] font-bold text-pitch-700">
@@ -188,9 +184,9 @@ export default async function MatchDetailPage({
             </div>
 
             {/* average predicted goals */}
-            <div className="flex items-center justify-between rounded-2xl bg-surface p-4 text-sm ring-1 ring-white/10">
+            <div className="card flex items-center justify-between p-4 text-sm">
               <span className="text-muted">{t.matchStats.avgGoals}</span>
-              <span className="font-feature-ss01 font-extrabold text-ink">
+              <span className="tnum font-extrabold text-ink">
                 {toPersianDigits(stats.avgHome)} - {toPersianDigits(stats.avgAway)}
               </span>
             </div>

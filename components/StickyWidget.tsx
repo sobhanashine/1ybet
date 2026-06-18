@@ -90,12 +90,13 @@ export default function StickyWidget({ initialHasVoted, initialHasEmail }: Props
   return (
     <div
       dir="rtl"
-      className="fixed bottom-[68px] left-1/2 z-30 w-[calc(100%-2rem)] max-w-[416px] -translate-x-1/2 overflow-hidden rounded-2xl border border-white/10 bg-surface/90 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-md transition-all duration-300 animate-in slide-in-from-bottom-5"
+      className="fixed bottom-[72px] left-1/2 z-[var(--z-sticky)] w-[calc(100%-2rem)] max-w-[416px] -translate-x-1/2 rounded-[var(--radius-xl)] border border-line-strong bg-surface/95 p-4 shadow-[0_12px_36px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-[var(--dur)] animate-in slide-in-from-bottom-5"
     >
-      <div className="absolute top-2.5 left-2.5 z-10">
+      <div className="absolute end-2.5 top-2.5 z-10">
         <button
           onClick={handleDismiss}
-          className="flex h-6 w-6 items-center justify-center rounded-full bg-white/5 text-muted transition hover:bg-white/10 hover:text-ink cursor-pointer"
+          aria-label="بستن"
+          className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-surface-2 text-muted transition-colors hover:bg-elevated hover:text-ink"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -103,51 +104,45 @@ export default function StickyWidget({ initialHasVoted, initialHasEmail }: Props
 
       {successMsg ? (
         <div className="flex flex-col items-center justify-center py-4 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pitch-500/10 text-pitch-700 shadow-[0_0_15px_rgba(22,224,127,0.2)]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-pitch-200 bg-pitch-50 text-pitch-700">
             <Check className="h-6 w-6" strokeWidth={3} />
           </div>
           <p className="mt-3 text-sm font-bold text-ink">{successMsg}</p>
         </div>
       ) : step === "poll" ? (
-        <div className="relative">
-          <div className="pointer-events-none absolute -top-12 -right-12 h-24 w-24 rounded-full bg-gold/10 blur-2xl" />
+        <div>
           <div className="flex items-center gap-2 text-gold">
-            <Trophy className="h-4.5 w-4.5" />
-            <h4 className="text-xs font-black tracking-wide uppercase">
-              {t.poll.prizeTitle}
-            </h4>
+            <Trophy className="h-[18px] w-[18px]" aria-hidden />
+            <h4 className="text-sm font-extrabold">{t.poll.prizeTitle}</h4>
           </div>
-          <p className="mt-1.5 text-xs font-semibold leading-relaxed text-muted pl-4">
+          <p className="mt-1.5 pe-1 text-xs font-medium leading-relaxed text-ink-dim">
             {t.poll.prizeQuestion}
           </p>
           <div className="mt-4 flex gap-2">
             <button
               onClick={() => handleVote("yes")}
               disabled={pending}
-              className="flex-1 rounded-xl bg-gradient-to-r from-pitch-500 to-pitch-600 py-2 text-xs font-bold text-[#08140e] shadow-[0_2px_10px_rgba(22,224,127,0.2)] transition active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="btn btn-primary flex-1 py-2 text-xs"
             >
               {t.poll.yes}
             </button>
             <button
               onClick={() => handleVote("no")}
               disabled={pending}
-              className="flex-1 rounded-xl bg-white/5 py-2 text-xs font-bold text-muted ring-1 ring-white/10 transition active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="btn btn-secondary flex-1 py-2 text-xs"
             >
               {t.poll.no}
             </button>
           </div>
-          {error && <p className="mt-2 text-[10px] text-red-400 font-semibold">{error}</p>}
+          {error && <p className="mt-2 text-[10px] font-semibold text-danger">{error}</p>}
         </div>
       ) : (
-        <div className="relative">
-          <div className="pointer-events-none absolute -top-12 -right-12 h-24 w-24 rounded-full bg-pitch-500/10 blur-2xl" />
+        <div>
           <div className="flex items-center gap-2 text-pitch-700">
-            <Mail className="h-4.5 w-4.5" />
-            <h4 className="text-xs font-black tracking-wide uppercase">
-              یادآور ایمیلی بازی‌ها
-            </h4>
+            <Mail className="h-[18px] w-[18px]" aria-hidden />
+            <h4 className="text-sm font-extrabold">یادآور ایمیلی بازی‌ها</h4>
           </div>
-          <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-muted pl-4">
+          <p className="mt-1.5 pe-1 text-[11px] font-medium leading-relaxed text-ink-dim">
             ایمیلت را وارد کن تا قبل از شروع بازی‌هایی که فراموش کرده‌ای پیش‌بینی کنی، برات یادآوری بفرستیم.
           </p>
           <div className="mt-3.5 flex gap-2">
@@ -157,18 +152,18 @@ export default function StickyWidget({ initialHasVoted, initialHasEmail }: Props
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="example@gmail.com"
-              className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-ink outline-none focus:border-pitch-500 focus:bg-white/10"
+              className="field flex-1 py-2 text-xs"
               onKeyDown={(e) => e.key === "Enter" && handleSaveEmail()}
             />
             <button
               onClick={handleSaveEmail}
               disabled={pending}
-              className="rounded-xl bg-pitch-500 px-4 text-xs font-bold text-[#08140e] transition hover:bg-pitch-600 disabled:opacity-50 cursor-pointer"
+              className="btn btn-primary px-4 text-xs"
             >
               ثبت
             </button>
           </div>
-          {error && <p className="mt-2 text-[10px] text-red-400 font-semibold">{error}</p>}
+          {error && <p className="mt-2 text-[10px] font-semibold text-danger">{error}</p>}
         </div>
       )}
     </div>

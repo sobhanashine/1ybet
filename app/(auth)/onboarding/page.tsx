@@ -23,12 +23,11 @@ export default function OnboardingPage() {
 
   return (
     <main className="flex flex-1 items-center justify-center p-6">
-      <div className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-gradient-to-br from-surface to-surface-2 p-7 shadow-2xl ring-1 ring-white/10">
-        <div className="pointer-events-none absolute -top-20 left-1/2 h-44 w-44 -translate-x-1/2 rounded-full bg-pitch-500/20 blur-3xl" />
-        <h1 className="relative mb-1 text-center text-xl font-extrabold text-ink">
+      <div className="card w-full max-w-sm p-7">
+        <h1 className="mb-1 text-center text-xl font-extrabold text-ink">
           {t.auth.welcome} 👋
         </h1>
-        <p className="relative mb-6 text-center text-sm text-muted">
+        <p className="mb-6 text-center text-sm text-muted">
           {t.auth.nameLabel}
         </p>
         <div className="space-y-4">
@@ -36,7 +35,7 @@ export default function OnboardingPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t.auth.namePlaceholder}
-            className="w-full rounded-xl border border-pitch-200 bg-pitch-50 px-4 py-3 text-center text-lg outline-none focus:border-pitch-500"
+            className="field py-3 text-center text-lg"
             onKeyDown={(e) => e.key === "Enter" && submit()}
             autoFocus
           />
@@ -44,18 +43,18 @@ export default function OnboardingPage() {
             value={country}
             onChange={(e) => setCountry(e.target.value)}
             placeholder="🇮🇷 کشور (اختیاری)"
-            className="w-full rounded-xl border border-pitch-200 bg-pitch-50 px-4 py-3 text-center outline-none focus:border-pitch-500"
+            className="field py-3 text-center"
           />
           <button
             onClick={submit}
             disabled={pending}
-            className="w-full rounded-xl bg-pitch-500 py-3 font-semibold text-[#08140e] transition hover:bg-pitch-600 disabled:opacity-60"
+            className="btn btn-primary w-full py-3"
           >
             {pending ? t.common.loading : t.auth.finish}
           </button>
         </div>
         {error && (
-          <p className="mt-4 text-center text-sm text-red-400">{error}</p>
+          <p className="mt-4 text-center text-sm font-semibold text-danger">{error}</p>
         )}
       </div>
     </main>

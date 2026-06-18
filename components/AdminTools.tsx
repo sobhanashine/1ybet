@@ -23,44 +23,44 @@ export default function AdminTools() {
         <button
           onClick={() => run(triggerSync)}
           disabled={pending}
-          className="flex-1 rounded-xl bg-pitch-500 py-2.5 text-sm font-semibold text-[#08140e] disabled:opacity-50"
+          className="btn btn-primary flex-1 py-2.5"
         >
           همگام‌سازی نتایج
         </button>
         <button
           onClick={() => run(triggerReminders)}
           disabled={pending}
-          className="flex-1 rounded-xl bg-pitch-600 py-2.5 text-sm font-semibold text-[#08140e] disabled:opacity-50"
+          className="btn btn-secondary flex-1 py-2.5"
         >
           ارسال یادآوری‌ها
         </button>
       </div>
 
-      <div className="space-y-2 rounded-2xl bg-surface p-4 ring-1 ring-white/10">
-        <p className="text-sm font-semibold">اطلاعیه همگانی</p>
+      <div className="card space-y-2 p-4">
+        <p className="text-sm font-bold text-ink">اطلاعیه همگانی</p>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="عنوان"
-          className="w-full rounded-xl border border-pitch-200 bg-pitch-50 px-3 py-2 text-sm outline-none focus:border-pitch-500"
+          className="field py-2 text-sm"
         />
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="متن"
           rows={2}
-          className="w-full rounded-xl border border-pitch-200 bg-pitch-50 px-3 py-2 text-sm outline-none focus:border-pitch-500"
+          className="field py-2 text-sm"
         />
         <button
           onClick={() => run(() => broadcast(title, body))}
           disabled={pending}
-          className="w-full rounded-xl bg-gold py-2 text-sm font-semibold text-[#1a1400] disabled:opacity-50"
+          className="btn w-full bg-gold py-2 text-[#1a1400] hover:bg-gold-dim"
         >
           ارسال اطلاعیه
         </button>
       </div>
 
-      {msg && <p className="text-center text-sm text-pitch-700">{msg}</p>}
+      {msg && <p className="text-center text-sm font-semibold text-pitch-700">{msg}</p>}
     </div>
   );
 }

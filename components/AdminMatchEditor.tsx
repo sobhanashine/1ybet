@@ -37,14 +37,14 @@ function Row({ match }: { match: AdminMatch }) {
   }
 
   return (
-    <div className="rounded-xl bg-surface p-3 ring-1 ring-white/10">
+    <div className="card p-3">
       <div className="mb-2 flex items-center justify-between text-xs text-muted">
         <div className="flex items-center gap-1.5 font-semibold text-ink">
-          <TeamFlag teamName={match.homeTeam} className="h-3.5 w-auto max-w-[20px] object-contain rounded-sm shadow-sm" />
+          <TeamFlag teamName={match.homeTeam} className="h-3.5 w-auto max-w-[20px] rounded-sm object-contain" />
           <span>{teamFa(match.homeTeam)}</span>
-          <span className="text-muted/40 mx-1">–</span>
+          <span className="mx-1 text-muted">–</span>
           <span>{teamFa(match.awayTeam)}</span>
-          <TeamFlag teamName={match.awayTeam} className="h-3.5 w-auto max-w-[20px] object-contain rounded-sm shadow-sm" />
+          <TeamFlag teamName={match.awayTeam} className="h-3.5 w-auto max-w-[20px] rounded-sm object-contain" />
         </div>
         <span suppressHydrationWarning>
           {formatJalaliDate(match.kickoffAt)} {toPersianDigits(formatTime(match.kickoffAt))}
@@ -54,7 +54,7 @@ function Row({ match }: { match: AdminMatch }) {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value as AdminMatch["status"])}
-          className="rounded-lg border border-pitch-200 bg-pitch-50 px-2 py-1.5 text-xs"
+          className="field w-auto px-2 py-1.5 text-xs"
         >
           <option value="SCHEDULED">برنامه‌ریزی‌شده</option>
           <option value="LIVE">در حال انجام</option>
@@ -66,7 +66,7 @@ function Row({ match }: { match: AdminMatch }) {
           value={home}
           onChange={(e) => setHome(e.target.value)}
           disabled={status !== "FINISHED"}
-          className="h-9 w-12 rounded-lg border border-pitch-200 bg-pitch-50 text-center disabled:opacity-50"
+          className="field h-9 w-12 px-0 disabled:opacity-50"
         />
         <span className="text-muted">-</span>
         <input
@@ -75,12 +75,12 @@ function Row({ match }: { match: AdminMatch }) {
           value={away}
           onChange={(e) => setAway(e.target.value)}
           disabled={status !== "FINISHED"}
-          className="h-9 w-12 rounded-lg border border-pitch-200 bg-pitch-50 text-center disabled:opacity-50"
+          className="field h-9 w-12 px-0 disabled:opacity-50"
         />
         <button
           onClick={save}
           disabled={pending}
-          className="ms-auto rounded-lg bg-pitch-500 px-3 py-1.5 text-xs font-semibold text-[#08140e] disabled:opacity-50"
+          className="btn btn-primary ms-auto px-3 py-1.5 text-xs"
         >
           {saved ? "✓" : "ذخیره"}
         </button>

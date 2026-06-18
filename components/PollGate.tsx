@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect } from "react";
 import { votePoll } from "@/app/actions/poll";
 import { PRIZE_POOL_POLL, type PollChoice } from "@/lib/polls-shared";
 import { t } from "@/lib/i18n";
+import { Trophy } from "lucide-react";
 
 /**
  * Full-screen blocking gate for the prize-pool poll. Every user MUST answer
@@ -42,45 +43,44 @@ export default function PollGate({ hasVoted }: { hasVoted: boolean }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
       {/* Opaque, non-dismissible backdrop — no onClick to close. */}
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
 
       <div
-        className={`relative w-full max-w-sm overflow-hidden rounded-3xl bg-gradient-to-br from-surface to-surface-2 p-6 ring-1 ring-gold/25 shadow-[0_20px_60px_rgba(0,0,0,0.6)] transition-all duration-500 ${
+        className={`card relative w-full max-w-sm border-gold/30 p-6 shadow-[0_24px_64px_rgba(0,0,0,0.6)] transition-all duration-[var(--dur)] ${
           thanks ? "scale-95 opacity-0" : "scale-100 opacity-100"
         }`}
       >
-        <div className="pointer-events-none absolute -top-12 -right-8 h-32 w-32 rounded-full bg-gold/10 blur-3xl" />
-
         {thanks ? (
-          <p className="relative py-6 text-center text-base font-bold text-pitch-700">
+          <p className="py-6 text-center text-base font-bold text-pitch-700">
             {t.poll.thanks}
           </p>
         ) : (
           <>
-            <h3 className="relative text-lg font-extrabold text-ink">
-              {t.poll.prizeTitle}
-            </h3>
-            <p className="relative mt-3 text-sm leading-relaxed text-ink/90">
+            <div className="mb-3 flex items-center gap-2 text-gold">
+              <Trophy className="h-5 w-5" aria-hidden />
+              <h3 className="text-lg font-extrabold text-ink">{t.poll.prizeTitle}</h3>
+            </div>
+            <p className="text-sm leading-relaxed text-ink-dim">
               {t.poll.prizeQuestion}
             </p>
-            <p className="relative mt-2 text-xs font-semibold text-muted">
+            <p className="mt-2 text-xs font-semibold text-muted">
               {t.poll.gateSubtitle}
             </p>
 
-            <div className="relative mt-5 grid grid-cols-2 gap-2.5">
+            <div className="mt-5 grid grid-cols-2 gap-2.5">
               <button
                 onClick={() => vote("yes")}
                 disabled={pending}
-                className="rounded-xl bg-gradient-to-r from-pitch-500 to-pitch-600 py-3 text-sm font-bold text-[#08140e] transition active:scale-95 disabled:opacity-50"
+                className="btn btn-primary py-3"
               >
                 {t.poll.yes}
               </button>
               <button
                 onClick={() => vote("no")}
                 disabled={pending}
-                className="rounded-xl bg-white/5 py-3 text-sm font-bold text-muted ring-1 ring-white/10 transition active:scale-95 disabled:opacity-50"
+                className="btn btn-secondary py-3"
               >
                 {t.poll.no}
               </button>

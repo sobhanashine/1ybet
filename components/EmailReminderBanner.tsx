@@ -26,18 +26,17 @@ export default function EmailReminderBanner({ hasEmail }: { hasEmail: boolean })
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-pitch-500/15 to-surface-2 p-5 ring-1 ring-pitch-500/30">
-      <div className="pointer-events-none absolute -top-14 -left-8 h-36 w-36 rounded-full bg-pitch-500/20 blur-3xl" />
+    <div className="card relative border-pitch-200 bg-pitch-50 p-5">
       <button
         onClick={() => setDismissed(true)}
         aria-label="بستن"
-        className="absolute left-3 top-3 text-lg leading-none text-muted transition hover:text-ink"
+        className="absolute end-3 top-3 text-lg leading-none text-muted transition-colors hover:text-ink"
       >
         ×
       </button>
 
       {done ? (
-        <div className="relative py-2 text-center">
+        <div className="py-2 text-center">
           <div className="mb-1 text-2xl">✅</div>
           <p className="text-sm font-bold text-ink">ایمیلت ثبت شد!</p>
           <p className="mt-1 text-xs leading-6 text-muted">
@@ -45,14 +44,14 @@ export default function EmailReminderBanner({ hasEmail }: { hasEmail: boolean })
           </p>
         </div>
       ) : (
-        <div className="relative">
+        <div>
           <div className="mb-2 flex items-center gap-2">
             <span className="text-xl">📧</span>
             <h2 className="text-sm font-extrabold text-ink">
               یادآور ایمیلی بازی‌ها فعال شد!
             </h2>
           </div>
-          <p className="mb-3 text-xs leading-6 text-muted">
+          <p className="mb-3 text-xs leading-6 text-ink-dim">
             ایمیلت را وارد کن تا قبل از شروع هر بازی که هنوز پیش‌بینی نکرده‌ای، یک یادآوری برات بفرستیم و امتیازی از دست ندی.
           </p>
           <div className="flex gap-2">
@@ -63,17 +62,17 @@ export default function EmailReminderBanner({ hasEmail }: { hasEmail: boolean })
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submit()}
               placeholder="name@example.com"
-              className="flex-1 rounded-xl border border-pitch-200 bg-pitch-50 px-3 py-2.5 text-sm outline-none focus:border-pitch-500"
+              className="field flex-1 py-2.5 text-sm"
             />
             <button
               onClick={submit}
               disabled={pending}
-              className="rounded-xl bg-pitch-500 px-5 text-sm font-semibold text-[#08140e] transition hover:bg-pitch-600 disabled:opacity-60"
+              className="btn btn-primary px-5"
             >
               {pending ? "..." : "فعال‌سازی"}
             </button>
           </div>
-          {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+          {error && <p className="mt-2 text-xs font-semibold text-danger">{error}</p>}
         </div>
       )}
     </div>

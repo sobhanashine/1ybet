@@ -39,48 +39,46 @@ export default async function HomePage() {
   const days = groupByDay(allMatches);
   const nextMatchId = allMatches.find((m) => m.status !== "FINISHED")?.id;
 
+  const stats = [
+    { label: t.profile.totalPoints, value: totalPoints > 0 || userRank > 0 ? toPersianDigits(totalPoints) : "۰" },
+    { label: t.leaderboard.title, value: userRank > 0 ? toPersianDigits(userRank) : "—" },
+    { label: "پیش‌بینی‌ها", value: toPersianDigits(totalPredicted) },
+  ];
+
   return (
-    <div className="space-y-5">
-      {/* Welcome / stats card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface to-surface-2 p-5 ring-1 ring-white/10">
-        <div className="pointer-events-none absolute -top-16 -left-10 h-40 w-40 rounded-full bg-pitch-500/15 blur-3xl" />
-        <div className="relative mb-4">
+    <div className="space-y-6">
+      {/* Welcome / stats */}
+      <div className="card p-5">
+        <div className="mb-4">
           <span className="text-xs font-semibold text-pitch-700">{t.auth.welcome}</span>
-          <h1 className="mt-0.5 text-2xl font-extrabold text-ink">{user.displayName} 👋</h1>
+          <h1 className="mt-1 text-2xl font-extrabold text-ink">{user.displayName} 👋</h1>
         </div>
-        <div className="relative grid grid-cols-3 gap-2 divide-x divide-x-reverse divide-white/10 border-t border-white/10 pt-4">
-          <div className="text-center">
-            <span className="mb-1 block text-[10px] font-semibold text-muted">{t.profile.totalPoints}</span>
-            <span className="text-2xl font-black text-pitch-700 font-feature-ss01">{toPersianDigits(totalPoints)}</span>
-          </div>
-          <div className="text-center">
-            <span className="mb-1 block text-[10px] font-semibold text-muted">{t.leaderboard.title}</span>
-            <span className="text-2xl font-black text-pitch-700 font-feature-ss01">
-              {userRank > 0 ? toPersianDigits(userRank) : "—"}
-            </span>
-          </div>
-          <div className="text-center">
-            <span className="mb-1 block text-[10px] font-semibold text-muted">پیش‌بینی‌ها</span>
-            <span className="text-2xl font-black text-pitch-700 font-feature-ss01">{toPersianDigits(totalPredicted)}</span>
-          </div>
+        <div className="grid grid-cols-3 divide-x divide-x-reverse divide-line border-t border-line pt-4">
+          {stats.map((s) => (
+            <div key={s.label} className="px-2 text-center">
+              <span className="block text-3xl font-black text-pitch-700 tnum">{s.value}</span>
+              <span className="mt-1 block text-[11px] font-semibold text-muted">{s.label}</span>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Promote the email-reminder opt-in to users who haven't added an email */}
       <EmailReminderBanner hasEmail={!!user.email} />
 
-      <div className="space-y-6">
-        <h2 className="text-xs font-bold text-pitch-600 tracking-wider uppercase px-1">{t.nav.fixtures}</h2>
+      <div className="space-y-7">
+        <h2 className="section-label px-0.5">{t.nav.fixtures}</h2>
 
         {days.length === 0 ? (
-          <div className="rounded-2xl bg-surface p-6 text-center ring-1 ring-white/10">
+          <div className="card p-8 text-center">
             <p className="text-sm text-muted">{t.leaderboard.empty}</p>
           </div>
         ) : (
           days.map(([day, ms]) => (
             <section key={day} className="space-y-3">
-              <h3 className="text-sm font-semibold text-pitch-600 px-1" suppressHydrationWarning>
+              <h3 className="flex items-center gap-3 px-0.5 text-sm font-bold text-ink-dim" suppressHydrationWarning>
                 {formatJalaliDate(ms[0].kickoffAt)}
+                <span className="h-px flex-1 bg-line" />
               </h3>
               <div className="space-y-3">
                 {ms.map((m) => (

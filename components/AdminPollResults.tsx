@@ -7,11 +7,11 @@ function VoterList({ voters, accent }: { voters: PollVoter[]; accent: string }) 
     return <p className="px-1 py-2 text-xs text-muted">{t.poll.adminEmpty}</p>;
   }
   return (
-    <ul className="divide-y divide-white/5">
+    <ul className="divide-y divide-line">
       {voters.map((v) => (
         <li key={v.userId} className="flex items-center justify-between gap-2 py-2">
           <span className="truncate text-sm font-semibold text-ink">{v.name}</span>
-          <span dir="ltr" className={`shrink-0 text-xs font-bold ${accent}`}>
+          <span dir="ltr" className={`shrink-0 text-xs font-bold tnum ${accent}`}>
             {v.phone}
           </span>
         </li>
@@ -27,21 +27,21 @@ export default function AdminPollResults({ data }: { data: PollBreakdown }) {
 
   return (
     <section className="space-y-3">
-      <h2 className="text-sm font-bold text-pitch-600">{t.poll.adminTitle}</h2>
+      <h2 className="section-label">{t.poll.adminTitle}</h2>
 
       {/* Tally bar */}
-      <div className="overflow-hidden rounded-2xl bg-surface p-4 ring-1 ring-white/10">
+      <div className="card p-4">
         <div className="mb-2 flex items-center justify-between text-xs font-bold">
           <span className="text-pitch-700">
             {t.poll.yesShare} · {toPersianDigits(yes.length)} ({toPersianDigits(yesPct)}٪)
           </span>
-          <span className="text-red-400">
+          <span className="text-danger">
             {t.poll.noShare} · {toPersianDigits(no.length)} ({toPersianDigits(noPct)}٪)
           </span>
         </div>
-        <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-white/5">
+        <div className="flex h-2.5 w-full overflow-hidden rounded-full border border-line bg-surface-2">
           <div className="bg-pitch-500" style={{ width: `${yesPct}%` }} />
-          <div className="bg-red-500" style={{ width: `${noPct}%` }} />
+          <div className="bg-danger" style={{ width: `${noPct}%` }} />
         </div>
         <p className="mt-2 text-center text-[10px] font-semibold text-muted">
           {toPersianDigits(total)} {t.poll.voters}
@@ -50,17 +50,17 @@ export default function AdminPollResults({ data }: { data: PollBreakdown }) {
 
       {/* Who voted what */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl bg-surface p-4 ring-1 ring-pitch-500/20">
+        <div className="card border-pitch-200 p-4">
           <h3 className="mb-1 text-xs font-bold text-pitch-700">
             {t.poll.yesShare} ({toPersianDigits(yes.length)})
           </h3>
           <VoterList voters={yes} accent="text-pitch-700" />
         </div>
-        <div className="rounded-2xl bg-surface p-4 ring-1 ring-red-500/20">
-          <h3 className="mb-1 text-xs font-bold text-red-400">
+        <div className="card border-danger/25 p-4">
+          <h3 className="mb-1 text-xs font-bold text-danger">
             {t.poll.noShare} ({toPersianDigits(no.length)})
           </h3>
-          <VoterList voters={no} accent="text-red-400" />
+          <VoterList voters={no} accent="text-danger" />
         </div>
       </div>
     </section>

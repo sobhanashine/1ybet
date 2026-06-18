@@ -7,10 +7,16 @@ import { teamFa } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
 import { formatTime, toPersianDigits } from "@/lib/format";
 import type { MatchWithPrediction } from "@/lib/matches";
-import { Clock, Lock, Check, BarChart3 } from "lucide-react";
+import { Clock, Lock, Check, BarChart3, ChevronLeft } from "lucide-react";
 import TeamFlag from "@/components/TeamFlag";
 
 type Props = { match: MatchWithPrediction; locked: boolean; isNext?: boolean };
+
+const FA_TO_EN: Record<string, string> = {
+  "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
+  "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9",
+};
+const toEnDigits = (val: string) => val.replace(/[۰-۹]/g, (d) => FA_TO_EN[d] ?? d);
 
 function ScoreBox({
   value,
@@ -28,96 +34,54 @@ function ScoreBox({
   hasPrediction?: boolean;
 }) {
   const handleInputChange = (val: string) => {
-    // Sanitize input to only keep digits (English and Persian)
+    // Keep only digits (English or Persian)
     const clean = val.replace(/[^\d۰-۹]/g, "");
     if (clean === "") {
       onChange("۰");
       return;
     }
-    // Convert to English digits first to do slice to max 2 digits
-    const englishDigits = clean.replace(/[۰-۹]/g, (d) => {
-      const mapping: Record<string, string> = {
-        "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
-        "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9"
-      };
-      return mapping[d] ?? d;
-    }).slice(0, 2);
-
-    // Convert back to Persian digits
-    const persian = englishDigits.replace(/[0-9]/g, (d) => {
-      const mapping = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
-      return mapping[Number(d)];
-    });
-
-    onChange(persian);
-
-    if (persian.length >= 1 && onComplete) {
+    const englishDigits = toEnDigits(clean).slice(0, 2);
+    onChange(toPersianDigits(englishDigits));
+    if (englishDigits.length >= 1 && onComplete) {
       setTimeout(onComplete, 50);
     }
   };
 
-  const toEnglishNumber = (val: string) => {
-    const cleanDigits = val.replace(/[۰-۹]/g, (d) => {
-      const mapping: Record<string, string> = {
-        "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
-        "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9"
-      };
-      return mapping[d] ?? d;
-    });
-    return Number(cleanDigits) || 0;
+  const toNum = (val: string) => Number(toEnDigits(val)) || 0;
+
+  const step = (delta: number) => {
+    if (disabled) return;
+    const next = Math.min(99, Math.max(0, toNum(value) + delta));
+    onChange(toPersianDigits(next));
   };
 
-  const handleIncrement = () => {
-    if (disabled) return;
-    const num = toEnglishNumber(value);
-    if (num < 99) {
-      onChange(toPersianDigits(num + 1));
-    }
-  };
-
-  const handleDecrement = () => {
-    if (disabled) return;
-    const num = toEnglishNumber(value);
-    if (num > 0) {
-      onChange(toPersianDigits(num - 1));
-    }
-  };
+  const stepBtn =
+    "flex h-6 w-9 items-center justify-center rounded-md border border-line-strong bg-surface-2 text-sm font-bold text-muted transition-colors duration-[var(--dur-fast)] hover:bg-elevated hover:text-ink active:scale-95 disabled:pointer-events-none disabled:opacity-25";
 
   return (
-    <div className="flex flex-col items-center gap-1 select-none">
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={handleIncrement}
-        className="flex h-6 w-6 items-center justify-center rounded-full border border-pitch-200/20 bg-pitch-50/5 text-ink hover:bg-pitch-500/20 hover:text-pitch-700 active:scale-90 transition disabled:opacity-20 disabled:pointer-events-none text-[10px] font-bold shadow-sm"
-      >
+    <div className="flex select-none flex-col items-center gap-1.5">
+      <button type="button" disabled={disabled} onClick={() => step(1)} className={stepBtn} aria-label="افزایش">
         ＋
       </button>
       <input
         type="text"
         inputMode="numeric"
         pattern="[0-9]*"
+        aria-label="نتیجه"
         value={toPersianDigits(value)}
         disabled={disabled}
         onFocus={(e) => e.target.select()}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && onEnter) {
-            onEnter();
-          }
+          if (e.key === "Enter" && onEnter) onEnter();
         }}
         onChange={(e) => handleInputChange(e.target.value)}
-        className={`h-12 w-12 rounded-2xl border text-center text-xl font-extrabold text-ink outline-none transition-all duration-200 focus:border-pitch-500 focus:bg-pitch-500/10 focus:ring-4 focus:ring-pitch-500/20 disabled:opacity-40 font-feature-ss01 hover:scale-105 ${
+        className={`h-14 w-14 rounded-[var(--radius-md)] border text-center text-2xl font-extrabold text-ink outline-none transition-[border-color,background-color] duration-[var(--dur)] focus:border-pitch-500 focus:bg-pitch-50 disabled:opacity-40 tnum ${
           hasPrediction
-            ? "border-pitch-500/30 bg-pitch-500/5 focus:border-pitch-500"
-            : "border-amber-500/30 bg-amber-500/5 focus:border-amber-500 focus:ring-amber-500/20"
+            ? "border-pitch-200 bg-pitch-50"
+            : "border-line-strong bg-surface-2"
         }`}
       />
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={handleDecrement}
-        className="flex h-6 w-6 items-center justify-center rounded-full border border-pitch-200/20 bg-pitch-50/5 text-ink hover:bg-pitch-500/20 hover:text-pitch-700 active:scale-90 transition disabled:opacity-20 disabled:pointer-events-none text-[10px] font-bold shadow-sm"
-      >
+      <button type="button" disabled={disabled} onClick={() => step(-1)} className={stepBtn} aria-label="کاهش">
         －
       </button>
     </div>
@@ -141,10 +105,7 @@ export default function MatchCard({ match, locked, isNext }: Props) {
   useEffect(() => {
     if (isNext && containerRef.current) {
       const timer = setTimeout(() => {
-        containerRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
+        containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 300);
       return () => clearTimeout(timer);
     }
@@ -154,163 +115,103 @@ export default function MatchCard({ match, locked, isNext }: Props) {
     setError("");
     setSaved(false);
     startTransition(async () => {
-      const homeDigits = home.replace(/[۰-۹]/g, (d) => {
-        const mapping: Record<string, string> = {
-          "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
-          "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9"
-        };
-        return mapping[d] ?? d;
-      });
-      const awayDigits = away.replace(/[۰-۹]/g, (d) => {
-        const mapping: Record<string, string> = {
-          "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
-          "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9"
-        };
-        return mapping[d] ?? d;
-      });
-
-      const res = await submitPrediction(match.id, Number(homeDigits), Number(awayDigits));
+      const res = await submitPrediction(
+        match.id,
+        Number(toEnDigits(home)),
+        Number(toEnDigits(away)),
+      );
       if (!res.ok) return setError(res.error ?? t.common.error);
       setSaved(true);
     });
   }
 
   const canSave = !locked && home !== "" && away !== "" && !pending;
-
   const hasPrediction = match.predHome != null || saved;
   const isUpcoming = !locked && !finished;
   const isAwaitingResult = locked && !finished;
-  const cardBorderClass = isAwaitingResult
-    ? hasPrediction
-      ? "ring-sky-500/25 hover:ring-sky-500/45 hover:shadow-[0_8px_30px_rgba(14,165,233,0.08)] bg-gradient-to-b from-surface/95 via-surface/98 to-sky-950/10 shadow-[0_2px_16px_rgba(14,165,233,0.02)]"
-      : "ring-red-500/15 border-dashed border-red-500/5 bg-gradient-to-b from-surface-2/60 to-surface-2/40 opacity-70"
-    : hasPrediction
-      ? "ring-pitch-500/25 hover:ring-pitch-500/45 hover:shadow-[0_8px_30px_rgba(22,224,127,0.08)] bg-gradient-to-b from-surface/95 via-surface/98 to-pitch-50/10 shadow-[0_2px_16px_rgba(22,224,127,0.02)]"
-      : isUpcoming
-        ? "ring-amber-500/30 hover:ring-amber-500/50 hover:shadow-[0_8px_30px_rgba(245,158,11,0.08)] bg-gradient-to-b from-surface/90 to-surface-2/90"
-        : "ring-white/5 border-dashed border-white/5 bg-gradient-to-b from-surface-2/60 to-surface-2/40 opacity-70";
+
+  // One status drives chip + border tone. No side stripes, no glow.
+  const status: {
+    label: string;
+    tone: "predicted" | "open" | "awaiting" | "missed" | "finished";
+  } = finished
+    ? { label: t.match.finished, tone: "finished" }
+    : isAwaitingResult
+      ? hasPrediction
+        ? { label: t.match.awaitingResult, tone: "awaiting" }
+        : { label: t.match.predictionMissed, tone: "missed" }
+      : hasPrediction
+        ? { label: "پیش‌بینی‌شده", tone: "predicted" }
+        : { label: "ثبت‌نشده", tone: "open" };
+
+  const borderByTone: Record<typeof status.tone, string> = {
+    predicted: "border-pitch-200",
+    open: "border-warn/35",
+    awaiting: "border-info/30",
+    missed: "border-danger/20",
+    finished: "border-line",
+  };
+  const chipByTone: Record<typeof status.tone, string> = {
+    predicted: "border-pitch-200 bg-pitch-50 text-pitch-700",
+    open: "border-warn/35 bg-warn/10 text-warn",
+    awaiting: "border-info/30 bg-info/10 text-info",
+    missed: "border-danger/25 bg-danger/10 text-danger",
+    finished: "border-line bg-surface-2 text-muted",
+  };
+  const dimmed = status.tone === "missed";
 
   return (
     <div
       ref={containerRef}
-      className={`group relative overflow-hidden rounded-3xl p-5 ring-1 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${cardBorderClass}`}
+      className={`card p-4 ${borderByTone[status.tone]} ${dimmed ? "opacity-70" : ""}`}
     >
-      {/* Top accent line representing predicted/unpredicted/missed status */}
-      {isAwaitingResult ? (
-        hasPrediction ? (
-          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-sky-500/70 to-transparent rounded-t-3xl" />
-        ) : (
-          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-red-500/30 to-transparent rounded-t-3xl" />
-        )
-      ) : hasPrediction ? (
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-pitch-500/70 to-transparent rounded-t-3xl" />
-      ) : isUpcoming ? (
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-amber-500/70 to-transparent rounded-t-3xl animate-pulse" />
-      ) : (
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-red-500/20 to-transparent rounded-t-3xl" />
-      )}
-
-      {/* Dynamic spotlight glow on card hover */}
-      <div
-        className={`pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full blur-3xl transition-opacity duration-300 opacity-0 group-hover:opacity-100 ${
-          isAwaitingResult
-            ? hasPrediction
-              ? "bg-sky-500/10"
-              : "bg-red-500/5"
-            : hasPrediction
-              ? "bg-pitch-500/10"
-              : isUpcoming
-                ? "bg-amber-500/10"
-                : "bg-red-500/5"
-        }`}
-      />
-
-      {/* Header Row */}
-      <div className="mb-4 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-1.5 flex-wrap">
+      {/* Header: group + status (start) · kickoff time (end) */}
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {match.groupName && (
-            <span className="rounded-full bg-white/5 px-2.5 py-0.5 font-bold text-muted border border-white/5">
-              گروه {match.groupName}
-            </span>
+            <span className="chip">گروه {match.groupName}</span>
           )}
-          {finished && (
-            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-bold text-muted">
-              {t.match.finished}
-            </span>
-          )}
-          {!finished && locked && (
-            <span className="rounded-full border border-red-500/10 bg-red-500/5 px-2.5 py-0.5 font-bold text-red-400">
-              {t.match.locked}
-            </span>
-          )}
-          
-          {hasPrediction ? (
-            <span className="flex items-center gap-1 rounded-full border border-pitch-500/30 bg-pitch-500/10 px-2.5 py-0.5 font-bold text-pitch-700 shadow-[0_0_8px_rgba(22,224,127,0.1)]">
-              <span className="h-1 w-1 rounded-full bg-pitch-500" />
-              پیش‌بینی‌شده
-            </span>
-          ) : (
-            <span className={`flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-bold ${
-              isUpcoming
-                ? "border-amber-500/30 bg-amber-500/10 text-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.08)] animate-pulse"
-                : "border-red-500/20 bg-red-500/5 text-red-400/70"
-            }`}>
-              <span className={`h-1 w-1 rounded-full ${isUpcoming ? "bg-amber-500 animate-pulse" : "bg-red-400/70"}`} />
-              {isUpcoming ? "ثبت‌نشده" : "پیش‌بینی‌نشده"}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2 text-muted">
-          <span className="flex items-center gap-1 font-semibold" suppressHydrationWarning>
-            <Clock className="h-3.5 w-3.5 opacity-70" />
-            {toPersianDigits(formatTime(match.kickoffAt))}
+          <span className={`chip ${chipByTone[status.tone]}`}>
+            <span className="chip-dot" />
+            {status.label}
           </span>
         </div>
+        <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-muted" suppressHydrationWarning>
+          <Clock className="h-3.5 w-3.5 opacity-70" aria-hidden />
+          {toPersianDigits(formatTime(match.kickoffAt))}
+        </span>
       </div>
 
-      {/* Grid Match Center */}
-      <div className="grid grid-cols-3 items-center py-2">
-        {/* Home Team */}
-        <div className="flex flex-col items-center text-center">
-          <div className="h-10 w-10 flex items-center justify-center mb-2 overflow-hidden rounded-xl bg-pitch-50/5 transition-transform duration-300 group-hover:scale-110 select-none">
-            <TeamFlag teamName={match.homeTeam} flagUrl={match.homeFlag} className="h-6 w-auto max-w-[28px] object-contain rounded-sm shadow-sm" />
-          </div>
-          <span className="text-sm font-extrabold text-ink leading-tight truncate max-w-[110px]">
+      {/* Match center: home · score · away (RTL → home on the right) */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 py-1">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-[var(--radius-md)] border border-line bg-surface-2">
+            <TeamFlag teamName={match.homeTeam} flagUrl={match.homeFlag} className="h-7 w-auto max-w-[30px] rounded-sm object-contain" />
+          </span>
+          <span className="max-w-[100px] truncate text-sm font-bold leading-tight text-ink">
             {teamFa(match.homeTeam)}
           </span>
         </div>
 
-        {/* Score Center */}
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center px-1">
           {finished ? (
-            <div className="flex items-center gap-2.5 rounded-2xl bg-pitch-500/5 border border-pitch-500/20 px-4 py-2 text-2xl font-black text-pitch-700 shadow-inner font-feature-ss01 select-none">
+            <div className="flex items-center gap-2.5 rounded-[var(--radius-md)] border border-pitch-200 bg-pitch-50 px-3.5 py-2 text-2xl font-black text-pitch-700 tnum">
               <span>{toPersianDigits(match.homeScore ?? 0)}</span>
-              <span className="text-xs font-normal opacity-50">{t.match.vs}</span>
+              <span className="text-sm font-normal text-muted">{t.match.vs}</span>
               <span>{toPersianDigits(match.awayScore ?? 0)}</span>
             </div>
           ) : locked ? (
-            // Prediction window closed, awaiting kickoff/result: read-only.
-            <div className="flex flex-col items-center gap-1.5 select-none">
-              {match.predHome != null ? (
-                <div className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-2xl font-black text-ink/85 shadow-inner font-feature-ss01">
-                  <span>{toPersianDigits(match.predHome)}</span>
-                  <span className="text-xs font-normal opacity-40">{t.match.vs}</span>
-                  <span>{toPersianDigits(match.predAway ?? 0)}</span>
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-2.5 text-xs font-bold text-muted/70">
-                  {t.match.notPredicted}
-                </div>
-              )}
-              <span className={`flex items-center gap-1.5 text-[10px] font-bold rounded-full px-2.5 py-0.5 border ${
-                hasPrediction
-                  ? "text-sky-400/80 bg-sky-500/5 border-sky-500/10 shadow-[0_0_8px_rgba(14,165,233,0.05)]"
-                  : "text-red-400/70 bg-red-500/5 border-red-500/10"
-              }`}>
-                <span className={`h-1 w-1 rounded-full ${hasPrediction ? "bg-sky-400 animate-pulse" : "bg-red-400/70"}`} />
-                {t.match.awaitingResult}
+            match.predHome != null ? (
+              <div className="flex items-center gap-2.5 rounded-[var(--radius-md)] border border-line-strong bg-surface-2 px-3.5 py-2 text-2xl font-black text-ink/90 tnum">
+                <span>{toPersianDigits(match.predHome)}</span>
+                <span className="text-sm font-normal text-muted">{t.match.vs}</span>
+                <span>{toPersianDigits(match.predAway ?? 0)}</span>
+              </div>
+            ) : (
+              <span className="rounded-[var(--radius-md)] border border-dashed border-line-strong px-3.5 py-2.5 text-xs font-bold text-muted">
+                {t.match.notPredicted}
               </span>
-            </div>
+            )
           ) : (
             <div className="flex items-center gap-2">
               <ScoreBox
@@ -327,7 +228,7 @@ export default function MatchCard({ match, locked, isNext }: Props) {
                 }}
                 hasPrediction={hasPrediction}
               />
-              <span className="text-[10px] font-black text-muted/60 select-none">{t.match.vs}</span>
+              <span className="text-xs font-black text-muted">{t.match.vs}</span>
               <ScoreBox
                 value={away}
                 onChange={setAway}
@@ -339,102 +240,74 @@ export default function MatchCard({ match, locked, isNext }: Props) {
           )}
         </div>
 
-        {/* Away Team */}
-        <div className="flex flex-col items-center text-center">
-          <div className="h-10 w-10 flex items-center justify-center mb-2 overflow-hidden rounded-xl bg-pitch-50/5 transition-transform duration-300 group-hover:scale-110 select-none">
-            <TeamFlag teamName={match.awayTeam} flagUrl={match.awayFlag} className="h-6 w-auto max-w-[28px] object-contain rounded-sm shadow-sm" />
-          </div>
-          <span className="text-sm font-extrabold text-ink leading-tight truncate max-w-[110px]">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-[var(--radius-md)] border border-line bg-surface-2">
+            <TeamFlag teamName={match.awayTeam} flagUrl={match.awayFlag} className="h-7 w-auto max-w-[30px] rounded-sm object-contain" />
+          </span>
+          <span className="max-w-[100px] truncate text-sm font-bold leading-tight text-ink">
             {teamFa(match.awayTeam)}
           </span>
         </div>
       </div>
 
-      {/* Prediction / Result Footer */}
-      <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-4">
+      {/* Footer: action / result / status */}
+      <div className="mt-4 border-t border-line pt-4">
         {finished ? (
-          <div className="flex w-full items-center justify-between text-xs">
-            <span className="text-muted font-medium">
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <span className="text-muted">
               {t.match.yourPrediction}:{" "}
               {match.predHome != null ? (
-                <span className="font-extrabold text-ink font-feature-ss01 bg-white/5 px-2 py-1 rounded-lg border border-white/5">
+                <span className="rounded-md border border-line bg-surface-2 px-2 py-0.5 font-extrabold text-ink tnum">
                   {toPersianDigits(match.predHome)} - {toPersianDigits(match.predAway ?? 0)}
                 </span>
               ) : (
-                <span className="italic opacity-60">{t.match.notPredicted}</span>
+                <span className="italic opacity-70">{t.match.notPredicted}</span>
               )}
             </span>
-            {match.predHome != null && (() => {
-              const pts = match.points ?? 0;
-              let badgeClass = "bg-white/5 text-muted border border-white/10";
-              let text = `${toPersianDigits(pts)} ${t.match.points}`;
-
-              if (pts === 10) {
-                badgeClass = "bg-gradient-to-r from-amber-500/10 to-yellow-500/10 text-gold border border-gold/30 shadow-[0_0_12px_rgba(245,197,24,0.15)]";
-                text = `🌟 ${toPersianDigits(pts)} ${t.match.points}`;
-              } else if (pts === 7) {
-                badgeClass = "bg-gradient-to-r from-pitch-500/15 to-emerald-500/15 text-pitch-700 border border-pitch-500/30 shadow-[0_0_12px_rgba(22,224,127,0.1)]";
-                text = `🔥 ${toPersianDigits(pts)} ${t.match.points}`;
-              } else if (pts === 5) {
-                badgeClass = "bg-pitch-500/10 text-pitch-700 border border-pitch-500/20";
-                text = `👍 ${toPersianDigits(pts)} ${t.match.points}`;
-              } else if (pts === 2) {
-                badgeClass = "bg-white/5 text-muted border border-white/10";
-              } else if (pts === 0) {
-                badgeClass = "bg-red-500/10 text-red-400 border border-red-500/20";
-              }
-              return (
-                <span className={`rounded-full px-3 py-1 font-extrabold text-[10px] tracking-wide ${badgeClass}`}>
-                  {text}
-                </span>
-              );
-            })()}
+            {match.predHome != null && <PointsBadge points={match.points ?? 0} />}
           </div>
         ) : locked ? (
-          <div className="flex w-full items-center justify-center">
+          <div className="flex justify-center">
             <span
-              className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[11px] font-bold ${
+              className={`chip ${
                 match.predHome != null
-                  ? "border-pitch-500/20 bg-pitch-500/5 text-pitch-700"
-                  : "border-white/10 bg-white/5 text-muted"
-              }`}
+                  ? "border-pitch-200 bg-pitch-50 text-pitch-700"
+                  : "border-line bg-surface-2 text-muted"
+              } px-3 py-1`}
             >
-              <Lock className="h-3 w-3" />
-              {match.predHome != null
-                ? t.match.predictionSaved
-                : t.match.predictionMissed}
+              <Lock className="h-3 w-3" aria-hidden />
+              {match.predHome != null ? t.match.predictionSaved : t.match.predictionMissed}
             </span>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-3 w-full">
+          <div className="flex flex-col items-center gap-3">
             {match.predHome != null && !saved && (
-              <span className="text-xs text-muted font-medium">
+              <span className="text-xs text-muted">
                 {t.match.yourPrediction}:{" "}
-                <span className="font-extrabold text-ink font-feature-ss01 bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
+                <span className="rounded-md border border-line bg-surface-2 px-2 py-0.5 font-extrabold text-ink tnum">
                   {toPersianDigits(match.predHome)} - {toPersianDigits(match.predAway ?? 0)}
                 </span>
               </span>
             )}
-
             <button
               onClick={save}
               disabled={!canSave}
-              className={`w-full max-w-[200px] rounded-xl py-2.5 text-xs font-bold shadow-md transition-all duration-300 cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-center flex items-center justify-center ${
+              className={`btn w-full max-w-[220px] py-2.5 text-sm ${
                 saved
-                  ? "bg-pitch-500/10 text-pitch-700 border border-pitch-500/30 shadow-none"
-                  : "bg-gradient-to-r from-pitch-500 to-pitch-600 text-[#08140e] hover:shadow-[0_4px_12px_rgba(22,224,127,0.25)] hover:from-pitch-600 hover:to-pitch-700"
+                  ? "border border-pitch-200 bg-pitch-50 text-pitch-700"
+                  : "btn-primary"
               }`}
             >
               {pending ? (
-                <span className="flex items-center gap-1.5 justify-center">
-                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#08140e] border-t-transparent" />
+                <>
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   {t.common.loading}
-                </span>
+                </>
               ) : saved ? (
-                <span className="flex items-center gap-1 text-pitch-700 font-extrabold justify-center">
-                  <Check className="h-3.5 w-3.5" />
+                <>
+                  <Check className="h-4 w-4" aria-hidden />
                   {t.common.save}
-                </span>
+                </>
               ) : (
                 t.match.save
               )}
@@ -443,16 +316,40 @@ export default function MatchCard({ match, locked, isNext }: Props) {
         )}
       </div>
 
-      {error && <p className="mt-2.5 text-xs text-red-400 font-bold text-center">{error}</p>}
+      {error && <p className="mt-2.5 text-center text-xs font-bold text-danger">{error}</p>}
 
       <Link
         href={`/match/${match.id}`}
-        className="mt-3 flex items-center justify-center gap-1.5 border-t border-white/5 pt-3 text-[11px] font-bold text-muted transition hover:text-pitch-700"
+        className="mt-3 flex items-center justify-center gap-1.5 border-t border-line pt-3 text-[11px] font-bold text-muted transition-colors duration-[var(--dur)] hover:text-pitch-700"
       >
-        <BarChart3 className="h-3.5 w-3.5" />
+        <BarChart3 className="h-3.5 w-3.5" aria-hidden />
         {t.match.details}
-        <span aria-hidden className="mr-0.5">›</span>
+        <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
       </Link>
     </div>
+  );
+}
+
+/** Points earned on a finished match — flat tinted chip, tier by score. */
+function PointsBadge({ points }: { points: number }) {
+  let cls = "border-line bg-surface-2 text-muted";
+  let prefix = "";
+  if (points === 10) {
+    cls = "border-gold/40 bg-gold/10 text-gold";
+    prefix = "🌟 ";
+  } else if (points === 7) {
+    cls = "border-pitch-200 bg-pitch-50 text-pitch-700";
+    prefix = "🔥 ";
+  } else if (points === 5) {
+    cls = "border-pitch-200 bg-pitch-50 text-pitch-700";
+    prefix = "👍 ";
+  } else if (points === 0) {
+    cls = "border-danger/25 bg-danger/10 text-danger";
+  }
+  return (
+    <span className={`chip ${cls} px-2.5 py-1`}>
+      {prefix}
+      {toPersianDigits(points)} {t.match.points}
+    </span>
   );
 }
