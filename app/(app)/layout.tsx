@@ -6,6 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { t } from "@/lib/i18n";
 import { getPollResults, PRIZE_POOL_POLL } from "@/lib/polls";
 import StickyWidget from "@/components/StickyWidget";
+import PollGate from "@/components/PollGate";
 
 export default async function AppLayout({
   children,
@@ -59,6 +60,9 @@ export default async function AppLayout({
       </header>
 
       <main className="flex-1 px-4 py-4">{children}</main>
+
+      {/* Mandatory prize-pool poll — blocks the app until every user answers. */}
+      <PollGate hasVoted={initialHasVoted} />
 
       <StickyWidget initialHasVoted={initialHasVoted} initialHasEmail={initialHasEmail} />
 
