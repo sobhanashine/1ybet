@@ -13,41 +13,43 @@ export default async function LeaderboardPage() {
   const rows = await getLeaderboard({ kind: "total" });
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-lg font-bold">{t.leaderboard.title}</h1>
+    <div className="space-y-5">
+      <h1 className="text-xl font-extrabold text-ink">{t.leaderboard.title}</h1>
 
-      {/* rows */}
       {rows.length === 0 ? (
-        <p className="text-sm text-muted">{t.leaderboard.empty}</p>
+        <div className="card p-8 text-center">
+          <p className="text-sm text-muted">{t.leaderboard.empty}</p>
+        </div>
       ) : (
-        <ol className="space-y-2">
+        <ol className="card divide-y divide-line overflow-hidden">
           {rows.map((r, i) => {
             const me = r.userId === user?.id;
+            const rank = i + 1;
+            const onPodium = rank <= 3;
+            const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
             return (
               <li
                 key={r.userId}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${
-                  me ? "bg-pitch-100 ring-1 ring-pitch-200" : "bg-surface ring-1 ring-white/10"
-                }`}
+                className={`flex items-center gap-3 px-3.5 py-3 ${me ? "bg-pitch-50" : ""}`}
               >
                 <span
-                  className={`w-7 text-center text-sm font-bold ${
-                    i < 3 ? "text-gold" : "text-muted"
+                  className={`flex w-7 shrink-0 justify-center text-sm font-extrabold tnum ${
+                    onPodium ? "text-gold" : "text-muted"
                   }`}
                 >
-                  {toPersianDigits(i + 1)}
+                  {medal ?? toPersianDigits(rank)}
                 </span>
-                <span className="flex-1 truncate text-sm font-medium">
+                <span className="flex-1 truncate text-sm font-bold text-ink">
                   {r.displayName}
-                  {me && <span className="mr-1 text-xs text-pitch-600"> (شما)</span>}
+                  {me && <span className="mr-1.5 text-xs font-semibold text-pitch-700">(شما)</span>}
                 </span>
-                <span className="text-sm font-bold text-pitch-700">
+                <span className="shrink-0 text-base font-extrabold text-pitch-700 tnum">
                   {toPersianDigits(r.points)}
                 </span>
                 {!me && (
                   <Link
                     href={`/h2h?b=${r.userId}`}
-                    className="rounded-lg bg-pitch-50/5 px-2 py-1 text-xs text-pitch-600 ring-1 ring-pitch-500/20"
+                    className="btn btn-secondary shrink-0 px-2.5 py-1 text-[11px]"
                   >
                     {t.compare.compare}
                   </Link>

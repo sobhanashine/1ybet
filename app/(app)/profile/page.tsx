@@ -16,13 +16,13 @@ export default async function ProfilePage() {
   ]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-pitch-100 text-2xl">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-line-strong bg-surface-2 text-2xl">
           👤
         </div>
-        <div>
-          <h1 className="text-lg font-bold">{user.displayName}</h1>
+        <div className="min-w-0">
+          <h1 className="truncate text-xl font-extrabold text-ink">{user.displayName}</h1>
           {user.country && (
             <p className="text-sm text-muted" dir="ltr">
               {user.country}
@@ -32,34 +32,36 @@ export default async function ProfilePage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl bg-surface p-4 text-center ring-1 ring-white/10">
-          <p className="text-2xl font-bold text-pitch-600">
+        <div className="card p-4 text-center">
+          <p className="text-3xl font-black text-pitch-700 tnum">
             {toPersianDigits(total)}
           </p>
-          <p className="text-xs text-muted">{t.profile.totalPoints}</p>
+          <p className="mt-1 text-xs font-semibold text-muted">{t.profile.totalPoints}</p>
         </div>
-        <div className="rounded-2xl bg-surface p-4 text-center ring-1 ring-white/10">
-          <p className="text-2xl font-bold text-gold">
+        <div className="card p-4 text-center">
+          <p className="text-3xl font-black text-gold tnum">
             {toPersianDigits(user.bestStreak)}
           </p>
-          <p className="text-xs text-muted">{t.profile.bestStreak}</p>
+          <p className="mt-1 text-xs font-semibold text-muted">{t.profile.bestStreak}</p>
         </div>
       </div>
 
-      <section className="space-y-2">
-        <h2 className="text-sm font-bold text-pitch-600">{t.profile.badges}</h2>
+      <section className="space-y-3">
+        <h2 className="section-label">{t.profile.badges}</h2>
         {earned.length === 0 ? (
-          <p className="text-sm text-muted">{t.leaderboard.empty}</p>
+          <div className="card p-6 text-center">
+            <p className="text-sm text-muted">{t.leaderboard.empty}</p>
+          </div>
         ) : (
           <div className="grid grid-cols-3 gap-3">
             {earned.map((b) => (
               <div
                 key={b.code}
-                className="flex flex-col items-center gap-1 rounded-2xl bg-surface p-3 text-center ring-1 ring-white/10"
+                className="card flex flex-col items-center gap-1.5 p-3 text-center"
                 title={b.descFa}
               >
                 <span className="text-2xl">{b.icon}</span>
-                <span className="text-[11px] leading-tight text-muted">
+                <span className="text-[11px] font-semibold leading-tight text-ink-dim">
                   {b.titleFa}
                 </span>
               </div>

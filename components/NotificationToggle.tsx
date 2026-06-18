@@ -62,15 +62,15 @@ export default function NotificationToggle({
   }
 
   return (
-    <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-white/10">
-      <h2 className="text-sm font-bold text-pitch-600">
-        {t.profile.enableNotifications}
-      </h2>
+    <section className="card space-y-3 p-4">
+      <h2 className="section-label">{t.profile.enableNotifications}</h2>
 
       <button
         onClick={enablePush}
         disabled={pushState === "on"}
-        className="w-full rounded-xl bg-pitch-500 py-2.5 text-sm font-semibold text-[#08140e] transition hover:bg-pitch-600 disabled:opacity-60"
+        className={`btn w-full py-2.5 ${
+          pushState === "on" ? "border border-pitch-200 bg-pitch-50 text-pitch-700" : "btn-primary"
+        }`}
       >
         {pushState === "on"
           ? "✓ " + t.profile.notificationsOn
@@ -80,7 +80,7 @@ export default function NotificationToggle({
       </button>
 
       <div>
-        <label className="mb-1 block text-xs text-muted">{t.profile.email}</label>
+        <label className="mb-1 block text-xs font-medium text-muted">{t.profile.email}</label>
         <p className="mb-2 text-[11px] leading-5 text-muted">
           قبل از شروع بازی‌هایی که پیش‌بینی نکرده‌ای برات ایمیل یادآوری می‌فرستیم.
         </p>
@@ -91,12 +91,12 @@ export default function NotificationToggle({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={hasEmail ? "••••••" : "name@example.com"}
-            className="flex-1 rounded-xl border border-pitch-200 bg-pitch-50 px-3 py-2 text-sm outline-none focus:border-pitch-500"
+            className="field flex-1 py-2 text-sm"
           />
           <button
             onClick={submitEmail}
             disabled={pending}
-            className="rounded-xl bg-pitch-600 px-4 text-sm font-semibold text-[#08140e] disabled:opacity-50"
+            className="btn btn-primary px-4"
           >
             {savedEmail ? "✓" : t.profile.save}
           </button>

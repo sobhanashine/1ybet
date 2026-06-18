@@ -1,50 +1,87 @@
 @import "tailwindcss";
 
-/* Dark "stadium night" theme: deep pitch-green base, electric green accent,
-   gold for highlights. Tuned for an RTL Persian mobile PWA. */
+/* ──────────────────────────────────────────────────────────────────────────
+   1ybet — "Stadium Night" design system
+   A dark, floodlit pitch. Deep green-black surfaces, one electric-green accent
+   reserved for action and success, gold for the podium. Tuned for an RTL
+   Persian mobile-first PWA. Flat at rest; motion conveys state, never decorates.
+   ────────────────────────────────────────────────────────────────────────── */
 @theme {
   --font-sans: var(--font-vazir);
 
-  /* pitch-50/100/200 are reused across the app as subtle/elevated surfaces and
-     borders — in the dark theme they map to dark green tints. */
-  --color-pitch-50: #12201b; /* input / inset surface */
-  --color-pitch-100: #1c3a2c; /* elevated highlight (e.g. "you" row) */
-  --color-pitch-200: #2c4a3c; /* hairline borders on inset surfaces */
-  --color-pitch-500: #16e07f; /* primary accent (buttons, focus) */
-  --color-pitch-600: #11c46e; /* accent hover / pressed */
-  --color-pitch-700: #57f0a6; /* accent text on dark surfaces */
+  /* Surfaces — layered from the pitch up */
+  --color-base: #0a120e; /* page background (the night) */
+  --color-surface: #131d18; /* cards, header, nav */
+  --color-surface-2: #0f1814; /* deeper inset (inputs, wells) */
+  --color-elevated: #1b2620; /* hover / raised state */
 
-  --color-ink: #e8f1ec; /* primary text */
-  --color-muted: #8aa89a; /* secondary text */
+  /* Hairlines — green-tinted so borders read as part of the pitch */
+  --color-line: #23302a; /* default hairline */
+  --color-line-strong: #2f3e36; /* stronger divider / focus rest */
 
-  --color-gold: #f5c518;
+  /* Ink — high-contrast on the dark base */
+  --color-ink: #eaf2ee; /* primary text */
+  --color-ink-dim: #b6c7bf; /* strong secondary (still ≥4.5:1) */
+  --color-muted: #8ba89b; /* labels, timestamps, secondary */
 
-  /* card / page surfaces */
-  --color-surface: #16211c; /* cards, header, nav */
-  --color-surface-2: #0f1915; /* deeper inset */
-  --color-base: #0b1410; /* page background */
+  /* Accent — pitch green. Action, selection, success. Nothing decorative. */
+  --color-pitch-500: #19e083; /* primary accent (buttons, focus, active) */
+  --color-pitch-600: #12c470; /* accent pressed / hover-darken */
+  --color-pitch-700: #5cf0a9; /* accent text on dark surfaces */
+  --color-pitch-ink: #06140d; /* text that sits on a pitch-500 fill */
+
+  /* Accent tints — fixed solid colors for resting status surfaces.
+     Pre-mixed against the surface so we avoid stacking translucent layers. */
+  --color-pitch-50: #11221a; /* faint green well / inset */
+  --color-pitch-100: #173026; /* selected row / "you" highlight */
+  --color-pitch-200: #234a39; /* border on green surfaces */
+
+  /* Semantic state colors (text-on-dark variants) */
+  --color-gold: #f6c945; /* podium, exact-score highlight */
+  --color-gold-dim: #caa12f;
+  --color-danger: #f98f8f; /* missed / error text */
+  --color-warn: #f7b94e; /* open-to-predict / attention */
+  --color-info: #56c5f5; /* awaiting result / neutral status */
+
+  /* Radius scale — used everywhere, no arbitrary values */
+  --radius-sm: 0.5rem; /* 8px  — chips, tags */
+  --radius-md: 0.75rem; /* 12px — buttons, inputs, score boxes */
+  --radius-lg: 1rem; /* 16px — cards */
+  --radius-xl: 1.25rem; /* 20px — feature blocks, modals */
+
+  /* Motion — ease-out, quick. Users are in a task. */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 130ms;
+  --dur: 190ms;
+
+  /* Semantic z-index scale */
+  --z-nav: 20;
+  --z-sticky: 30;
+  --z-backdrop: 40;
+  --z-modal: 50;
+  --z-toast: 60;
 }
 
 html {
   font-family: var(--font-sans), system-ui, sans-serif;
-  /* render native controls (selects, scrollbars, number spinners) dark */
-  color-scheme: dark;
+  color-scheme: dark; /* native controls (selects, scrollbars) render dark */
 }
 
 body {
   background-color: var(--color-base);
-  /* soft floodlight glow from the top, like a night match */
+  /* One deliberate floodlight from the top of the stand — the single
+     atmospheric flourish, at page level, never repeated per component. */
   background-image: radial-gradient(
-    130% 75% at 50% -10%,
-    rgba(22, 224, 127, 0.1),
-    transparent 60%
+    120% 70% at 50% -12%,
+    rgba(25, 224, 131, 0.07),
+    transparent 58%
   );
   background-attachment: fixed;
-  /* tabular numbers help score columns line up */
-  font-feature-settings: "ss01";
+  font-feature-settings: "ss01"; /* tabular-friendly digits for scores */
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* RTL: keep number inputs from flipping the spinner awkwardly */
+/* RTL: keep numeric score inputs upright and centered */
 input[type="number"] {
   direction: ltr;
   text-align: center;
@@ -52,4 +89,136 @@ input[type="number"] {
 
 .font-feature-ss01 {
   font-feature-settings: "ss01";
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "ss01";
+}
+
+/* Consistent focus ring for keyboard users across all interactives */
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-pitch-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Component primitives — one vocabulary, reused everywhere.
+   ────────────────────────────────────────────────────────────────────────── */
+@layer components {
+  /* Card: flat at rest, hairline border, no gradient, no glow. */
+  .card {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-line);
+    background-color: var(--color-surface);
+  }
+
+  /* Section label — replaces the scattered uppercase eyebrows */
+  .section-label {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--color-muted);
+  }
+
+  /* Chip / pill — status + meta tags. Tone set per use via text/bg/border. */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    background-color: var(--color-surface-2);
+    padding: 0.125rem 0.625rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+  .chip-dot {
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 999px;
+    background-color: currentColor;
+  }
+
+  /* Buttons — solid primary, quiet secondary, ghost. Flat, no gradient. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--radius-md);
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color var(--dur) var(--ease-out),
+      border-color var(--dur) var(--ease-out),
+      color var(--dur) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out);
+  }
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background-color: var(--color-pitch-500);
+    color: var(--color-pitch-ink);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-pitch-600);
+  }
+  .btn-secondary {
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-line-strong);
+    color: var(--color-ink);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-elevated);
+  }
+  .btn-ghost {
+    background-color: transparent;
+    color: var(--color-muted);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    color: var(--color-ink);
+    background-color: var(--color-surface-2);
+  }
+
+  /* Field — text/number/email inputs share one look */
+  .field {
+    width: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-line-strong);
+    background-color: var(--color-surface-2);
+    padding: 0.625rem 0.875rem;
+    color: var(--color-ink);
+    outline: none;
+    transition:
+      border-color var(--dur) var(--ease-out),
+      background-color var(--dur) var(--ease-out);
+  }
+  .field::placeholder {
+    color: var(--color-muted);
+  }
+  .field:focus {
+    border-color: var(--color-pitch-500);
+    background-color: var(--color-surface);
+  }
+}
+
+/* Reduced motion: collapse all transitions/animations to near-instant */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

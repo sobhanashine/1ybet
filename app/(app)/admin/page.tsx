@@ -33,15 +33,15 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-lg font-bold">{t.nav.admin}</h1>
+    <div className="space-y-6">
+      <h1 className="text-xl font-extrabold text-ink">{t.nav.admin}</h1>
 
       <AdminTools />
 
       <AdminPollResults data={pollBreakdown} />
 
-      <section className="space-y-2">
-        <h2 className="text-sm font-bold text-pitch-600">{t.nav.fixtures}</h2>
+      <section className="space-y-3">
+        <h2 className="section-label">{t.nav.fixtures}</h2>
         <AdminMatchEditor matches={allMatches} />
       </section>
     </div>

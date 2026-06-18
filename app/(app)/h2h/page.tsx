@@ -22,12 +22,12 @@ function Row({
   fmt?: (n: number) => string;
 }) {
   return (
-    <div className="grid grid-cols-3 items-center gap-2 border-b border-white/10 py-2 text-sm last:border-0">
-      <span className={`text-center font-bold ${a >= b ? "text-pitch-600" : "text-muted"}`}>
+    <div className="grid grid-cols-3 items-center gap-2 border-b border-line py-2.5 text-sm last:border-0">
+      <span className={`text-center font-extrabold tnum ${a >= b ? "text-pitch-700" : "text-muted"}`}>
         {fmt(a)}
       </span>
-      <span className="text-center text-xs text-muted">{label}</span>
-      <span className={`text-center font-bold ${b >= a ? "text-pitch-600" : "text-muted"}`}>
+      <span className="text-center text-xs font-medium text-muted">{label}</span>
+      <span className={`text-center font-extrabold tnum ${b >= a ? "text-pitch-700" : "text-muted"}`}>
         {fmt(b)}
       </span>
     </div>
@@ -45,8 +45,8 @@ function PickCell({ pick, win }: { pick: Pick | null; win: boolean }) {
   return (
     <div className="flex flex-col items-center gap-1">
       <span
-        className={`font-feature-ss01 rounded-lg px-2 py-1 text-sm font-extrabold ${
-          win ? "bg-pitch-500/10 text-pitch-700 ring-1 ring-pitch-500/30" : "bg-white/5 text-ink"
+        className={`tnum rounded-md border px-2 py-1 text-sm font-extrabold ${
+          win ? "border-pitch-200 bg-pitch-50 text-pitch-700" : "border-line bg-surface-2 text-ink"
         }`}
       >
         {toPersianDigits(pick.predHome)} - {toPersianDigits(pick.predAway)}
@@ -79,7 +79,7 @@ export default async function H2HPage({
 
     return (
       <div className="space-y-4">
-        <h1 className="text-lg font-bold">{t.compare.title}</h1>
+        <h1 className="text-xl font-extrabold text-ink">{t.compare.title}</h1>
         <p className="text-sm text-muted">{t.compare.pickOpponent}</p>
         <ComparePicker players={players} />
       </div>
@@ -101,20 +101,20 @@ export default async function H2HPage({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">{t.compare.title}</h1>
-        <Link href="/h2h" className="text-xs text-pitch-600">
+        <h1 className="text-xl font-extrabold text-ink">{t.compare.title}</h1>
+        <Link href="/h2h" className="text-xs font-semibold text-pitch-700 transition-colors hover:text-pitch-500">
           {t.compare.compare}
         </Link>
       </div>
 
-      <div className="grid grid-cols-3 items-center gap-2 rounded-2xl bg-surface p-4 text-ink ring-1 ring-white/10">
-        <span className="truncate text-center text-sm font-bold text-pitch-700">{youLabel}</span>
+      <div className="card grid grid-cols-3 items-center gap-2 p-4">
+        <span className="truncate text-center text-sm font-extrabold text-pitch-700">{youLabel}</span>
         <span className="text-center text-xs font-medium text-muted">{t.match.vs}</span>
-        <span className="truncate text-center text-sm font-bold text-pitch-700">{b.displayName}</span>
+        <span className="truncate text-center text-sm font-extrabold text-pitch-700">{b.displayName}</span>
       </div>
 
-      <h2 className="text-sm font-bold text-pitch-600">{t.compare.overall}</h2>
-      <div className="rounded-2xl bg-surface px-4 ring-1 ring-white/10">
+      <h2 className="section-label">{t.compare.overall}</h2>
+      <div className="card px-4">
         <Row label={t.profile.totalPoints} a={a.total} b={b.total} />
         <Row label={t.compare.predictions} a={a.predicted} b={b.predicted} />
         <Row label={t.compare.exact} a={a.exactCount} b={b.exactCount} />
@@ -127,8 +127,8 @@ export default async function H2HPage({
         <Row label={t.profile.bestStreak} a={a.bestStreak} b={b.bestStreak} />
       </div>
 
-      <h2 className="text-sm font-bold text-pitch-600">{t.leaderboard.stage}</h2>
-      <div className="rounded-2xl bg-surface px-4 ring-1 ring-white/10">
+      <h2 className="section-label">{t.leaderboard.stage}</h2>
+      <div className="card px-4">
         {stages.map((s) => (
           <Row
             key={s}
@@ -139,38 +139,37 @@ export default async function H2HPage({
         ))}
       </div>
 
-      <h2 className="text-sm font-bold text-pitch-600">{t.compare.matchByMatch}</h2>
+      <h2 className="section-label">{t.compare.matchByMatch}</h2>
       {perMatch.length === 0 ? (
-        <p className="text-sm text-muted">{t.compare.noCommonMatches}</p>
+        <div className="card p-6 text-center">
+          <p className="text-sm text-muted">{t.compare.noCommonMatches}</p>
+        </div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {perMatch.map((m) => {
             const aPts = m.a?.scored ? m.a.points : 0;
             const bPts = m.b?.scored ? m.b.points : 0;
             const finished = m.status === "FINISHED";
             return (
-              <li
-                key={m.matchId}
-                className="rounded-2xl bg-surface p-3 ring-1 ring-white/10"
-              >
+              <li key={m.matchId} className="card p-3">
                 {/* match header: teams + result */}
-                <div className="mb-2 flex items-center justify-center gap-2 text-xs">
+                <div className="mb-2.5 flex items-center justify-center gap-2 text-xs">
                   <span className="flex items-center gap-1.5 font-bold text-ink">
-                    <TeamFlag teamName={m.homeTeam} flagUrl={m.homeFlag} className="h-3.5 w-auto max-w-[20px] object-contain rounded-sm shadow-sm" />
+                    <TeamFlag teamName={m.homeTeam} flagUrl={m.homeFlag} className="h-3.5 w-auto max-w-[20px] rounded-sm object-contain" />
                     {teamFa(m.homeTeam)}
                   </span>
-                  <span className="font-feature-ss01 font-extrabold text-pitch-700">
+                  <span className="tnum font-extrabold text-pitch-700">
                     {finished
                       ? `${toPersianDigits(m.homeScore ?? 0)} - ${toPersianDigits(m.awayScore ?? 0)}`
                       : toPersianDigits(formatTime(m.kickoffAt))}
                   </span>
                   <span className="flex items-center gap-1.5 font-bold text-ink">
                     {teamFa(m.awayTeam)}
-                    <TeamFlag teamName={m.awayTeam} flagUrl={m.awayFlag} className="h-3.5 w-auto max-w-[20px] object-contain rounded-sm shadow-sm" />
+                    <TeamFlag teamName={m.awayTeam} flagUrl={m.awayFlag} className="h-3.5 w-auto max-w-[20px] rounded-sm object-contain" />
                   </span>
                 </div>
                 {/* the two picks side by side */}
-                <div className="grid grid-cols-2 gap-2 border-t border-white/10 pt-2">
+                <div className="grid grid-cols-2 gap-2 border-t border-line pt-2.5">
                   <PickCell pick={m.a} win={finished && aPts > bPts} />
                   <PickCell pick={m.b} win={finished && bPts > aPts} />
                 </div>
