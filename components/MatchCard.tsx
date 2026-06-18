@@ -144,26 +144,46 @@ export default function MatchCard({ match, locked, isNext }: Props) {
         ? { label: "پیش‌بینی‌شده", tone: "predicted" }
         : { label: "ثبت‌نشده", tone: "open" };
 
-  const borderByTone: Record<typeof status.tone, string> = {
-    predicted: "border-pitch-200",
-    open: "border-warn/35",
-    awaiting: "border-info/30",
-    missed: "border-danger/20",
-    finished: "border-line",
+  const cardStyleByTone: Record<
+    typeof status.tone,
+    { border: string; bg: string }
+  > = {
+    predicted: {
+      border: "border border-solid border-pitch-200/80 border-[1.5px]",
+      bg: "bg-surface",
+    },
+    open: {
+      border: "border-dashed border-[1.8px] border-warn/70",
+      bg: "bg-surface-2/60",
+    },
+    awaiting: {
+      border: "border border-solid border-info/30",
+      bg: "bg-surface",
+    },
+    missed: {
+      border: "border border-solid border-danger/20",
+      bg: "bg-surface-2/40",
+    },
+    finished: {
+      border: "border border-solid border-line",
+      bg: "bg-surface-2/20",
+    },
   };
+
   const chipByTone: Record<typeof status.tone, string> = {
-    predicted: "border-pitch-200 bg-pitch-50 text-pitch-700",
+    predicted: "border-pitch-200 bg-pitch-50/60 text-pitch-700",
     open: "border-warn/35 bg-warn/10 text-warn",
     awaiting: "border-info/30 bg-info/10 text-info",
     missed: "border-danger/25 bg-danger/10 text-danger",
     finished: "border-line bg-surface-2 text-muted",
   };
   const dimmed = status.tone === "missed";
+  const style = cardStyleByTone[status.tone];
 
   return (
     <div
       ref={containerRef}
-      className={`card p-4 ${borderByTone[status.tone]} ${dimmed ? "opacity-70" : ""}`}
+      className={`rounded-[var(--radius-lg)] p-4 transition-all duration-[var(--dur)] ${style.border} ${style.bg} ${dimmed ? "opacity-70" : ""}`}
     >
       {/* Header: group + status (start) · kickoff time (end) */}
       <div className="mb-4 flex items-center justify-between gap-2">
@@ -172,7 +192,11 @@ export default function MatchCard({ match, locked, isNext }: Props) {
             <span className="chip">گروه {match.groupName}</span>
           )}
           <span className={`chip ${chipByTone[status.tone]}`}>
-            <span className="chip-dot" />
+            {status.tone === "predicted" ? (
+              <Check className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            ) : (
+              <span className={`chip-dot ${status.tone === "open" ? "animate-pulse" : ""}`} />
+            )}
             {status.label}
           </span>
         </div>
