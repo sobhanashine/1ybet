@@ -10,6 +10,9 @@ Persian-speaking football/soccer fans predicting World Cup 2026 matches. They us
 ## Product Purpose
 A fully RTL, installable Persian PWA where users predict World Cup 2026 matches, earn points, climb daily/weekly/stage-based leaderboards, fill a knockout bracket, and compete in private groups.
 
+## Prize Tournament
+An opt-in, entry-fee prize league layered on top of the regular game. Players join via a first-visit gate on the `/tournament` page; the entry fee is 100,000 toman and the full pot (entry × members) is awarded to the winner. The tournament starts at the Belgium–Iran group match — a live countdown leads up to it, and only predictions for matches from that kickoff onward count toward a members-only standings table. Joining is opt-in only; there is no in-app payment collection yet, so the displayed pot reflects everyone who has joined.
+
 ## Brand Personality
 Sporty, modern, clean, and highly usable. Uses pitch-inspired green tones with high contrast to feel energetic yet highly functional and readable.
 

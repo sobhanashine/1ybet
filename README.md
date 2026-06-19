@@ -21,12 +21,13 @@ A premium, fully Persian (RTL layout), installable PWA and **Telegram Mini App**
   - **5 Points**: Correct winner (incorrect scoreline/margin).
   - **2 Points**: Participation points (floor margin — no zero).
   - *Knockouts are scored on the 90-minute regulation result; bracket advancement uses the real winner including ET/penalties.*
+* 🏆 **100k-Toman Prize Tournament**: An opt-in, entry-fee prize league. Players join through a first-visit gate (Yes → join, No → back to the regular game); each entry is 100,000 toman and the **whole pot (entry × members) goes to the winner**. The page shows a live pot, a countdown to the kickoff match (Belgium–Iran), and a **members-only standings** table scored only from that match onward — the regular leaderboard is untouched. Promoted via a raised gold center FAB in the bottom nav.
 * 👥 **Private Leagues**: Build or join customized mini-competitions with friends using shareable invitation codes.
 * ⚔️ **Head-to-Head**: Compare your predictions and points against any other player.
 * 🥇 **Leaderboards & Badges**: High-contrast global rankings plus an achievement/badge catalog.
 * 💎 **Telegram Mini App Integration**: Runs the *same* Next.js app inside a Telegram Bot WebApp with auto-login via `initData` HMAC hash verification and mobile viewport optimization (`expand()`). Accounts are linked by phone, so web and Telegram share one identity.
 * 🔔 **Multi-Channel Notifications (Telegram & Email)**: Real-time match results and prediction score updates (detailing final scores, predicted scores, points earned, and flag emojis next to team names) sent via Telegram Bot messages to linked users, or falling back to optional Resend email. Upcoming match reminders are also sent 1 hour before kickoff if a user's prediction is missing.
-* 📬 **Sticky Engagement Widget**: A floating interactive widget prompting users to participate in the prize-pool poll, followed by email/notification setup. The widget automatically disappears once both steps are completed or if manually dismissed.
+* 📬 **Email Reminder Widget**: A floating, dismissible widget that collects a user's email for match reminders. It disappears once an email is saved or manually dismissed.
 * 🗓️ **Jalali Date System**: Dates render as Shamsi (Jalali) with Persian digits in the `Asia/Tehran` timezone (Sat–Fri week).
 * 🎨 **RTL-First "Tactical Turf" Theme**: Energy-packed pitch-green accents tailored for optimal Persian readability utilizing the premium `Vazirmatn` font.
 * 🛠️ **Full Admin Control Panel**: Manual result overrides, API synchronization triggers, and push notification broadcast tools.
