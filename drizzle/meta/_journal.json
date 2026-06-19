@@ -36,6 +36,13 @@
       "when": 1781734045937,
       "tag": "0004_flaky_enchantress",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1781910029330,
+      "tag": "0005_vengeful_wiccan",
+      "breakpoints": true
     }
   ]
 }

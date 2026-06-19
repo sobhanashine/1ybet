@@ -135,6 +135,17 @@ export const pollVotes = pgTable(
   (t) => [primaryKey({ columns: [t.pollKey, t.userId] })],
 );
 
+// --- tournament membership (100k prize league) ---
+// A user is "in" the tournament only by an explicit opt-in here. Their
+// tournament score counts only matches kicking off at/after the tournament
+// start (Belgium vs Iran); the regular prediction game is unaffected.
+export const tournamentMembers = pgTable("tournament_members", {
+  userId: integer("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  joinedAt: timestamp("joined_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 // --- streaks & badges ---
 export const badges = pgTable("badges", {
   id: serial("id").primaryKey(),
