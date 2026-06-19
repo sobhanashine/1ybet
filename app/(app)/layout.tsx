@@ -4,9 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { logout } from "@/app/actions/auth";
 import BottomNav from "@/components/BottomNav";
 import { t } from "@/lib/i18n";
-import { getPollResults, PRIZE_POOL_POLL } from "@/lib/polls";
 import StickyWidget from "@/components/StickyWidget";
-import PollGate from "@/components/PollGate";
 
 export default async function AppLayout({
   children,
@@ -17,8 +15,6 @@ export default async function AppLayout({
   if (!user) redirect("/login");
   if (!user.displayName) redirect("/onboarding");
 
-  const pollResults = await getPollResults(PRIZE_POOL_POLL, user.id);
-  const initialHasVoted = pollResults.myChoice !== null;
   const initialHasEmail = !!user.email;
 
   return (
@@ -59,10 +55,7 @@ export default async function AppLayout({
 
       <main className="flex-1 px-4 py-5">{children}</main>
 
-      {/* Mandatory prize-pool poll — blocks the app until every user answers. */}
-      <PollGate hasVoted={initialHasVoted} />
-
-      <StickyWidget initialHasVoted={initialHasVoted} initialHasEmail={initialHasEmail} />
+      <StickyWidget initialHasEmail={initialHasEmail} />
 
       <BottomNav />
     </div>

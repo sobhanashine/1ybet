@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Vazirmatn } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { t } from "@/lib/i18n";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
@@ -41,15 +40,9 @@ export default function RootLayout({
       className={`${vazir.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        {/* Load Telegram WebApp SDK before interactive scripts */}
-        <Script
-          src="https://telegram.org/js/telegram-web-app.js"
-          strategy="beforeInteractive"
-        />
-      </head>
       <body className="min-h-full flex flex-col text-ink">
         {children}
+        {/* Loads the Telegram WebApp SDK (afterInteractive) and initialises it. */}
         <TelegramProvider />
         <ServiceWorkerRegister />
       </body>

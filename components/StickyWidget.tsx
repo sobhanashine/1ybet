@@ -1,20 +1,17 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { votePoll } from "@/app/actions/poll";
 import { saveEmail } from "@/app/actions/profile";
-import { PRIZE_POOL_POLL } from "@/lib/polls-shared";
 import { t } from "@/lib/i18n";
-import { X, Mail, Trophy, Check } from "lucide-react";
+import { X, Mail, Check } from "lucide-react";
 
 type Props = {
-  initialHasVoted: boolean;
   initialHasEmail: boolean;
 };
 
-export default function StickyWidget({ initialHasVoted, initialHasEmail }: Props) {
+export default function StickyWidget({ initialHasEmail }: Props) {
   const [dismissed, setDismissed] = useState(true); // Hidden on first hydration to avoid layout shift
-  const [step, setStep] = useState<"poll" | "email" | "none">("none");
+  const [step, setStep] = useState<"email" | "none">("none");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -29,43 +26,20 @@ export default function StickyWidget({ initialHasVoted, initialHasEmail }: Props
       return;
     }
 
-    if (!initialHasVoted) {
-      setStep("poll");
-      setDismissed(false);
-    } else if (!initialHasEmail) {
+    if (!initialHasEmail) {
       setStep("email");
       setDismissed(false);
     } else {
       setStep("none");
       setDismissed(true);
     }
-  }, [initialHasVoted, initialHasEmail]);
+  }, [initialHasEmail]);
 
   if (dismissed || step === "none") return null;
 
   const handleDismiss = () => {
     setDismissed(true);
     localStorage.setItem("sticky_widget_dismissed", "true");
-  };
-
-  const handleVote = (choice: "yes" | "no") => {
-    setError("");
-    startTransition(async () => {
-      const res = await votePoll(PRIZE_POOL_POLL, choice);
-      if (res.ok) {
-        setSuccessMsg(t.poll.thanks);
-        setTimeout(() => {
-          setSuccessMsg("");
-          if (!initialHasEmail) {
-            setStep("email");
-          } else {
-            handleDismiss();
-          }
-        }, 1500);
-      } else {
-        setError(res.error || t.common.error);
-      }
-    });
   };
 
   const handleSaveEmail = () => {
@@ -108,33 +82,6 @@ export default function StickyWidget({ initialHasVoted, initialHasEmail }: Props
             <Check className="h-6 w-6" strokeWidth={3} />
           </div>
           <p className="mt-3 text-sm font-bold text-ink">{successMsg}</p>
-        </div>
-      ) : step === "poll" ? (
-        <div>
-          <div className="flex items-center gap-2 text-gold">
-            <Trophy className="h-[18px] w-[18px]" aria-hidden />
-            <h4 className="text-sm font-extrabold">{t.poll.prizeTitle}</h4>
-          </div>
-          <p className="mt-1.5 pe-1 text-xs font-medium leading-relaxed text-ink-dim">
-            {t.poll.prizeQuestion}
-          </p>
-          <div className="mt-4 flex gap-2">
-            <button
-              onClick={() => handleVote("yes")}
-              disabled={pending}
-              className="btn btn-primary flex-1 py-2 text-xs"
-            >
-              {t.poll.yes}
-            </button>
-            <button
-              onClick={() => handleVote("no")}
-              disabled={pending}
-              className="btn btn-secondary flex-1 py-2 text-xs"
-            >
-              {t.poll.no}
-            </button>
-          </div>
-          {error && <p className="mt-2 text-[10px] font-semibold text-danger">{error}</p>}
         </div>
       ) : (
         <div>
