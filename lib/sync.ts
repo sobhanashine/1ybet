@@ -9,6 +9,7 @@ import { fetchWorldCupMatches } from "./football-api";
 import { scorePrediction } from "./scoring";
 import { resolveBracketResults, scoreBracket } from "./bracket-server";
 import { updateStreaksAndBadges } from "./badges-server";
+import { awardTournamentTop3 } from "./tournament-badges";
 
 export type SyncSummary = {
   fetched: number;
@@ -230,6 +231,14 @@ export async function runSync(): Promise<SyncSummary> {
     ({ badgesAwarded } = await updateStreaksAndBadges());
   } catch (e) {
     console.error("Badge update failed:", e instanceof Error ? e.message : e);
+  }
+  try {
+    badgesAwarded += await awardTournamentTop3();
+  } catch (e) {
+    console.error(
+      "Tournament podium award failed:",
+      e instanceof Error ? e.message : e,
+    );
   }
 
   return {

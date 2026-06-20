@@ -15,6 +15,8 @@ import { teamFa } from "@/lib/teams-fa";
 import Countdown from "@/components/Countdown";
 import TournamentJoinModal from "@/components/TournamentJoinModal";
 import TournamentGuideButton from "@/components/TournamentGuideButton";
+import { TournamentCrest } from "@/components/BadgeArt";
+import { TOURNAMENT_PODIUM_CODES, tournamentPodiumTitle } from "@/lib/badges";
 import { Trophy, Users } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -148,28 +150,33 @@ export default async function TournamentPage() {
               const me = r.userId === user.id;
               const rank = i + 1;
               const onPodium = rank <= 3;
-              const medal =
-                rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
               return (
                 <li
                   key={r.userId}
                   className={`flex items-center gap-3 px-3.5 py-3 ${me ? "bg-pitch-50" : ""}`}
                 >
-                  <span
-                    className={`flex w-7 shrink-0 justify-center text-sm font-extrabold tnum ${
-                      onPodium ? "text-gold" : "text-muted"
-                    }`}
-                  >
-                    {medal ?? toPersianDigits(rank)}
-                  </span>
-                  <span className="flex-1 truncate text-sm font-bold text-ink">
-                    {r.displayName}
-                    {me && (
-                      <span className="mr-1.5 text-xs font-semibold text-pitch-700">
-                        (شما)
-                      </span>
+                  <span className="flex w-7 shrink-0 justify-center text-sm font-extrabold tnum text-muted">
+                    {onPodium ? (
+                      <TournamentCrest code={TOURNAMENT_PODIUM_CODES[rank - 1]} />
+                    ) : (
+                      toPersianDigits(rank)
                     )}
                   </span>
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-sm font-bold text-ink">
+                      {r.displayName}
+                      {me && (
+                        <span className="mr-1.5 text-xs font-semibold text-pitch-700">
+                          (شما)
+                        </span>
+                      )}
+                    </span>
+                    {onPodium && tournamentPodiumTitle(rank) && (
+                      <span className="truncate text-[11px] font-extrabold text-gold">
+                        {tournamentPodiumTitle(rank)}
+                      </span>
+                    )}
+                  </div>
                   <span className="shrink-0 text-base font-extrabold text-pitch-700 tnum">
                     {toPersianDigits(r.points)}
                   </span>
