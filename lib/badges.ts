@@ -73,3 +73,10 @@ export const TOURNAMENT_PODIUM_CODES = [
   "tournament_2nd",
   "tournament_3rd",
 ] as const;
+
+/** Display name (titleFa) of the podium badge for a 1-based rank, or null. */
+export function tournamentPodiumTitle(rank: number): string | null {
+  const code = TOURNAMENT_PODIUM_CODES[rank - 1];
+  if (!code) return null;
+  return BADGE_CATALOG.find((b) => b.code === code)?.titleFa ?? null;
+}
