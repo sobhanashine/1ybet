@@ -128,6 +128,11 @@ The system is flat-by-default, emphasizing structured grid boundaries and border
 - **Style:** Bottom navigation bar on mobile, utilizing semi-transparent Stadium White with backdrop blur (`backdrop-blur`).
 - **States:** Active links use Pitch Green; inactive links use Muted Slate.
 
+### Badges & Rank Artwork
+- **Source:** Custom inline SVG (`components/BadgeArt.tsx`), not emoji — server-renderable, scales crisply, and stays on-palette.
+- **Tiers:** Podium rank uses a gold → silver → bronze gradient set (each a vertical `from`→`to` fill with a lighter rim), reserved for top-3 placement only.
+- **Forms:** Numbered **medals** (`RankMedal`) for the global leaderboard top 3; tiered **crests** (`TournamentCrest`) for the prize-tournament top 3, each carrying a name-specific motif. Lower ranks show the Persian numeral, not a badge.
+
 ## 6. Do's and Don'ts
 
 ### Do:

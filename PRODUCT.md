@@ -13,6 +13,8 @@ A fully RTL, installable Persian PWA where users predict World Cup 2026 matches,
 ## Prize Tournament
 An opt-in, entry-fee prize league layered on top of the regular game. Players join via a first-visit gate on the `/tournament` page; the entry fee is 100,000 toman and the full pot (entry × members) is awarded to the winner. The tournament starts at the Belgium–Iran group match — a live countdown leads up to it, and only predictions for matches from that kickoff onward count toward a members-only standings table. Joining is opt-in only; there is no in-app payment collection yet, so the displayed pot reflects everyone who has joined.
 
+A short **guide video** explains how to register and the rules; it surfaces both as a button on the page and as an on-open popup the player can watch or dismiss. The live top 3 of the standings earn three **named podium badges** — الماسخاله (1st), آرسنال (2nd), and الو مشکات (3rd) — shown as custom crests on the standings and on player profiles.
+
 ## Brand Personality
 Sporty, modern, clean, and highly usable. Uses pitch-inspired green tones with high contrast to feel energetic yet highly functional and readable.
 
