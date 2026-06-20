@@ -61,7 +61,7 @@ export const BADGE_CATALOG: BadgeDef[] = [
   },
   {
     code: "tournament_3rd",
-    titleFa: "مشکات",
+    titleFa: "الو مشکات",
     descFa: "نفر سوم تورنمنت جایزه‌دار 🥉",
     icon: "🏮",
   },
