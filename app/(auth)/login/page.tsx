@@ -17,13 +17,28 @@ export default function LoginPage() {
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tg = (window as any).Telegram?.WebApp;
-    if (tg && tg.initData) {
+    let cancelled = false;
+    let attempts = 0;
+    const maxAttempts = 40; // ~6s at 150ms before giving up on the SDK
+
+    // The Telegram SDK is loaded `afterInteractive` (see TelegramProvider), so it
+    // may not be on `window` yet when this effect first runs. Poll until the
+    // WebApp + initData are available, then auto-login. If they never appear
+    // (a normal web browser, not a Mini App), we simply stop and show the phone
+    // form. This is what restores instant login for returning Telegram users.
+    function tryTelegramLogin() {
+      if (cancelled) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const tg = (window as any).Telegram?.WebApp;
+      if (!tg || !tg.initData) {
+        if (++attempts < maxAttempts) setTimeout(tryTelegramLogin, 150);
+        return;
+      }
       tg.ready?.();
       tg.expand?.(); // Expand WebApp view to occupy maximum space
       startTransition(async () => {
         const res = await loginViaTelegram(tg.initData);
+        if (cancelled) return;
         if (res.ok && res.needsPhoneLink) {
           // First Telegram launch: collect phone to link/merge the web account.
           setTgInitData(tg.initData);
@@ -35,6 +50,11 @@ export default function LoginPage() {
         }
       });
     }
+
+    tryTelegramLogin();
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   function submitPhone() {
