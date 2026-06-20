@@ -161,6 +161,11 @@ export const fa = {
     guideButton: "راهنمای ثبت‌نام (ویدیو)",
     guideTitle: "چطور در تورنمنت ثبت‌نام کنم؟",
     guideUnavailable: "ویدیوی راهنما هنوز در دسترس نیست.",
+    guidePopupTitle: "ویدیوی راهنمای تورنمنت 🎬",
+    guidePopupBody:
+      "یه ویدیوی کوتاه آماده کردیم که نشون می‌ده چطور توی تورنمنت ثبت‌نام کنی و شرایطش چیه. الان می‌بینیش؟",
+    guidePopupYes: "بله، نشونم بده",
+    guidePopupNo: "نه، نمایش نده",
   },
 
   // bracket

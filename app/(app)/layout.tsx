@@ -5,6 +5,7 @@ import { logout } from "@/app/actions/auth";
 import BottomNav from "@/components/BottomNav";
 import { t } from "@/lib/i18n";
 import StickyWidget from "@/components/StickyWidget";
+import GuideVideoPopup from "@/components/GuideVideoPopup";
 
 export default async function AppLayout({
   children,
@@ -56,6 +57,8 @@ export default async function AppLayout({
       <main className="flex-1 px-4 py-5">{children}</main>
 
       <StickyWidget initialHasEmail={initialHasEmail} />
+
+      <GuideVideoPopup />
 
       <BottomNav />
     </div>
