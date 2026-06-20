@@ -9,6 +9,7 @@ import { formatTime, toPersianDigits } from "@/lib/format";
 import type { MatchWithPrediction } from "@/lib/matches";
 import { Clock, Lock, Check, BarChart3, ChevronLeft } from "lucide-react";
 import TeamFlag from "@/components/TeamFlag";
+import { useLiveScore } from "@/components/LiveScores";
 
 type Props = { match: MatchWithPrediction; locked: boolean; isNext?: boolean };
 
@@ -90,6 +91,9 @@ function ScoreBox({
 
 export default function MatchCard({ match, locked, isNext }: Props) {
   const finished = match.status === "FINISHED";
+  const live = useLiveScore(match.extId);
+  // A live in-play score only matters until the match is finished/scored.
+  const showLive = !finished && !!live;
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [home, setHome] = useState(
@@ -133,21 +137,27 @@ export default function MatchCard({ match, locked, isNext }: Props) {
   // One status drives chip + border tone. No side stripes, no glow.
   const status: {
     label: string;
-    tone: "predicted" | "open" | "awaiting" | "missed" | "finished";
-  } = finished
-    ? { label: t.match.finished, tone: "finished" }
-    : isAwaitingResult
-      ? hasPrediction
-        ? { label: t.match.awaitingResult, tone: "awaiting" }
-        : { label: t.match.predictionMissed, tone: "missed" }
-      : hasPrediction
-        ? { label: "پیش‌بینی‌شده", tone: "predicted" }
-        : { label: "ثبت‌نشده", tone: "open" };
+    tone: "live" | "predicted" | "open" | "awaiting" | "missed" | "finished";
+  } = showLive
+    ? { label: t.match.live, tone: "live" }
+    : finished
+      ? { label: t.match.finished, tone: "finished" }
+      : isAwaitingResult
+        ? hasPrediction
+          ? { label: t.match.awaitingResult, tone: "awaiting" }
+          : { label: t.match.predictionMissed, tone: "missed" }
+        : hasPrediction
+          ? { label: "پیش‌بینی‌شده", tone: "predicted" }
+          : { label: "ثبت‌نشده", tone: "open" };
 
   const cardStyleByTone: Record<
     typeof status.tone,
     { border: string; bg: string }
   > = {
+    live: {
+      border: "border border-solid border-danger/40",
+      bg: "bg-surface",
+    },
     predicted: {
       border: "border border-solid border-pitch-200/80 border-[1.5px]",
       bg: "bg-surface",
@@ -171,6 +181,7 @@ export default function MatchCard({ match, locked, isNext }: Props) {
   };
 
   const chipByTone: Record<typeof status.tone, string> = {
+    live: "border-danger/30 bg-danger/10 text-danger",
     predicted: "border-pitch-200 bg-pitch-50/60 text-pitch-700",
     open: "border-warn/35 bg-warn/10 text-warn",
     awaiting: "border-info/30 bg-info/10 text-info",
@@ -195,7 +206,7 @@ export default function MatchCard({ match, locked, isNext }: Props) {
             {status.tone === "predicted" ? (
               <Check className="h-3.5 w-3.5 shrink-0" aria-hidden />
             ) : (
-              <span className={`chip-dot ${status.tone === "open" ? "animate-pulse" : ""}`} />
+              <span className={`chip-dot ${status.tone === "open" || status.tone === "live" ? "animate-pulse" : ""}`} />
             )}
             {status.label}
           </span>
@@ -218,7 +229,19 @@ export default function MatchCard({ match, locked, isNext }: Props) {
         </div>
 
         <div className="flex flex-col items-center justify-center px-1">
-          {finished ? (
+          {showLive ? (
+            <div className="flex flex-col items-center gap-1">
+              <div className="flex items-center gap-2.5 rounded-[var(--radius-md)] border border-danger/40 bg-danger/5 px-3.5 py-2 text-2xl font-black text-danger tnum">
+                <span>{toPersianDigits(live!.home)}</span>
+                <span className="text-sm font-normal text-muted">{t.match.vs}</span>
+                <span>{toPersianDigits(live!.away)}</span>
+              </div>
+              <span className="flex items-center gap-1 text-[10px] font-bold text-danger">
+                <span className="chip-dot animate-pulse" />
+                {t.match.live}
+              </span>
+            </div>
+          ) : finished ? (
             <div className="flex items-center gap-2.5 rounded-[var(--radius-md)] border border-pitch-200 bg-pitch-50 px-3.5 py-2 text-2xl font-black text-pitch-700 tnum">
               <span>{toPersianDigits(match.homeScore ?? 0)}</span>
               <span className="text-sm font-normal text-muted">{t.match.vs}</span>

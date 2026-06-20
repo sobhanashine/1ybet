@@ -98,7 +98,8 @@ export function normalize(m: ApiMatch): NormalizedMatch | null {
   };
 }
 
-export async function fetchWorldCupMatches(): Promise<NormalizedMatch[]> {
+/** Raw fetch of the competition's matches from football-data.org. */
+async function fetchApiMatches(): Promise<ApiMatch[]> {
   const res = await fetch(
     `${FOOTBALL_API_BASE}/competitions/${WC_COMPETITION}/matches`,
     {
@@ -111,7 +112,41 @@ export async function fetchWorldCupMatches(): Promise<NormalizedMatch[]> {
     throw new Error(`football-data.org error ${res.status}: ${await res.text()}`);
   }
   const data = (await res.json()) as { matches: ApiMatch[] };
-  return data.matches
+  return data.matches;
+}
+
+export async function fetchWorldCupMatches(): Promise<NormalizedMatch[]> {
+  const apiMatches = await fetchApiMatches();
+  return apiMatches
     .map(normalize)
     .filter((m): m is NormalizedMatch => m !== null);
+}
+
+/** In-play score for a single live match (for display only). */
+export type LiveScore = {
+  extId: string;
+  home: number;
+  away: number;
+  status: "LIVE";
+};
+
+/**
+ * Current running scores for matches that are in progress right now. Unlike
+ * `fetchWorldCupMatches` — which only reports a regulation score once a match is
+ * FINISHED — this reads the live `fullTime` score while a match is IN_PLAY or
+ * PAUSED. It is for live display only and is never used to score predictions.
+ */
+export async function fetchLiveScores(): Promise<LiveScore[]> {
+  const apiMatches = await fetchApiMatches();
+  const live: LiveScore[] = [];
+  for (const m of apiMatches) {
+    if (m.status !== "IN_PLAY" && m.status !== "PAUSED") continue;
+    live.push({
+      extId: `fd-${m.id}`,
+      home: m.score.fullTime.home ?? 0,
+      away: m.score.fullTime.away ?? 0,
+      status: "LIVE",
+    });
+  }
+  return live;
 }

@@ -1,8 +1,10 @@
 import { getCurrentUser } from "@/lib/auth";
 import { getMatchesWithPredictions, isLocked, type MatchWithPrediction } from "@/lib/matches";
+import { isLiveWindow } from "@/lib/time";
 import { getLeaderboard } from "@/lib/leaderboard";
 import { maybeAutoSync } from "@/lib/auto-sync";
 import MatchCard from "@/components/MatchCard";
+import { LiveScoresProvider } from "@/components/LiveScores";
 import EmailReminderBanner from "@/components/EmailReminderBanner";
 import { t } from "@/lib/i18n";
 import { toPersianDigits, formatJalaliDate, tehranDayKey } from "@/lib/format";
@@ -39,6 +41,12 @@ export default async function HomePage() {
   const days = groupByDay(allMatches);
   const nextMatchId = allMatches.find((m) => m.status !== "FINISHED")?.id;
 
+  // Only poll the live-scores endpoint when a match is plausibly in progress.
+  // On any other day the provider does nothing, so there's zero polling overhead.
+  const liveActive = allMatches.some(
+    (m) => m.status !== "FINISHED" && isLiveWindow(m.kickoffAt),
+  );
+
   const stats = [
     { label: t.profile.totalPoints, value: totalPoints > 0 || userRank > 0 ? toPersianDigits(totalPoints) : "۰" },
     { label: t.leaderboard.title, value: userRank > 0 ? toPersianDigits(userRank) : "—" },
@@ -74,24 +82,26 @@ export default async function HomePage() {
             <p className="text-sm text-muted">{t.leaderboard.empty}</p>
           </div>
         ) : (
-          days.map(([day, ms]) => (
-            <section key={day} className="space-y-3">
-              <h3 className="flex items-center gap-3 px-0.5 text-sm font-bold text-ink-dim" suppressHydrationWarning>
-                {formatJalaliDate(ms[0].kickoffAt)}
-                <span className="h-px flex-1 bg-line" />
-              </h3>
-              <div className="space-y-3">
-                {ms.map((m) => (
-                  <MatchCard
-                    key={m.id}
-                    match={m}
-                    locked={isLocked(m.kickoffAt)}
-                    isNext={m.id === nextMatchId}
-                  />
-                ))}
-              </div>
-            </section>
-          ))
+          <LiveScoresProvider active={liveActive}>
+            {days.map(([day, ms]) => (
+              <section key={day} className="space-y-3">
+                <h3 className="flex items-center gap-3 px-0.5 text-sm font-bold text-ink-dim" suppressHydrationWarning>
+                  {formatJalaliDate(ms[0].kickoffAt)}
+                  <span className="h-px flex-1 bg-line" />
+                </h3>
+                <div className="space-y-3">
+                  {ms.map((m) => (
+                    <MatchCard
+                      key={m.id}
+                      match={m}
+                      locked={isLocked(m.kickoffAt)}
+                      isNext={m.id === nextMatchId}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </LiveScoresProvider>
         )}
       </div>
     </div>
