@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth";
 import { getUserTotalPoints, getUserBadges } from "@/lib/profile";
 import NotificationToggle from "@/components/NotificationToggle";
+import { BadgeArt } from "@/components/BadgeArt";
 import { t } from "@/lib/i18n";
 import { toPersianDigits } from "@/lib/format";
 
@@ -60,7 +61,7 @@ export default async function ProfilePage() {
                 className="card flex flex-col items-center gap-1.5 p-3 text-center"
                 title={b.descFa}
               >
-                <span className="text-2xl">{b.icon}</span>
+                <BadgeArt code={b.code} fallback={b.icon} size={40} />
                 <span className="text-[11px] font-semibold leading-tight text-ink-dim">
                   {b.titleFa}
                 </span>

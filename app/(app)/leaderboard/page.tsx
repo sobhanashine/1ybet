@@ -4,6 +4,7 @@ import { getLeaderboard } from "@/lib/leaderboard";
 import { maybeAutoSync } from "@/lib/auto-sync";
 import { t } from "@/lib/i18n";
 import { toPersianDigits } from "@/lib/format";
+import { RankMedal } from "@/components/BadgeArt";
 
 export const dynamic = "force-dynamic";
 
@@ -26,18 +27,13 @@ export default async function LeaderboardPage() {
             const me = r.userId === user?.id;
             const rank = i + 1;
             const onPodium = rank <= 3;
-            const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
             return (
               <li
                 key={r.userId}
                 className={`flex items-center gap-3 px-3.5 py-3 ${me ? "bg-pitch-50" : ""}`}
               >
-                <span
-                  className={`flex w-7 shrink-0 justify-center text-sm font-extrabold tnum ${
-                    onPodium ? "text-gold" : "text-muted"
-                  }`}
-                >
-                  {medal ?? toPersianDigits(rank)}
+                <span className="flex w-7 shrink-0 justify-center text-sm font-extrabold tnum text-muted">
+                  {onPodium ? <RankMedal rank={rank} /> : toPersianDigits(rank)}
                 </span>
                 <span className="flex-1 truncate text-sm font-bold text-ink">
                   {r.displayName}

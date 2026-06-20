@@ -44,4 +44,32 @@ export const BADGE_CATALOG: BadgeDef[] = [
     descFa: "قهرمان جام را درست پیش‌بینی کرد",
     icon: "🧠",
   },
+  // Tournament podium badges — awarded to the top 3 of the prize-tournament
+  // standings. Rendered as custom crests (see components/BadgeArt.tsx); the
+  // emoji here is only a fallback if the SVG art is unavailable.
+  {
+    code: "tournament_1st",
+    titleFa: "الماسخاله",
+    descFa: "نفر اول تورنمنت جایزه‌دار 🥇",
+    icon: "💎",
+  },
+  {
+    code: "tournament_2nd",
+    titleFa: "آرسنال",
+    descFa: "نفر دوم تورنمنت جایزه‌دار 🥈",
+    icon: "⚙️",
+  },
+  {
+    code: "tournament_3rd",
+    titleFa: "مشکات",
+    descFa: "نفر سوم تورنمنت جایزه‌دار 🥉",
+    icon: "🏮",
+  },
 ];
+
+// Badge code for each tournament podium place (index 0 = 1st).
+export const TOURNAMENT_PODIUM_CODES = [
+  "tournament_1st",
+  "tournament_2nd",
+  "tournament_3rd",
+] as const;
