@@ -14,6 +14,7 @@ import TeamFlag from "@/components/TeamFlag";
 import { teamFa } from "@/lib/teams-fa";
 import Countdown from "@/components/Countdown";
 import TournamentJoinModal from "@/components/TournamentJoinModal";
+import TournamentGuideButton from "@/components/TournamentGuideButton";
 import { Trophy, Users } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -81,6 +82,9 @@ export default async function TournamentPage() {
             </span>
           )}
         </div>
+
+        {/* Short video explaining how to register and the rules. */}
+        <TournamentGuideButton />
       </section>
 
       {/* Countdown + starting match */}

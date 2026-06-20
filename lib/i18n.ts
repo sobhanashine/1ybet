@@ -158,6 +158,9 @@ export const fa = {
     minutes: "دقیقه",
     seconds: "ثانیه",
     yourRank: "رتبه‌ی شما",
+    guideButton: "راهنمای ثبت‌نام (ویدیو)",
+    guideTitle: "چطور در تورنمنت ثبت‌نام کنم؟",
+    guideUnavailable: "ویدیوی راهنما هنوز در دسترس نیست.",
   },
 
   // bracket
