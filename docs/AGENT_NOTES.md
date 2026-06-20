@@ -19,7 +19,7 @@ before writing any Next.js code — this is Next 16, not the version you remembe
 
 ## Talking to the database from a script / one-off
 `lib/db`, `lib/email`, `lib/telegram` all `import "server-only"`, so they **cannot** be imported from a `tsx` script (ESM hoists the import before any `server-only` mock runs — it throws). Two options:
-1. Inline the dependency (see `scripts/announce-tournament.ts` — it instantiates Resend and calls the Telegram Bot API directly).
+1. Inline the dependency (see `scripts/announce-guide.ts` — it instantiates Resend and calls the Telegram Bot API directly).
 2. For raw SQL, read `DATABASE_URL` straight from `.env.local` and use `postgres`:
    ```js
    const url = require("fs").readFileSync(".env.local","utf8").match(/^DATABASE_URL=(.+)$/m)[1].trim();
@@ -47,11 +47,22 @@ before writing any Next.js code — this is Next 16, not the version you remembe
 - **Start match fact**: Belgium vs Iran, match id 44, kickoff `2026-06-21T19:00:00Z` (22:30 Tehran, Sunday). Everything from this kickoff counts.
 - **Bottom nav** (`components/BottomNav.tsx`): raised gold center FAB → `/tournament`. Compare (`/h2h`) was dropped from the bar but is still reachable from leaderboard rows.
 - Removed the app-wide blocking `PollGate`; `StickyWidget` is now email-reminder only.
+- **Guide-video popup** (`components/GuideVideoPopup.tsx`, mounted in `app/(app)/layout.tsx`): on app open it offers the tournament guide video (Yes → plays inline with a close button, No → suppressed). It keeps offering until the user picks **No** — only then is `localStorage["guide-video-dismissed"]` set. Stages `hidden → prompt → video`; the reveal is deferred via `setTimeout(…, 0)` to satisfy eslint `react-hooks/set-state-in-effect` (same pattern as `Countdown.tsx`). Video URL: `NEXT_PUBLIC_TOURNAMENT_VIDEO_URL` (falls back to `/tournament-guide.mp4`). Copy lives in `t.tournament.guidePopup*`.
+
+## Tournament podium badges + custom rank artwork (added 2026-06)
+- **Three named podium badges** awarded to the live tournament top 3: `tournament_1st` = **الماسخاله** (gold), `tournament_2nd` = **آرسنال** (silver), `tournament_3rd` = **الو مشکات** (bronze). Catalog entries + helpers in `lib/badges.ts` (`TOURNAMENT_PODIUM_CODES`, `tournamentPodiumTitle(rank)`). Seed them with `scripts/seed.ts` (onConflictDoUpdate) — already seeded to the live DB.
+- **Award logic**: `lib/tournament-badges.ts` `awardTournamentTop3()` — reads `getTournamentLeaderboard`, takes the top 3 **with `points > 0`** (never awards a podium badge to someone at zero before any results), inserts `user_badges` with `onConflictDoNothing` (idempotent — a player keeps a badge once earned, badges are never revoked). Called best-effort from `runSync()` in `lib/sync.ts` (try/catch, folded into `badgesAwarded`).
+- **Custom SVG art** replaces the old 🥇🥈🥉 emojis — `components/BadgeArt.tsx`, pure SVG with no client hooks so it renders from server components:
+  - `<RankMedal rank={1|2|3} />` — numbered gold/silver/bronze medal with ribbon, used for the top 3 of the **general leaderboard** (`app/(app)/leaderboard/page.tsx`).
+  - `<TournamentCrest code={…} />` — a tiered shield with a per-name motif (diamond / cannon / lantern), used for the top 3 on the **tournament standings** (`app/(app)/tournament/page.tsx`) where each podium row also shows the badge name label under the display name.
+  - `<BadgeArt code fallback size />` — renders a crest for podium codes, else the emoji fallback; used on the **profile** badge grid (`app/(app)/profile/page.tsx`).
+  - SVG gradient ids are unique per tier (`crest-gold`, `medal-gold`, …) to avoid id collisions when several render on one page.
 
 ## Sending email / Telegram to users
-- Script: `scripts/announce-tournament.ts`. **Defaults to dry-run** (prints recipients, sends nothing); pass `--send` to deliver. Always dry-run first and confirm content + counts with the user — this is irreversible outward messaging to real people.
+- Scripts: `scripts/announce-guide.ts` (guide-video broadcast) and `scripts/announce-video.ts`; both follow the same dual-channel pattern. **Default to dry-run** (print recipients, send nothing); pass `--send` to deliver. Useful flags: `--telegram-only` / `--email-only`, `--only <id>`, `--admins`. Always dry-run first and confirm content + counts with the user — this is irreversible outward messaging to real people.
 - Reachability is small: most users have a `telegram_id`, few have a real `email` (some `email` values are the literal string `"NULL"` — filter on `includes("@")`).
 - **Email caveat**: `RESEND_FROM` is `onboarding@resend.dev` (Resend's free sender), which only delivers to the Resend **account owner's** address. To email everyone, verify a domain at resend.com/domains and set `RESEND_FROM` to it. Telegram has no such limit.
+- **Telegram network caveat**: `api.telegram.org` is often **blocked from the user's machine** (Iran) — sends time out with `ConnectTimeoutError`. It works only when the user has a VPN/proxy active. Resend and Supabase remain reachable. If a Telegram send times out, ask the user to enable their VPN and retry, rather than assuming the token/code is wrong.
 
 ## Git workflow used here
 Feature branch off `dev` → PR to `dev` → check PR is `CLEAN`/`MERGEABLE` (GitGuardian + Vercel preview must pass) → merge to `dev`, delete the feature branch → merge `dev` into `main`. **Never delete `dev` or `main`.** Commit messages end with the `Co-Authored-By: Claude` trailer; PR bodies end with the Claude Code trailer.
