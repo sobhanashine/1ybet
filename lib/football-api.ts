@@ -150,3 +150,72 @@ export async function fetchLiveScores(): Promise<LiveScore[]> {
   }
   return live;
 }
+
+/** Aggregated record of the two teams' previous encounters. */
+export type Head2Head = {
+  numberOfMatches: number;
+  totalGoals: number;
+  home: { wins: number; draws: number; losses: number };
+  away: { wins: number; draws: number; losses: number };
+};
+
+type ApiH2HTeam = { wins?: number; draws?: number; losses?: number };
+type ApiH2H = {
+  numberOfMatches?: number;
+  totalGoals?: number;
+  homeTeam?: ApiH2HTeam;
+  awayTeam?: ApiH2HTeam;
+};
+
+// Head-to-head changes only when these teams play again, so cache it for an
+// hour. We use our own in-memory cache rather than Next's fetch cache because
+// the match page is `force-dynamic`, which forces every fetch to `no-store` —
+// without this each page view would hit the free tier's ~10 req/min limit.
+const H2H_TTL_MS = 60 * 60 * 1000;
+const h2hCache = new Map<string, { at: number; data: Head2Head | null }>();
+
+/**
+ * Head-to-head history for one match, from football-data.org. This aggregate
+ * (matches played, total goals, each side's W/D/L) is the only per-match stat
+ * available on the free tier — detailed stats, lineups and events are paid.
+ * Returns null when the match has no football-data id or no prior encounters.
+ */
+export async function fetchMatchHead2Head(
+  extId: string,
+): Promise<Head2Head | null> {
+  if (!extId.startsWith("fd-")) return null;
+
+  const cached = h2hCache.get(extId);
+  if (cached && Date.now() - cached.at < H2H_TTL_MS) return cached.data;
+
+  const fdId = extId.slice(3);
+  const res = await fetch(`${FOOTBALL_API_BASE}/matches/${fdId}`, {
+    headers: { "X-Auth-Token": requireEnv("FOOTBALL_DATA_API_KEY") },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error(`football-data.org error ${res.status}: ${await res.text()}`);
+  }
+  const data = (await res.json()) as { head2head?: ApiH2H };
+  const h = data.head2head;
+  const result: Head2Head | null =
+    !h || typeof h.numberOfMatches !== "number"
+      ? null
+      : {
+          numberOfMatches: h.numberOfMatches,
+          totalGoals: h.totalGoals ?? 0,
+          home: {
+            wins: h.homeTeam?.wins ?? 0,
+            draws: h.homeTeam?.draws ?? 0,
+            losses: h.homeTeam?.losses ?? 0,
+          },
+          away: {
+            wins: h.awayTeam?.wins ?? 0,
+            draws: h.awayTeam?.draws ?? 0,
+            losses: h.awayTeam?.losses ?? 0,
+          },
+        };
+
+  h2hCache.set(extId, { at: Date.now(), data: result });
+  return result;
+}

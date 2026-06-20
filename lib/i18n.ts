@@ -63,6 +63,13 @@ export const fa = {
     predictors: "نفر پیش‌بینی کرده‌اند",
     lockedHint: "برای جلوگیری از تأثیرگذاری، آمار پس از بسته شدن پیش‌بینی‌ها نمایش داده می‌شود",
     noPredictions: "هنوز پیش‌بینی‌ای برای این بازی ثبت نشده است",
+    h2hTitle: "سابقه رویارویی دو تیم",
+    h2hMatches: "بازی",
+    h2hGoals: "مجموع گل",
+    h2hWins: "برد",
+    h2hDraws: "مساوی",
+    h2hLosses: "باخت",
+    h2hSource: "بر اساس داده‌های football-data.org",
   },
 
   stage: {

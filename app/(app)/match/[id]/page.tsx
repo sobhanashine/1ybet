@@ -2,11 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getMatchWithPrediction, isLocked } from "@/lib/matches";
+import { isLiveWindow } from "@/lib/time";
 import { getMatchPredictionStats } from "@/lib/match-stats";
+import { fetchMatchHead2Head, type Head2Head } from "@/lib/football-api";
 import { teamFa } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
 import { ArrowRight } from "lucide-react";
 import TeamFlag from "@/components/TeamFlag";
+import { LiveScoresProvider } from "@/components/LiveScores";
+import MatchScore from "@/components/MatchScore";
 import {
   toPersianDigits,
   formatTime,
@@ -88,7 +92,22 @@ export default async function MatchDetailPage({
   // Always retrieve the crowd distribution stats, even if predictions are still open.
   const stats = await getMatchPredictionStats(matchId);
 
+  // Head-to-head history from football-data.org (free tier). Best-effort: a
+  // missing API key, rate limit or outage must never break the page.
+  let h2h: Head2Head | null = null;
+  if (match.extId) {
+    try {
+      h2h = await fetchMatchHead2Head(match.extId);
+    } catch (e) {
+      console.error("head-to-head fetch failed:", e instanceof Error ? e.message : e);
+    }
+  }
+
+  // Poll for the live score only while this match is plausibly in progress.
+  const liveActive = !finished && isLiveWindow(match.kickoffAt);
+
   return (
+    <LiveScoresProvider active={liveActive}>
     <div className="space-y-5">
       <Link href="/" className="inline-flex items-center gap-1 text-xs font-bold text-pitch-700 transition-colors hover:text-pitch-500">
         <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -109,14 +128,12 @@ export default async function MatchDetailPage({
         <div className="flex items-center gap-2">
           <TeamBadge team={match.homeTeam} flag={match.homeFlag} />
           <div className="flex flex-col items-center">
-            {finished ? (
-              <span className="tnum rounded-[var(--radius-md)] border border-pitch-200 bg-pitch-50 px-4 py-2 text-2xl font-black text-pitch-700">
-                {toPersianDigits(match.homeScore ?? 0)} {t.match.vs}{" "}
-                {toPersianDigits(match.awayScore ?? 0)}
-              </span>
-            ) : (
-              <span className="text-lg font-black text-muted">{t.match.vs}</span>
-            )}
+            <MatchScore
+              extId={match.extId}
+              finished={finished}
+              homeScore={match.homeScore}
+              awayScore={match.awayScore}
+            />
           </div>
           <TeamBadge team={match.awayTeam} flag={match.awayFlag} />
         </div>
@@ -193,6 +210,76 @@ export default async function MatchDetailPage({
           </>
         )}
       </section>
+
+      {/* head-to-head history (football-data.org, free tier) */}
+      {h2h && h2h.numberOfMatches > 0 && (
+        <section className="space-y-3">
+          <h2 className="section-label">{t.matchStats.h2hTitle}</h2>
+          <div className="card space-y-4 p-4">
+            <div className="flex justify-around text-center">
+              <div className="flex flex-col">
+                <span className="tnum text-2xl font-black text-ink">
+                  {toPersianDigits(h2h.numberOfMatches)}
+                </span>
+                <span className="text-[11px] font-bold text-muted">
+                  {t.matchStats.h2hMatches}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="tnum text-2xl font-black text-ink">
+                  {toPersianDigits(h2h.totalGoals)}
+                </span>
+                <span className="text-[11px] font-bold text-muted">
+                  {t.matchStats.h2hGoals}
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 border-t border-line pt-3">
+              <TeamRecord team={match.homeTeam} record={h2h.home} tone="home" />
+              <TeamRecord team={match.awayTeam} record={h2h.away} tone="away" />
+            </div>
+            <p className="text-center text-[10px] text-muted">
+              {t.matchStats.h2hSource}
+            </p>
+          </div>
+        </section>
+      )}
+    </div>
+    </LiveScoresProvider>
+  );
+}
+
+/** One team's win/draw/loss tally across previous encounters. */
+function TeamRecord({
+  team,
+  record,
+  tone,
+}: {
+  team: string;
+  record: Head2Head["home"];
+  tone: "home" | "away";
+}) {
+  const accent = tone === "home" ? "text-pitch-700" : "text-info";
+  const cells: { value: number; label: string }[] = [
+    { value: record.wins, label: t.matchStats.h2hWins },
+    { value: record.draws, label: t.matchStats.h2hDraws },
+    { value: record.losses, label: t.matchStats.h2hLosses },
+  ];
+  return (
+    <div className="rounded-[var(--radius-md)] border border-line bg-surface-2 p-3">
+      <p className={`mb-2 truncate text-center text-xs font-extrabold ${accent}`}>
+        {teamFa(team)}
+      </p>
+      <div className="flex justify-around">
+        {cells.map((c) => (
+          <div key={c.label} className="flex flex-col items-center">
+            <span className="tnum text-base font-black text-ink">
+              {toPersianDigits(c.value)}
+            </span>
+            <span className="text-[10px] font-medium text-muted">{c.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
