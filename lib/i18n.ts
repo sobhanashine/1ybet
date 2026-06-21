@@ -12,10 +12,30 @@ export const fa = {
     analyze: "تحلیل بازی‌ها",
     compare: "مقایسه",
     bracket: "جدول حذفی",
+    standings: "جدول جام جهانی",
     profile: "پروفایل",
     tournament: "تورنمنت",
     admin: "مدیریت",
     logout: "خروج",
+  },
+
+  // world cup group tables (live, read-only — football-data.org free tier)
+  standings: {
+    title: "جدول جام جهانی",
+    subtitle: "جدول زندهٔ گروه‌ها",
+    group: "گروه",
+    pos: "#",
+    team: "تیم",
+    played: "بازی",
+    won: "برد",
+    draw: "مساوی",
+    lost: "باخت",
+    goalDiff: "تفاضل",
+    points: "امتیاز",
+    empty: "جدول گروه‌ها هنوز در دسترس نیست",
+    unavailable: "دریافت جدول از سرور ممکن نشد. کمی بعد دوباره امتحان کنید.",
+    qualifyHint: "دو تیم برتر هر گروه به مرحلهٔ بعد صعود می‌کنند",
+    source: "بر اساس داده‌های زندهٔ football-data.org",
   },
 
   // games analyze (free: group standings + our crowd data + recent form)

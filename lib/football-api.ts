@@ -234,7 +234,17 @@ export type StandingRow = {
   goalDiff: number;
 };
 
-type ApiStandingTeam = { name?: string | null; tla?: string | null };
+/** A standings row enriched with the team's identity (for rendering a table). */
+export type GroupTeamRow = StandingRow & {
+  team: string;
+  code: string | null;
+  crest: string | null;
+};
+
+/** One group's ordered table. */
+export type GroupTable = { group: string | null; rows: GroupTeamRow[] };
+
+type ApiStandingTeam = { name?: string | null; tla?: string | null; crest?: string | null };
 type ApiStandingRow = {
   position?: number;
   team?: ApiStandingTeam;
@@ -250,18 +260,17 @@ type ApiStandingRow = {
 type ApiStandingsGroup = { group?: string | null; table?: ApiStandingRow[] };
 
 // Group tables move only when matches finish, so a short cache keeps us well
-// under the free tier's ~10 req/min. One shared entry (the whole competition).
+// under the free tier's ~10 req/min. One shared entry (the whole competition),
+// reused by both the table view and the analyse lookup.
 const STANDINGS_TTL_MS = 30 * 60 * 1000;
-let standingsCache: { at: number; data: Map<string, StandingRow> } | null = null;
+let standingsCache: { at: number; data: GroupTable[] } | null = null;
 
 /**
- * Current group standings for the competition, from football-data.org (free
- * tier). Returns a lookup keyed by BOTH team code (TLA) and full name, so a
- * caller can resolve a team either way. Best-effort: throws are the caller's to
- * swallow. `form` is intentionally not used (it's null on the WC free tier — we
- * derive recent form from our own results instead).
+ * Live group standings for the competition, from football-data.org (free tier),
+ * as ordered group tables. Cached 30m. `form` is intentionally ignored (null on
+ * the WC free tier). Throws on API error — callers decide whether to swallow.
  */
-export async function fetchStandings(): Promise<Map<string, StandingRow>> {
+export async function fetchGroupTables(): Promise<GroupTable[]> {
   if (standingsCache && Date.now() - standingsCache.at < STANDINGS_TTL_MS) {
     return standingsCache.data;
   }
@@ -278,27 +287,55 @@ export async function fetchStandings(): Promise<Map<string, StandingRow>> {
   }
   const data = (await res.json()) as { standings?: ApiStandingsGroup[] };
 
-  const map = new Map<string, StandingRow>();
+  const tables: GroupTable[] = [];
   for (const g of data.standings ?? []) {
     const group = g.group?.replace(/^Group\s+/i, "").trim() || null;
-    for (const r of g.table ?? []) {
-      const row: StandingRow = {
-        group,
-        position: r.position ?? 0,
-        played: r.playedGames ?? 0,
-        won: r.won ?? 0,
-        draw: r.draw ?? 0,
-        lost: r.lost ?? 0,
-        points: r.points ?? 0,
-        goalsFor: r.goalsFor ?? 0,
-        goalsAgainst: r.goalsAgainst ?? 0,
-        goalDiff: r.goalDifference ?? 0,
-      };
-      if (r.team?.tla) map.set(r.team.tla.toUpperCase(), row);
-      if (r.team?.name) map.set(r.team.name, row);
-    }
+    const rows: GroupTeamRow[] = (g.table ?? []).map((r) => ({
+      group,
+      position: r.position ?? 0,
+      played: r.playedGames ?? 0,
+      won: r.won ?? 0,
+      draw: r.draw ?? 0,
+      lost: r.lost ?? 0,
+      points: r.points ?? 0,
+      goalsFor: r.goalsFor ?? 0,
+      goalsAgainst: r.goalsAgainst ?? 0,
+      goalDiff: r.goalDifference ?? 0,
+      team: r.team?.name ?? "",
+      code: r.team?.tla ?? null,
+      crest: r.team?.crest ?? null,
+    }));
+    tables.push({ group, rows });
   }
 
-  standingsCache = { at: Date.now(), data: map };
+  standingsCache = { at: Date.now(), data: tables };
+  return tables;
+}
+
+/**
+ * Standings as a lookup keyed by BOTH team code (TLA) and full name, so a caller
+ * can resolve a team either way. Built from the cached group tables.
+ */
+export async function fetchStandings(): Promise<Map<string, StandingRow>> {
+  const tables = await fetchGroupTables();
+  const map = new Map<string, StandingRow>();
+  for (const g of tables) {
+    for (const r of g.rows) {
+      const row: StandingRow = {
+        group: r.group,
+        position: r.position,
+        played: r.played,
+        won: r.won,
+        draw: r.draw,
+        lost: r.lost,
+        points: r.points,
+        goalsFor: r.goalsFor,
+        goalsAgainst: r.goalsAgainst,
+        goalDiff: r.goalDiff,
+      };
+      if (r.code) map.set(r.code.toUpperCase(), row);
+      if (r.team) map.set(r.team, row);
+    }
+  }
   return map;
 }
