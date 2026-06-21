@@ -23,7 +23,7 @@ export async function triggerSync(): Promise<AdminResult> {
   try {
     const s = await runSync();
     revalidatePath("/admin");
-    revalidatePath("/leaderboard");
+    revalidatePath("/tournament");
     return {
       ok: true,
       info: `دریافت ${s.fetched}، امتیازدهی ${s.predictionsScored} پیش‌بینی`,
@@ -76,7 +76,7 @@ export async function saveMatchResult(
 
   revalidatePath("/admin");
   revalidatePath("/");
-  revalidatePath("/leaderboard");
+  revalidatePath("/tournament");
   return { ok: true, info: "ذخیره شد" };
 }
 
