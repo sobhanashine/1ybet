@@ -314,7 +314,18 @@ export default function MatchCard({ match, locked, isNext }: Props) {
             {match.predHome != null && <PointsBadge points={match.points ?? 0} />}
           </div>
         ) : locked ? (
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2.5">
+            {/* While the match is locked (incl. live), the center shows the
+                live/awaited score — so always surface the user's own
+                prediction here too, otherwise it disappears mid-match. */}
+            {match.predHome != null && (
+              <span className="text-xs text-muted">
+                {t.match.yourPrediction}:{" "}
+                <span className="rounded-md border border-line bg-surface-2 px-2 py-0.5 font-extrabold text-ink tnum">
+                  {toPersianDigits(match.predHome)} - {toPersianDigits(match.predAway ?? 0)}
+                </span>
+              </span>
+            )}
             <span
               className={`chip ${
                 match.predHome != null
