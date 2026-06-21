@@ -219,3 +219,86 @@ export async function fetchMatchHead2Head(
   h2hCache.set(extId, { at: Date.now(), data: result });
   return result;
 }
+
+/** One team's row in a group standings table (free tier). */
+export type StandingRow = {
+  group: string | null; // e.g. "A"
+  position: number;
+  played: number;
+  won: number;
+  draw: number;
+  lost: number;
+  points: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDiff: number;
+};
+
+type ApiStandingTeam = { name?: string | null; tla?: string | null };
+type ApiStandingRow = {
+  position?: number;
+  team?: ApiStandingTeam;
+  playedGames?: number;
+  won?: number;
+  draw?: number;
+  lost?: number;
+  points?: number;
+  goalsFor?: number;
+  goalsAgainst?: number;
+  goalDifference?: number;
+};
+type ApiStandingsGroup = { group?: string | null; table?: ApiStandingRow[] };
+
+// Group tables move only when matches finish, so a short cache keeps us well
+// under the free tier's ~10 req/min. One shared entry (the whole competition).
+const STANDINGS_TTL_MS = 30 * 60 * 1000;
+let standingsCache: { at: number; data: Map<string, StandingRow> } | null = null;
+
+/**
+ * Current group standings for the competition, from football-data.org (free
+ * tier). Returns a lookup keyed by BOTH team code (TLA) and full name, so a
+ * caller can resolve a team either way. Best-effort: throws are the caller's to
+ * swallow. `form` is intentionally not used (it's null on the WC free tier — we
+ * derive recent form from our own results instead).
+ */
+export async function fetchStandings(): Promise<Map<string, StandingRow>> {
+  if (standingsCache && Date.now() - standingsCache.at < STANDINGS_TTL_MS) {
+    return standingsCache.data;
+  }
+
+  const res = await fetch(
+    `${FOOTBALL_API_BASE}/competitions/${WC_COMPETITION}/standings`,
+    {
+      headers: { "X-Auth-Token": requireEnv("FOOTBALL_DATA_API_KEY") },
+      cache: "no-store",
+    },
+  );
+  if (!res.ok) {
+    throw new Error(`football-data.org error ${res.status}: ${await res.text()}`);
+  }
+  const data = (await res.json()) as { standings?: ApiStandingsGroup[] };
+
+  const map = new Map<string, StandingRow>();
+  for (const g of data.standings ?? []) {
+    const group = g.group?.replace(/^Group\s+/i, "").trim() || null;
+    for (const r of g.table ?? []) {
+      const row: StandingRow = {
+        group,
+        position: r.position ?? 0,
+        played: r.playedGames ?? 0,
+        won: r.won ?? 0,
+        draw: r.draw ?? 0,
+        lost: r.lost ?? 0,
+        points: r.points ?? 0,
+        goalsFor: r.goalsFor ?? 0,
+        goalsAgainst: r.goalsAgainst ?? 0,
+        goalDiff: r.goalDifference ?? 0,
+      };
+      if (r.team?.tla) map.set(r.team.tla.toUpperCase(), row);
+      if (r.team?.name) map.set(r.team.name, row);
+    }
+  }
+
+  standingsCache = { at: Date.now(), data: map };
+  return map;
+}

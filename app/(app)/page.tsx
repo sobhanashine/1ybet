@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getMatchesWithPredictions, isLocked, type MatchWithPrediction } from "@/lib/matches";
 import { isLiveWindow } from "@/lib/time";
 import { getLeaderboard } from "@/lib/leaderboard";
+import { getStartMatch, getTournamentLeaderboard } from "@/lib/tournament";
 import { maybeAutoSync } from "@/lib/auto-sync";
 import MatchCard from "@/components/MatchCard";
 import { LiveScoresProvider } from "@/components/LiveScores";
@@ -28,15 +29,22 @@ export default async function HomePage() {
   // last load — so scores and rank update without depending on an external cron.
   await maybeAutoSync();
 
-  const [leaderboard, allMatches] = await Promise.all([
+  const [leaderboard, allMatches, startMatch] = await Promise.all([
     getLeaderboard({ kind: "total" }),
     getMatchesWithPredictions(user.id),
+    getStartMatch(),
   ]);
 
   const userRow = leaderboard.find((r) => r.userId === user.id);
   const totalPoints = userRow?.points ?? 0;
-  const userRank = userRow ? leaderboard.findIndex((r) => r.userId === user.id) + 1 : 0;
   const totalPredicted = userRow?.predicted ?? 0;
+
+  // Rank shown to users is their position in the prize tournament standings
+  // (the general leaderboard page was retired). 0 when they haven't joined.
+  const tournamentRows = startMatch
+    ? await getTournamentLeaderboard(startMatch.kickoffAt)
+    : [];
+  const userRank = tournamentRows.findIndex((r) => r.userId === user.id) + 1;
 
   const days = groupByDay(allMatches);
   const nextMatchId = allMatches.find((m) => m.status !== "FINISHED")?.id;
@@ -49,7 +57,7 @@ export default async function HomePage() {
 
   const stats = [
     { label: t.profile.totalPoints, value: totalPoints > 0 || userRank > 0 ? toPersianDigits(totalPoints) : "۰" },
-    { label: t.leaderboard.title, value: userRank > 0 ? toPersianDigits(userRank) : "—" },
+    { label: t.tournament.rankLabel, value: userRank > 0 ? toPersianDigits(userRank) : "—" },
     { label: "پیش‌بینی‌ها", value: toPersianDigits(totalPredicted) },
   ];
 
