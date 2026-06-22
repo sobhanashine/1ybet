@@ -7,6 +7,7 @@ import { maybeAutoSync } from "@/lib/auto-sync";
 import MatchCard from "@/components/MatchCard";
 import { LiveScoresProvider } from "@/components/LiveScores";
 import EmailReminderBanner from "@/components/EmailReminderBanner";
+import { FirstVisitTournamentGate } from "@/components/FirstVisitTournamentGate";
 import { t } from "@/lib/i18n";
 import { toPersianDigits, formatJalaliDate, tehranDayKey } from "@/lib/format";
 
@@ -63,6 +64,10 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-6">
+      {/* First-ever app open: bounce a not-yet-registered user to the
+          tournament page once. Members (userRank > 0) are never redirected. */}
+      <FirstVisitTournamentGate isMember={userRank > 0} />
+
       {/* Welcome / stats */}
       <div className="card p-5">
         <div className="mb-4">

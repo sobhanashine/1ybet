@@ -18,6 +18,9 @@ export async function joinTournament(): Promise<JoinResult> {
     .values({ userId: session.uid })
     .onConflictDoNothing();
 
+  // Joining changes the member count (pot), the standings, and the home rank.
   revalidatePath("/tournament");
+  revalidatePath("/leaderboard");
+  revalidatePath("/");
   return { ok: true };
 }
