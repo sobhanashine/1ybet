@@ -4,10 +4,11 @@ import { getCurrentUser } from "@/lib/auth";
 import { getMatchWithPrediction, isLocked } from "@/lib/matches";
 import { isLiveWindow } from "@/lib/time";
 import { getMatchPredictionStats } from "@/lib/match-stats";
+import { getMatchAnalysis, type GameAnalysis, type FormResult } from "@/lib/analyze";
 import { fetchMatchHead2Head, type Head2Head } from "@/lib/football-api";
 import { teamFa } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BarChart3 } from "lucide-react";
 import TeamFlag from "@/components/TeamFlag";
 import { LiveScoresProvider } from "@/components/LiveScores";
 import MatchScore from "@/components/MatchScore";
@@ -72,6 +73,74 @@ function ShareBar({
   );
 }
 
+/** Recent form as coloured W/D/L pills (oldest → newest). */
+function FormDots({ form }: { form: FormResult[] }) {
+  if (form.length === 0) {
+    return <span className="text-[11px] text-muted">—</span>;
+  }
+  const tone: Record<FormResult, string> = {
+    W: "bg-pitch-500 text-pitch-ink",
+    D: "bg-muted/30 text-ink-dim",
+    L: "bg-danger/80 text-white",
+  };
+  const label: Record<FormResult, string> = { W: "ب", D: "م", L: "خ" };
+  return (
+    <div className="flex gap-1" dir="ltr">
+      {form.map((r, i) => (
+        <span
+          key={i}
+          className={`flex h-5 w-5 items-center justify-center rounded-[5px] text-[10px] font-extrabold ${tone[r]}`}
+          aria-label={r}
+        >
+          {label[r]}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/** One team's analysis column: name, group standing summary, recent form. */
+function AnalysisColumn({
+  team,
+  analysis,
+  align,
+}: {
+  team: string;
+  analysis: GameAnalysis["home"];
+  align: "start" | "end";
+}) {
+  const s = analysis.standing;
+  return (
+    <div
+      className={`flex flex-1 flex-col gap-2 ${align === "end" ? "items-end text-right" : "items-start text-left"}`}
+    >
+      <span className="text-sm font-extrabold text-ink">{teamFa(team)}</span>
+      {s ? (
+        <div className="text-[11px] font-semibold text-muted">
+          {s.group && (
+            <span className="text-pitch-700">
+              {t.analyze.groupPos} {toPersianDigits(s.position)}
+            </span>
+          )}
+          <span className="mx-1 text-line-strong">·</span>
+          {toPersianDigits(s.points)} {t.analyze.points}
+        </div>
+      ) : (
+        <span className="text-[11px] text-muted">{t.analyze.noStanding}</span>
+      )}
+      <FormDots form={analysis.form} />
+    </div>
+  );
+}
+
+/** The computed lean, phrased as a short Persian verdict. */
+function verdictText(g: GameAnalysis): string {
+  if (g.lean.side === "even") return t.analyze.even;
+  const team = g.lean.side === "home" ? g.match.homeTeam : g.match.awayTeam;
+  const edge = g.lean.strength === "clear" ? t.analyze.edgeClear : t.analyze.edgeSlight;
+  return `${edge} ${teamFa(team)}`;
+}
+
 export default async function MatchDetailPage({
   params,
 }: {
@@ -91,6 +160,10 @@ export default async function MatchDetailPage({
   const locked = isLocked(match.kickoffAt);
   // Always retrieve the crowd distribution stats, even if predictions are still open.
   const stats = await getMatchPredictionStats(matchId);
+
+  // Standings + recent form + computed lean (moved here from the old /analyze
+  // page). Best-effort — never blocks the page if standings can't be fetched.
+  const analysis = await getMatchAnalysis(matchId, user.id);
 
   // Head-to-head history from football-data.org (free tier). Best-effort: a
   // missing API key, rate limit or outage must never break the page.
@@ -150,6 +223,29 @@ export default async function MatchDetailPage({
           )}
         </div>
       </div>
+
+      {/* analysis: group standing, recent form, computed lean */}
+      {analysis && (
+        <section className="space-y-3">
+          <h2 className="section-label flex items-center gap-1.5">
+            <BarChart3 className="h-4 w-4 text-pitch-700" aria-hidden />
+            {t.analyze.matchTitle}
+          </h2>
+          <div className="card space-y-3 p-4">
+            <div className="flex items-start gap-3">
+              <AnalysisColumn team={match.homeTeam} analysis={analysis.home} align="start" />
+              <span className="mt-1 text-xs font-bold text-muted">{t.match.vs}</span>
+              <AnalysisColumn team={match.awayTeam} analysis={analysis.away} align="end" />
+            </div>
+            <div className="rounded-[var(--radius-md)] border border-line bg-surface-2 px-3 py-2">
+              <p className="text-[11px] font-bold text-muted">
+                {t.analyze.verdict}:{" "}
+                <span className="text-ink">{verdictText(analysis)}</span>
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* crowd stats */}
       <section className="space-y-3">

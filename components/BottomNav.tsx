@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Home, Table2, Trophy, User } from "lucide-react";
+import { Home, Medal, Table2, Trophy, User } from "lucide-react";
 import { t } from "@/lib/i18n";
 
 // Two tabs on each side of the raised center Tournament button.
@@ -11,7 +11,7 @@ const LEFT = [
   { href: "/standings", label: t.nav.standings, Icon: Table2 },
 ];
 const RIGHT = [
-  { href: "/analyze", label: t.nav.analyze, Icon: BarChart3 },
+  { href: "/leaderboard", label: t.nav.leaderboard, Icon: Medal },
   { href: "/profile", label: t.nav.profile, Icon: User },
 ];
 

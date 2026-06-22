@@ -41,6 +41,7 @@ export const fa = {
   // games analyze (free: group standings + our crowd data + recent form)
   analyze: {
     title: "تحلیل بازی‌ها",
+    matchTitle: "تحلیل و فرم",
     subtitle: "آمار، فرم و تحلیل بازی‌های پیش رو",
     empty: "بازی پیش‌رویی برای تحلیل وجود ندارد",
     groupPos: "رتبهٔ گروه",
@@ -207,6 +208,19 @@ export const fa = {
       "یه ویدیوی کوتاه آماده کردیم که نشون می‌ده چطور توی تورنمنت ثبت‌نام کنی و شرایطش چیه. الان می‌بینیش؟",
     guidePopupYes: "بله، نشونم بده",
     guidePopupNo: "نه، نمایش نده",
+    // how-to + in-page registration (the tournament page is now the join surface)
+    howTitle: "چطور وارد تورنمنت بشم؟",
+    how1: "ثبت‌نام کن (ورودی هر نفر ۱۰۰٬۰۰۰ تومان)",
+    how2: "نتیجهٔ بازی‌ها رو از صفحهٔ خانه پیش‌بینی کن",
+    how3: "بیشترین امتیاز رو بگیر و کل جایزه رو ببر 🏆",
+    registerCta: "ثبت‌نام در تورنمنت",
+    registered: "تو داخل تورنمنت هستی ✅",
+    viewLeaderboard: "دیدن جدول تورنمنت",
+    congratsTitle: "تبریک! 🎉",
+    congratsBody:
+      "ثبت‌نامت توی تورنمنت انجام شد. حالا برو نتیجهٔ بازی‌ها رو پیش‌بینی کن!",
+    startPredicting: "شروع پیش‌بینی",
+    redirecting: "در حال انتقال به صفحهٔ خانه…",
   },
 
   // bracket
@@ -228,6 +242,21 @@ export const fa = {
     enableNotifications: "فعال‌سازی اعلان‌ها",
     notificationsOn: "اعلان‌ها فعال است",
     save: "ذخیره",
+    // points breakdown (tournament-scoped)
+    tournamentPoints: "امتیاز تورنمنت",
+    pointsTitle: "امتیازها از کجا میاد؟",
+    rank: "رتبه",
+    predicted: "پیش‌بینی‌ها",
+    accuracy: "دقت",
+    exact: "نتیجهٔ دقیق",
+    diff: "تفاضل درست",
+    winner: "برندهٔ درست",
+    miss: "شرکت",
+    times: "بار",
+    pointsUnit: "امتیاز",
+    bracketBonus: "امتیاز جدول حذفی",
+    pointsEmpty:
+      "هنوز هیچ بازی‌ای امتیازدهی نشده. بعد از مشخص‌شدن نتیجهٔ بازی‌ها، تفکیک امتیازت اینجا میاد.",
   },
 
   common: {
