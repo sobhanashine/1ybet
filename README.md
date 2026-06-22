@@ -7,24 +7,27 @@
 [![Drizzle ORM](https://img.shields.io/badge/Drizzle_ORM-v0.45-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black)](https://orm.drizzle.team)
 [![Telegram WebApp](https://img.shields.io/badge/Telegram_Mini_App-Active-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://core.telegram.org/bots/webapps)
 
-A premium, fully Persian (RTL layout), installable PWA and **Telegram Mini App** where users predict World Cup 2026 match scores, fill dynamic knockout brackets, earn achievements/badges, climb high-contrast leaderboards, and compete in private leagues.
+A premium, fully Persian (RTL layout), installable PWA and **Telegram Mini App** where users predict World Cup 2026 match scores, join a 100k-toman prize tournament, follow live group standings, analyze upcoming fixtures, earn achievements/badges, and climb the live tournament leaderboard.
 
 ---
 
 ## 📸 Core Features
 
 * ⚽️ **Match Score Predictions**: Submit scorelines for every group-stage and knockout fixture, with cards auto-locking at kickoff.
-* 🏟️ **Dynamic Bracket Progression**: Interactive select-and-advance knockout bracket prediction grid with scaling stage rewards (3 / 5 / 8 / 13 / 21 / 34 for each round reached, from the Round of 32 up to champion).
+* 🏟️ **Dynamic Bracket Progression**: Interactive select-and-advance knockout bracket prediction grid with scaling stage rewards (3 / 5 / 8 / 13 / 21 / 34 for each round reached, from the Round of 32 up to champion). *(Predictions are preserved at `/bracket`; the route is no longer surfaced in the main bottom nav.)*
 * 🏆 **Granular Scoring Metric**: Rewarding statistical prediction accuracy (floor scoring ensures active participation yields points):
   - **10 Points**: Exact score prediction.
   - **7 Points**: Correct goal difference (including a correct draw).
   - **5 Points**: Correct winner (incorrect scoreline/margin).
   - **2 Points**: Participation points (floor margin — no zero).
   - *Knockouts are scored on the 90-minute regulation result; bracket advancement uses the real winner including ET/penalties.*
-* 🏆 **100k-Toman Prize Tournament**: An opt-in, entry-fee prize league. Players join through a first-visit gate (Yes → join, No → back to the regular game); each entry is 100,000 toman and the **whole pot (entry × members) goes to the winner**. The page shows a live pot, a countdown to the kickoff match (Belgium–Iran), and a **members-only standings** table scored only from that match onward — the regular leaderboard is untouched. Promoted via a raised gold center FAB in the bottom nav. An on-open **guide-video popup** offers a short how-to-play video (kept offering until the user dismisses it). The live top 3 earn **named podium badges** (الماسخاله / آرسنال / الو مشکات).
-* 👥 **Private Leagues**: Build or join customized mini-competitions with friends using shareable invitation codes.
-* ⚔️ **Head-to-Head**: Compare your predictions and points against any other player.
-* 🥇 **Leaderboards & Badges**: High-contrast global rankings plus an achievement/badge catalog. The top 3 use **custom SVG artwork** (numbered medals on the global leaderboard, tiered crests in the tournament) instead of emojis.
+* 🏆 **100k-Toman Prize Tournament**: An opt-in, entry-fee prize league reached via a raised gold center FAB in the bottom nav. The tournament page is a focused *how-to-join* surface — a live pot, the entry fee, a member count, a countdown to the kickoff match (Belgium–Iran), and an **inline register button** that joins the league, shows a congrats card, then auto-redirects home to start predicting. Each entry is 100,000 toman and the **whole pot (entry × members) goes to the winner**. On a user's **very first** app open they're routed once to this page to register (already-registered members are never redirected). An on-open **guide-video popup** offers a short how-to-play video.
+* 📊 **Tournament Leaderboard**: A dedicated bottom-nav tab showing the **members-only standings**, scored only from the kickoff match onward. The live top 3 earn **named podium badges** (الماسخاله / آرسنال / الو مشکات) rendered as tiered **custom SVG crests** instead of emojis.
+* 🔎 **Match Analysis**: Each match detail page folds in a free, computed read on the fixture — both teams' live group standing, recent W/D/L form (derived from finished results), the crowd's home/draw/away prediction split, and a simple three-signal **lean/verdict**.
+* 📋 **Live World Cup Standings**: A read-only group-tables tab with live positions from football-data.org; the top two of each group are highlighted as qualifying.
+* ⚔️ **Head-to-Head**: Compare your predictions and points against any other player (reachable from leaderboard rows).
+* 🥇 **Badges & Achievements**: An achievement/badge catalog shown on the profile, including the tournament podium crests.
+* 👤 **Tournament-Scoped Profile**: The profile centers on the prize tournament — the headline total equals the user's **tournament points** (counted from the kickoff match onward, matching the standings), with a per-tier breakdown of *where points came from* (exact 10 / diff 7 / winner 5 / participation 2) plus **Rank · Predictions · Accuracy**.
 * 💎 **Telegram Mini App Integration**: Runs the *same* Next.js app inside a Telegram Bot WebApp with auto-login via `initData` HMAC hash verification and mobile viewport optimization (`expand()`). Accounts are linked by phone, so web and Telegram share one identity.
 * 🔔 **Multi-Channel Notifications (Telegram & Email)**: Real-time match results and prediction score updates (detailing final scores, predicted scores, points earned, and flag emojis next to team names) sent via Telegram Bot messages to linked users, or falling back to optional Resend email. Upcoming match reminders are also sent 1 hour before kickoff if a user's prediction is missing.
 * 📬 **Email Reminder Widget**: A floating, dismissible widget that collects a user's email for match reminders. It disappears once an email is saved or manually dismissed.
