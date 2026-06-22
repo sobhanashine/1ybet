@@ -23,9 +23,7 @@ export type GameAnalysis = {
   lean: Lean;
 };
 
-// How many upcoming/live matches to analyse on the page. Bounds the per-match
-// crowd-stat queries; the analyse hub is about the next games, not the archive.
-const MAX_GAMES = 12;
+// How many recent results make up a team's form line.
 const FORM_LEN = 5;
 
 const formPoints = (form: FormResult[]) =>
@@ -85,17 +83,20 @@ function computeLean(
 }
 
 /**
- * Analysis for the next few games: group standing + recent form for each side,
- * the crowd's prediction split, and a computed lean. All from free sources —
- * football-data.org standings (cached, best-effort) and our own predictions.
+ * Analysis for a single match: group standing + recent form for each side, the
+ * crowd's prediction split, and a computed lean. Rendered inline on the match
+ * detail page. All from free sources — football-data.org standings (cached,
+ * best-effort) and our own predictions. Returns null if the match is unknown.
  */
-export async function getGamesAnalysis(userId: number): Promise<GameAnalysis[]> {
+export async function getMatchAnalysis(
+  matchId: number,
+  userId: number,
+): Promise<GameAnalysis | null> {
   const all = await getMatchesWithPredictions(userId);
-  const formMap = buildFormMap(all);
+  const match = all.find((m) => m.id === matchId);
+  if (!match) return null;
 
-  const upcoming = all
-    .filter((m) => m.status !== "FINISHED")
-    .slice(0, MAX_GAMES);
+  const formMap = buildFormMap(all);
 
   // Standings are best-effort: a missing key, rate limit or outage must never
   // break the page — we just render without group positions.
@@ -112,18 +113,14 @@ export async function getGamesAnalysis(userId: number): Promise<GameAnalysis[]> 
   const recentForm = (team: string): FormResult[] =>
     (formMap.get(team) ?? []).slice(-FORM_LEN);
 
-  const out: GameAnalysis[] = [];
-  for (const m of upcoming) {
-    const home: TeamAnalysis = {
-      standing: lookup(m.homeTeam, m.homeCode),
-      form: recentForm(m.homeTeam),
-    };
-    const away: TeamAnalysis = {
-      standing: lookup(m.awayTeam, m.awayCode),
-      form: recentForm(m.awayTeam),
-    };
-    const crowd = await getMatchPredictionStats(m.id);
-    out.push({ match: m, home, away, crowd, lean: computeLean(home, away, crowd) });
-  }
-  return out;
+  const home: TeamAnalysis = {
+    standing: lookup(match.homeTeam, match.homeCode),
+    form: recentForm(match.homeTeam),
+  };
+  const away: TeamAnalysis = {
+    standing: lookup(match.awayTeam, match.awayCode),
+    form: recentForm(match.awayTeam),
+  };
+  const crowd = await getMatchPredictionStats(matchId);
+  return { match, home, away, crowd, lean: computeLean(home, away, crowd) };
 }

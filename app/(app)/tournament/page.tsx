@@ -1,10 +1,10 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { maybeAutoSync } from "@/lib/auto-sync";
 import {
   getMemberCount,
   getStartMatch,
-  getTournamentLeaderboard,
   isMember,
   TOURNAMENT_ENTRY_FEE_TOMAN,
 } from "@/lib/tournament";
@@ -13,11 +13,10 @@ import { toPersianDigits, formatJalaliDate, formatTime } from "@/lib/format";
 import TeamFlag from "@/components/TeamFlag";
 import { teamFa } from "@/lib/teams-fa";
 import Countdown from "@/components/Countdown";
-import TournamentJoinModal from "@/components/TournamentJoinModal";
 import TournamentGuideButton from "@/components/TournamentGuideButton";
-import { TournamentCrest } from "@/components/BadgeArt";
-import { TOURNAMENT_PODIUM_CODES, tournamentPodiumTitle } from "@/lib/badges";
-import { Trophy, Users } from "lucide-react";
+import TournamentRegister from "@/components/TournamentRegister";
+import { MarkTournamentIntroSeen } from "@/components/FirstVisitTournamentGate";
+import { CheckCircle2, Medal, Trophy, Users } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -32,17 +31,17 @@ export default async function TournamentPage() {
     getMemberCount(),
   ]);
 
-  const rows = startMatch
-    ? await getTournamentLeaderboard(startMatch.kickoffAt)
-    : [];
-  const myRank = rows.findIndex((r) => r.userId === user.id) + 1;
-
   // The whole pot — every entry fee — goes to the winner.
   const pot = memberCount * TOURNAMENT_ENTRY_FEE_TOMAN;
   const potFa = new Intl.NumberFormat("fa-IR").format(pot);
 
+  const steps = [t.tournament.how1, t.tournament.how2, t.tournament.how3];
+
   return (
     <div className="space-y-5">
+      {/* Reaching this page counts as having seen the one-time intro. */}
+      <MarkTournamentIntroSeen />
+
       {/* Hero */}
       <section className="card overflow-hidden border-gold/25 p-5">
         <div className="flex items-center gap-2 text-gold">
@@ -89,6 +88,25 @@ export default async function TournamentPage() {
         <TournamentGuideButton />
       </section>
 
+      {/* How to take part */}
+      <section className="card p-5">
+        <h2 className="mb-3 text-sm font-extrabold text-ink">
+          {t.tournament.howTitle}
+        </h2>
+        <ol className="space-y-3">
+          {steps.map((step, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-pitch-500/12 text-sm font-extrabold text-pitch-700 tnum">
+                {toPersianDigits(i + 1)}
+              </span>
+              <p className="pt-0.5 text-sm font-semibold leading-relaxed text-ink-dim">
+                {step}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       {/* Countdown + starting match */}
       {startMatch && (
         <section className="card p-5">
@@ -127,68 +145,26 @@ export default async function TournamentPage() {
         </section>
       )}
 
-      {/* Standings */}
-      <section>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-base font-extrabold text-ink">
-            {t.tournament.standings}
-          </h2>
-          {member && myRank > 0 && (
-            <span className="text-xs font-bold text-pitch-700">
-              {t.tournament.yourRank}: {toPersianDigits(myRank)}
-            </span>
-          )}
-        </div>
-
-        {rows.length === 0 ? (
-          <div className="card p-8 text-center">
-            <p className="text-sm text-muted">{t.tournament.empty}</p>
+      {/* Call to action: register (non-members) or jump to the standings. */}
+      {member ? (
+        <section className="card border-pitch-500/25 p-5 text-center">
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-pitch-500/12 text-pitch-700">
+            <CheckCircle2 className="h-7 w-7" aria-hidden />
           </div>
-        ) : (
-          <ol className="card divide-y divide-line overflow-hidden">
-            {rows.map((r, i) => {
-              const me = r.userId === user.id;
-              const rank = i + 1;
-              const onPodium = rank <= 3;
-              return (
-                <li
-                  key={r.userId}
-                  className={`flex items-center gap-3 px-3.5 py-3 ${me ? "bg-pitch-50" : ""}`}
-                >
-                  <span className="flex w-7 shrink-0 justify-center text-sm font-extrabold tnum text-muted">
-                    {onPodium ? (
-                      <TournamentCrest code={TOURNAMENT_PODIUM_CODES[rank - 1]} />
-                    ) : (
-                      toPersianDigits(rank)
-                    )}
-                  </span>
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-sm font-bold text-ink">
-                      {r.displayName}
-                      {me && (
-                        <span className="mr-1.5 text-xs font-semibold text-pitch-700">
-                          (شما)
-                        </span>
-                      )}
-                    </span>
-                    {onPodium && tournamentPodiumTitle(rank) && (
-                      <span className="truncate text-[11px] font-extrabold text-gold">
-                        {tournamentPodiumTitle(rank)}
-                      </span>
-                    )}
-                  </div>
-                  <span className="shrink-0 text-base font-extrabold text-pitch-700 tnum">
-                    {toPersianDigits(r.points)}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
-        )}
-      </section>
-
-      {/* First-visit join gate (non-members only). */}
-      {!member && <TournamentJoinModal />}
+          <p className="text-sm font-extrabold text-ink">
+            {t.tournament.registered}
+          </p>
+          <Link
+            href="/leaderboard"
+            className="btn btn-secondary mt-4 flex w-full items-center justify-center gap-2 py-3"
+          >
+            <Medal className="h-5 w-5" aria-hidden />
+            {t.tournament.viewLeaderboard}
+          </Link>
+        </section>
+      ) : (
+        <TournamentRegister />
+      )}
     </div>
   );
 }
