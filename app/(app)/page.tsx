@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ChevronLeft, Coins } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getMatchesWithPredictions, isLocked, type MatchWithPrediction } from "@/lib/matches";
 import { isLiveWindow } from "@/lib/time";
@@ -83,6 +85,26 @@ export default async function HomePage() {
           ))}
         </div>
       </div>
+
+      {/* New mode: poker-style chip wagering on predictions. */}
+      <Link
+        href="/chip-cup"
+        className="card flex items-center gap-3 border-gold/30 bg-gold/5 p-4 transition-colors hover:bg-gold/10"
+      >
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
+          <Coins className="h-6 w-6" aria-hidden />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1.5 text-sm font-extrabold text-ink">
+            {t.chipCup.title}
+            <span className="rounded-full bg-gold/20 px-1.5 py-0.5 text-[9px] font-bold text-gold-dim">
+              {t.common.new}
+            </span>
+          </p>
+          <p className="truncate text-[11px] text-muted">{t.chipCup.tagline}</p>
+        </div>
+        <ChevronLeft className="h-4 w-4 shrink-0 text-gold" aria-hidden />
+      </Link>
 
       {/* Promote the email-reminder opt-in to users who haven't added an email */}
       <EmailReminderBanner hasEmail={!!user.email} />
