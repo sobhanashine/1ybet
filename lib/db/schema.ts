@@ -146,6 +146,47 @@ export const tournamentMembers = pgTable("tournament_members", {
   joinedAt: timestamp("joined_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+// --- Chip Cup (poker-style prediction tournament) ---
+// Players opt in for an equal starting stack, then wager chips on match
+// predictions. Payout scales with accuracy (scoring tiers) and the odds implied
+// by the crowd — backing a correct underdog pays big, the favourite pays little.
+// Independent of the regular game and the prize tournament.
+export const chipStacks = pgTable("chip_stacks", {
+  userId: integer("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  // Available (un-committed) chips. Chips at stake live in open chip_wagers.
+  chips: integer("chips").notNull(),
+  joinedAt: timestamp("joined_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const chipWagers = pgTable(
+  "chip_wagers",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    matchId: integer("match_id")
+      .notNull()
+      .references(() => matches.id, { onDelete: "cascade" }),
+    predHome: integer("pred_home").notNull(),
+    predAway: integer("pred_away").notNull(),
+    // Chips committed (already deducted from the stack while the wager is open).
+    amount: integer("amount").notNull(),
+    settled: boolean("settled").notNull().default(false),
+    // Net chip change once settled (gross return − amount); kept for display.
+    delta: integer("delta").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("chip_wager_user_match_idx").on(t.userId, t.matchId),
+    index("chip_wager_user_idx").on(t.userId),
+    index("chip_wager_settled_idx").on(t.settled),
+  ],
+);
+
 // --- streaks & badges ---
 export const badges = pgTable("badges", {
   id: serial("id").primaryKey(),

@@ -43,6 +43,13 @@
       "when": 1781910029330,
       "tag": "0005_vengeful_wiccan",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782164892776,
+      "tag": "0006_overrated_microchip",
+      "breakpoints": true
     }
   ]
 }
