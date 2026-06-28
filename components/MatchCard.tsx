@@ -242,11 +242,33 @@ export default function MatchCard({ match, locked, isNext }: Props) {
               </span>
             </div>
           ) : finished ? (
-            <div className="flex items-center gap-2.5 rounded-[var(--radius-md)] border border-pitch-200 bg-pitch-50 px-3.5 py-2 text-2xl font-black text-pitch-700 tnum">
-              <span>{toPersianDigits(match.homeScore ?? 0)}</span>
-              <span className="text-sm font-normal text-muted">{t.match.vs}</span>
-              <span>{toPersianDigits(match.awayScore ?? 0)}</span>
-            </div>
+            (() => {
+              const isKnockout = match.stage !== "GROUP";
+              const drawnAt90 =
+                isKnockout &&
+                match.homeScore != null &&
+                match.awayScore != null &&
+                match.homeScore === match.awayScore;
+              return (
+                <div className="flex flex-col items-center gap-1">
+                  <div className="flex items-center gap-2.5 rounded-[var(--radius-md)] border border-pitch-200 bg-pitch-50 px-3.5 py-2 text-2xl font-black text-pitch-700 tnum">
+                    <span>{toPersianDigits(match.homeScore ?? 0)}</span>
+                    <span className="text-sm font-normal text-muted">{t.match.vs}</span>
+                    <span>{toPersianDigits(match.awayScore ?? 0)}</span>
+                  </div>
+                  {isKnockout && (
+                    <span className="text-[10px] font-semibold text-muted">
+                      {t.match.regulationLabel}
+                    </span>
+                  )}
+                  {drawnAt90 && match.winnerTeam && (
+                    <span className="text-[10px] font-bold text-pitch-700">
+                      {t.match.advancedLabel}: {teamFa(match.winnerTeam)}
+                    </span>
+                  )}
+                </div>
+              );
+            })()
           ) : locked ? (
             match.predHome != null ? (
               <div className="flex items-center gap-2.5 rounded-[var(--radius-md)] border border-line-strong bg-surface-2 px-3.5 py-2 text-2xl font-black text-ink/90 tnum">
@@ -311,7 +333,7 @@ export default function MatchCard({ match, locked, isNext }: Props) {
                 <span className="italic opacity-70">{t.match.notPredicted}</span>
               )}
             </span>
-            {match.predHome != null && <PointsBadge points={match.points ?? 0} />}
+            {match.predHome != null && <PointsBadge points={match.points ?? 0} isKnockout={match.stage !== "GROUP"} />}
           </div>
         ) : locked ? (
           <div className="flex flex-col items-center gap-2.5">
@@ -389,16 +411,20 @@ export default function MatchCard({ match, locked, isNext }: Props) {
 }
 
 /** Points earned on a finished match — flat tinted chip, tier by score. */
-function PointsBadge({ points }: { points: number }) {
+function PointsBadge({ points, isKnockout }: { points: number; isKnockout: boolean }) {
+  const EXACT  = isKnockout ? 20 : 10;
+  const DIFF   = isKnockout ? 14 : 7;
+  const WINNER = isKnockout ? 10 : 5;
+
   let cls = "border-line bg-surface-2 text-muted";
   let prefix = "";
-  if (points === 10) {
+  if (points === EXACT) {
     cls = "border-gold/40 bg-gold/10 text-gold";
     prefix = "🌟 ";
-  } else if (points === 7) {
+  } else if (points === DIFF) {
     cls = "border-pitch-200 bg-pitch-50 text-pitch-700";
     prefix = "🔥 ";
-  } else if (points === 5) {
+  } else if (points === WINNER) {
     cls = "border-pitch-200 bg-pitch-50 text-pitch-700";
     prefix = "👍 ";
   } else if (points === 0) {

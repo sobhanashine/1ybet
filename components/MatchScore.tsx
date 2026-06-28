@@ -2,6 +2,7 @@
 
 import { useLiveScore } from "@/components/LiveScores";
 import { toPersianDigits } from "@/lib/format";
+import { teamFa } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
 
 type Props = {
@@ -9,15 +10,17 @@ type Props = {
   finished: boolean;
   homeScore: number | null;
   awayScore: number | null;
+  isKnockout?: boolean;
+  winnerTeam?: string | null;
 };
 
 /**
  * Center score for the match-detail header. Shows the live in-play score (red,
  * pulsing) when the match is on, the final score when finished, or a plain "vs"
- * otherwise. Live data comes from the surrounding LiveScoresProvider; with no
- * provider/live data it simply falls back to the finished/scheduled view.
+ * otherwise. For finished knockout matches shows a "نتیجه ۹۰'" label and the
+ * advancing team when the match was level at 90 min (ET / penalties).
  */
-export default function MatchScore({ extId, finished, homeScore, awayScore }: Props) {
+export default function MatchScore({ extId, finished, homeScore, awayScore, isKnockout, winnerTeam }: Props) {
   const live = useLiveScore(extId);
 
   if (!finished && live) {
@@ -35,10 +38,28 @@ export default function MatchScore({ extId, finished, homeScore, awayScore }: Pr
   }
 
   if (finished) {
+    const drawnAt90 =
+      isKnockout &&
+      homeScore != null &&
+      awayScore != null &&
+      homeScore === awayScore;
+
     return (
-      <span className="tnum rounded-[var(--radius-md)] border border-pitch-200 bg-pitch-50 px-4 py-2 text-2xl font-black text-pitch-700">
-        {toPersianDigits(homeScore ?? 0)} {t.match.vs} {toPersianDigits(awayScore ?? 0)}
-      </span>
+      <div className="flex flex-col items-center gap-1">
+        <span className="tnum rounded-[var(--radius-md)] border border-pitch-200 bg-pitch-50 px-4 py-2 text-2xl font-black text-pitch-700">
+          {toPersianDigits(homeScore ?? 0)} {t.match.vs} {toPersianDigits(awayScore ?? 0)}
+        </span>
+        {isKnockout && (
+          <span className="text-[10px] font-semibold text-muted">
+            {t.match.regulationLabel}
+          </span>
+        )}
+        {drawnAt90 && winnerTeam && (
+          <span className="text-[10px] font-bold text-pitch-700">
+            {t.match.advancedLabel}: {teamFa(winnerTeam)}
+          </span>
+        )}
+      </div>
     );
   }
 

@@ -206,6 +206,8 @@ export default async function MatchDetailPage({
               finished={finished}
               homeScore={match.homeScore}
               awayScore={match.awayScore}
+              isKnockout={match.stage !== "GROUP"}
+              winnerTeam={match.winnerTeam}
             />
           </div>
           <TeamBadge team={match.awayTeam} flag={match.awayFlag} />

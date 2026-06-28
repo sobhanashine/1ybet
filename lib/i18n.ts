@@ -93,6 +93,8 @@ export const fa = {
     predictionSaved: "پیش‌بینی شما ثبت شد",
     predictionMissed: "فرصت پیش‌بینی تمام شد",
     details: "جزئیات و آمار",
+    regulationLabel: "نتیجه ۹۰ دقیقه",
+    advancedLabel: "صعودکننده",
   },
 
   matchStats: {
