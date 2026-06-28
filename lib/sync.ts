@@ -6,7 +6,7 @@ import { sendEmail, predictionResultEmailHtml } from "./email";
 import { teamFa, teamFlag } from "./teams-fa";
 import { sendTelegramMessage } from "./telegram";
 import { fetchWorldCupMatches } from "./football-api";
-import { scorePrediction } from "./scoring";
+import { scorePrediction, KNOCKOUT_MULTIPLIER } from "./scoring";
 import { resolveBracketResults, scoreBracket } from "./bracket-server";
 import { updateStreaksAndBadges } from "./badges-server";
 import { awardTournamentTop3 } from "./tournament-badges";
@@ -97,12 +97,14 @@ export async function scoreFinishedMatches(): Promise<{
     }
 
     for (const p of unscored) {
-      const pts = scorePrediction(
+      const basePts = scorePrediction(
         p.prediction.predHome,
         p.prediction.predAway,
         m.homeScore!,
         m.awayScore!,
       );
+      const multiplier = m.stage !== "GROUP" ? KNOCKOUT_MULTIPLIER : 1;
+      const pts = basePts * multiplier;
       await db
         .update(predictions)
         .set({ points: pts, scored: true })
@@ -114,14 +116,14 @@ export async function scoreFinishedMatches(): Promise<{
       if (p.telegramId) {
         try {
           let message = "";
-          if (pts === 10) {
-            message = "🔥 فوق‌العاده بود! نتیجه دقیق را حدس زدی و ۱۰ امتیاز کامل گرفتی!";
-          } else if (pts === 7) {
-            message = "👏 آفرین! تفاضل گل و نتیجه بازی را درست حدس زدی و ۷ امتیاز گرفتی!";
-          } else if (pts === 5) {
-            message = "👍 خوب بود! برنده بازی را درست حدس زدی و ۵ امتیاز گرفتی!";
+          if (basePts === 10) {
+            message = `🔥 فوق‌العاده بود! نتیجه دقیق را حدس زدی و ${pts} امتیاز کامل گرفتی!`;
+          } else if (basePts === 7) {
+            message = `👏 آفرین! تفاضل گل و نتیجه بازی را درست حدس زدی و ${pts} امتیاز گرفتی!`;
+          } else if (basePts === 5) {
+            message = `👍 خوب بود! برنده بازی را درست حدس زدی و ${pts} امتیاز گرفتی!`;
           } else {
-            message = "پیش‌بینی‌ات درست نبود ولی ۲ امتیاز مشارکت را گرفتی. برای بازی بعدی بیشتر تلاش کن! ⚽";
+            message = `پیش‌بینی‌ات درست نبود ولی ${pts} امتیاز مشارکت را گرفتی. برای بازی بعدی بیشتر تلاش کن! ⚽`;
           }
 
           const homeFlag = teamFlag(m.homeTeam);
@@ -187,7 +189,9 @@ export async function rescoreMatch(matchId: number): Promise<number> {
     .where(eq(predictions.matchId, matchId));
 
   for (const p of preds) {
-    const pts = scorePrediction(p.predHome, p.predAway, m.homeScore, m.awayScore);
+    const basePts = scorePrediction(p.predHome, p.predAway, m.homeScore, m.awayScore);
+    const multiplier = m.stage !== "GROUP" ? KNOCKOUT_MULTIPLIER : 1;
+    const pts = basePts * multiplier;
     await db
       .update(predictions)
       .set({ points: pts, scored: true })

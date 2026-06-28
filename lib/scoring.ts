@@ -6,6 +6,9 @@ export const POINTS = {
   FLOOR: 2, // any submitted-but-wrong prediction (there is no zero)
 } as const;
 
+// Knockout matches (any stage other than GROUP) are worth double points.
+export const KNOCKOUT_MULTIPLIER = 2;
+
 export type Outcome = "HOME" | "DRAW" | "AWAY";
 
 export function outcome(home: number, away: number): Outcome {
