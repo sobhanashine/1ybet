@@ -66,10 +66,37 @@ The bottom nav (`components/BottomNav.tsx`) is now **Home · WC Table · [Tourna
 - **`/standings` — جدول جام جهانی** (`app/(app)/standings/page.tsx`, force-dynamic): live group tables, read-only, **no prediction**. Top two per group highlighted as qualifying.
 - **Free-data note**: both pages reuse the existing `FOOTBALL_DATA_API_KEY` (football-data.org free tier). `lib/football-api.ts` `fetchGroupTables()` (ordered groups for the table) and `fetchStandings()` (lookup Map for analyze) share **one** cached `/standings` fetch (30-min TTL) — no extra calls, nothing paid. API-Football's richer Predictions endpoint was evaluated and rejected (free plan ~100 req/day, unlikely to cover the live WC season, adds a key).
 
+## Knockout phase update (added 2026-06)
+The bottom nav is now **Home · Knockout · [Tournament FAB] · Leaderboard · Profile**. `/standings` was replaced by `/knockout` since the group stage is over and the live bracket is now the primary data surface.
+
+### `/knockout` — جدول حذفی (live bracket results)
+- **Page**: `app/(app)/knockout/page.tsx` (force-dynamic, server component). Calls `fetchWorldCupMatches()`, filters out GROUP stage, groups by stage in order LAST_32 → LAST_16 → QUARTER_FINAL → SEMI_FINAL → THIRD_PLACE → FINAL, renders each round as a card with team flags, scores, and a winner tick (✓). Scheduled matches show kickoff time; live matches show a red "زنده" badge.
+- **No new API or key**: reuses the existing `FOOTBALL_DATA_API_KEY` (football-data.org free tier). All knockout matches come from the same `fetchWorldCupMatches()` call already used by the sync cron.
+- **Nav icon**: `GitBranch` from lucide-react. Label: `t.nav.knockout`.
+
+### Knockout roadmap in `/tournament`
+- The tournament page (`app/(app)/tournament/page.tsx`) fetches knockout matches alongside its existing data (single extra `fetchWorldCupMatches().catch(() => [])` in `Promise.all`).
+- Renders a **`KnockoutRoadmap`** section: a horizontally scrollable row of stage pills (completed = dim green, active = filled green, future = grey) plus a compact match list for the current active round, and a "دیدن همه بازی‌ها" link to `/knockout`.
+- Active round logic: first round with LIVE or SCHEDULED matches; falls back to the last round with any matches once the tournament is complete.
+
+### Knockout double scoring
+- **`lib/scoring.ts`**: `KNOCKOUT_MULTIPLIER = 2` constant added alongside `POINTS`.
+- **`lib/sync.ts`**: both `scoreFinishedMatches()` and `rescoreMatch()` compute `basePts = scorePrediction(…)` then `pts = basePts * (m.stage !== "GROUP" ? KNOCKOUT_MULTIPLIER : 1)`. Telegram notification messages use `pts` (the multiplied value) and branch on `basePts` for the tier label.
+- **Effective knockout points**: exact 20 / goal-diff 14 / correct winner 10 / participation 4.
+- **Already-scored knockout predictions** keep the old (un-doubled) values in the DB until re-scored via the admin panel (`rescoreMatch` applies the multiplier).
+
+### 90-minute result display
+- **`components/MatchCard.tsx`**: for finished knockout (`stage !== "GROUP"`) matches, shows `"نتیجه ۹۰ دقیقه"` under the score box so users know prediction scoring uses regulation time only. If the score is drawn at 90 min (ET / penalties decided it), also shows `"صعودکننده: [team]"` using `match.winnerTeam`.
+- **`components/MatchScore.tsx`** (match detail page): same label + advancing team, via new optional props `isKnockout` and `winnerTeam`. The match detail page (`app/(app)/match/[id]/page.tsx`) passes `match.stage !== "GROUP"` and `match.winnerTeam`.
+- **`PointsBadge`** (inside `MatchCard.tsx`): tiers now key off `isKnockout` — group: 10🌟/7🔥/5👍; knockout: 20🌟/14🔥/10👍.
+
+### Announcement script
+- `scripts/announce-knockout.ts`: Telegram broadcast (dry-run by default, `--send` to deliver) announcing the three features — `/knockout` page, tournament roadmap, and double points. Follows the same boilerplate as other announce-*.ts scripts.
+
 ## Tournament onboarding redesign + analyze→match move (added 2026-06)
 A reshuffle around the prize tournament. The nav is now **Home · WC Table · [Tournament FAB] · Leaderboard · Profile**.
 - **`/analyze` deleted.** Its per-match content (each side's group standing + recent form, crowd lean, computed verdict) moved **inline into the match detail page** (`app/(app)/match/[id]/page.tsx`), as a "تحلیل و فرم" section above the crowd stats. `lib/analyze.ts` now exports **`getMatchAnalysis(matchId, userId)`** (single match, returns `GameAnalysis | null`); the old `getGamesAnalysis()` and `MAX_GAMES` were removed. The crowd-split bar isn't repeated there — the match page already renders full crowd stats below.
-- **Bottom nav** (`components/BottomNav.tsx`): the right "تحلیل بازی‌ها" tab is replaced by **Leaderboard** (`/leaderboard`, `Medal` icon, `t.nav.leaderboard`). The gold Tournament FAB still points at `/tournament`.
+- **Bottom nav** (`components/BottomNav.tsx`): after the knockout update the bar is **Home · Knockout (`GitBranch`) · [Tournament FAB] · Leaderboard (`Medal`) · Profile**. `/standings` and `/analyze` are no longer in the nav (both pages still exist at their routes).
 - **`/leaderboard` (new)** = the **tournament standings**, moved out of `/tournament` (`app/(app)/leaderboard/page.tsx`, force-dynamic). Same podium crests / your-rank / points list as before, plus a compact pot header. Note: this reuses the `/leaderboard` route name that the *general* leaderboard once held (that page was deleted earlier); it has nothing to do with `lib/leaderboard.ts`.
 - **`/tournament` redesigned** into a pure "why + how to join + register" page: pot/fee/members/guide hero, a 3-step "چطور وارد تورنمنت بشم؟" list, the start-match countdown, then a CTA. Non-members get **`components/TournamentRegister.tsx`** (client): tap register → `joinTournament()` → in-page congrats card → auto-redirect to `/` after 2s (+ a "start predicting" button). Members see a "you're in ✅" state with a link to `/leaderboard`. The old **`TournamentJoinModal` is deleted** (registration is now inline, no blocking modal).
 - **First-visit onboarding**: `components/FirstVisitTournamentGate.tsx` — `FirstVisitTournamentGate` is mounted on the home page and, on the **very first** app open of a **not-yet-registered** user, sets `localStorage["tournament-intro-seen"]` and `router.replace("/tournament")`; every later open lands on home normally. It takes `isMember` (home passes `userRank > 0`, which reliably means a member since `getTournamentLeaderboard` lists every member even at 0 points) — **members are never redirected**, opening the app keeps them on home (we just mark the intro seen). `MarkTournamentIntroSeen` (same file) is mounted on `/tournament` so reaching it via the FAB also marks the intro seen (no later bounce). Client-side flag, same pattern as the guide popup — no DB/server state.
