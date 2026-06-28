@@ -232,12 +232,18 @@ export const fa = {
   // knockout bracket (live results from football-data.org)
   knockout: {
     title: "جدول حذفی",
-    subtitle: "نتایج زندهٔ مرحله حذفی",
+    subtitle: "مسیر هر تیم تا فینال",
     empty: "مسابقات مرحله حذفی هنوز شروع نشده‌اند",
     unavailable: "دریافت اطلاعات ممکن نشد. کمی بعد دوباره امتحان کنید.",
     live: "زنده",
     finished: "پایان",
     source: "بر اساس داده‌های زندهٔ football-data.org",
+    advancesTo: "برنده می‌رود به",
+    advanced: "صعودکننده",
+    tbdTeam: "در انتظار...",
+    thirdPlace: "رده‌بندی",
+    vsLabel: "مقابل",
+    matchDate: "تاریخ بازی",
   },
 
   // bracket

@@ -122,6 +122,60 @@ export async function fetchWorldCupMatches(): Promise<NormalizedMatch[]> {
     .filter((m): m is NormalizedMatch => m !== null);
 }
 
+/**
+ * Knockout slot — same as NormalizedMatch but teams can be null (TBD fixtures).
+ * Used for bracket display; does NOT feed into scoring or sync.
+ */
+export type KnockoutSlot = {
+  extId: string;
+  stage: NormalizedMatch["stage"];
+  homeTeam: string | null;
+  awayTeam: string | null;
+  homeCode: string | null;
+  awayCode: string | null;
+  homeFlag: string | null;
+  awayFlag: string | null;
+  kickoffAt: Date;
+  status: "SCHEDULED" | "LIVE" | "FINISHED";
+  homeScore: number | null;
+  awayScore: number | null;
+  winnerTeam: string | null;
+};
+
+function normalizeSlot(m: ApiMatch): KnockoutSlot | null {
+  const stage = STAGE_MAP[m.stage];
+  if (!stage || stage === "GROUP") return null;
+  const reg = regulationScore(m);
+  let winnerTeam: string | null = null;
+  if (m.status === "FINISHED") {
+    if (m.score.winner === "HOME_TEAM") winnerTeam = m.homeTeam.name ?? null;
+    else if (m.score.winner === "AWAY_TEAM") winnerTeam = m.awayTeam.name ?? null;
+  }
+  return {
+    extId: `fd-${m.id}`,
+    stage,
+    homeTeam: m.homeTeam.name ?? null,
+    awayTeam: m.awayTeam.name ?? null,
+    homeCode: m.homeTeam.tla ?? null,
+    awayCode: m.awayTeam.tla ?? null,
+    homeFlag: m.homeTeam.crest ?? null,
+    awayFlag: m.awayTeam.crest ?? null,
+    kickoffAt: new Date(m.utcDate),
+    status: mapStatus(m.status),
+    homeScore: reg.home,
+    awayScore: reg.away,
+    winnerTeam,
+  };
+}
+
+/** All knockout slots including TBD fixtures (teams = null). For bracket display only. */
+export async function fetchKnockoutSlots(): Promise<KnockoutSlot[]> {
+  const apiMatches = await fetchApiMatches();
+  return apiMatches
+    .map(normalizeSlot)
+    .filter((m): m is KnockoutSlot => m !== null);
+}
+
 /** In-play score for a single live match (for display only). */
 export type LiveScore = {
   extId: string;
