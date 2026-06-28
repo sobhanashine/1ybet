@@ -6,7 +6,6 @@ import BottomNav from "@/components/BottomNav";
 import { t } from "@/lib/i18n";
 import StickyWidget from "@/components/StickyWidget";
 import GuideVideoPopup from "@/components/GuideVideoPopup";
-import { GitFork } from "lucide-react";
 
 export default async function AppLayout({
   children,
@@ -36,15 +35,6 @@ export default async function AppLayout({
         </Link>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/bracket"
-            className="flex h-8 items-center gap-1 rounded-[var(--radius-md)] border border-line bg-surface-2 px-2 text-[11px] font-extrabold text-ink transition hover:bg-elevated"
-            title={t.nav.bracket}
-          >
-            <GitFork className="h-3.5 w-3.5 rotate-90 text-pitch-500" strokeWidth={2.4} aria-hidden />
-            <span>{t.nav.bracket}</span>
-          </Link>
-
           {user.isAdmin && (
             <Link
               href="/admin"
