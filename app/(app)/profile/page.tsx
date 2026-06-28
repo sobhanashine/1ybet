@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
+import { logout } from "@/app/actions/auth";
 import { getUserTournamentBreakdown, getUserBadges } from "@/lib/profile";
 import { getStartMatch, getTournamentLeaderboard } from "@/lib/tournament";
 import { POINTS } from "@/lib/scoring";
@@ -6,7 +8,7 @@ import NotificationToggle from "@/components/NotificationToggle";
 import { BadgeArt } from "@/components/BadgeArt";
 import { t } from "@/lib/i18n";
 import { toPersianDigits } from "@/lib/format";
-import { Percent, Target, Trophy } from "lucide-react";
+import { Percent, Target, Trophy, LogOut } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -216,6 +218,24 @@ export default async function ProfilePage() {
       </section>
 
       <NotificationToggle hasEmail={!!user.email} />
+
+      {/* Account actions — moved here since the top header was removed. */}
+      <div className="space-y-2 pt-1">
+        {user.isAdmin && (
+          <Link
+            href="/admin"
+            className="btn btn-secondary w-full justify-center gap-2 py-2.5 text-sm"
+          >
+            🛠️ {t.nav.admin}
+          </Link>
+        )}
+        <form action={logout}>
+          <button className="btn btn-ghost w-full justify-center gap-2 py-2.5 text-sm text-danger hover:bg-danger/10">
+            <LogOut className="h-4 w-4" aria-hidden />
+            {t.nav.logout}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

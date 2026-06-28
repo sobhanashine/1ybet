@@ -119,6 +119,10 @@ This supersedes the nav order and `/knockout` rendering above. The bottom nav is
 - **Home is the raised center FAB** (green `pitch-500`); **Tournament is now a plain side tab** (uniform with the others — the earlier gold tint was removed per user request). Order: Tournament · Knockout · [Home] · Leaderboard · Profile.
 - The duplicate **"جدول حذفی" button was removed from the top header** (`app/(app)/layout.tsx`) — the bracket is reachable only from the bottom menu now. The `/bracket` prediction page still exists at its route.
 
+### Top header removed entirely (`app/(app)/layout.tsx`)
+- The app shell now has **no top header** (it was briefly reworked into a glass pill, then dropped per user request). Navigation is the bottom glass nav only. `<main>` carries `pt-[max(1.25rem,env(safe-area-inset-top))]` so content still clears the status bar/notch. `Link`/`t` imports were dropped from the layout.
+- Everything that lived in the header **moved to the bottom of the profile page** (`app/(app)/profile/page.tsx`), in an "account actions" block: the **logout** (full-width danger-tinted `خروج` button, `LogOut` icon, `<form action={logout}>`) and, for admins, the **🛠️ admin link** to `/admin` (`btn-secondary`). The header was the only UI path to both, so they had to be preserved somewhere.
+
 ### Vercel Analytics
 - `@vercel/analytics` (^2) wired via `import { Analytics } from "@vercel/analytics/next"` rendered in the root `app/layout.tsx` `<body>`. Use the **`/next`** export subpath (App Router), not `/react`.
 
