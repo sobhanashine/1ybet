@@ -4,6 +4,7 @@ import "./globals.css";
 import { t } from "@/lib/i18n";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import TelegramProvider from "@/components/TelegramProvider";
+import { Analytics } from "@vercel/analytics/next";
 
 const vazir = Vazirmatn({
   variable: "--font-vazir",
@@ -45,6 +46,7 @@ export default function RootLayout({
         {/* Loads the Telegram WebApp SDK (afterInteractive) and initialises it. */}
         <TelegramProvider />
         <ServiceWorkerRegister />
+        <Analytics />
       </body>
     </html>
   );

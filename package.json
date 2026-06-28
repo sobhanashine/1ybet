@@ -15,6 +15,7 @@
     "email:test": "tsx scripts/test-reminder-email.ts"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "dayjs": "^1.11.21",
     "drizzle-orm": "^0.45.2",
     "jalaliday": "^3.1.1",
