@@ -13,6 +13,7 @@ export const fa = {
     compare: "مقایسه",
     bracket: "جدول حذفی",
     standings: "جدول جام جهانی",
+    knockout: "مرحله حذفی",
     profile: "پروفایل",
     tournament: "تورنمنت",
     admin: "مدیریت",
@@ -216,11 +217,25 @@ export const fa = {
     registerCta: "ثبت‌نام در تورنمنت",
     registered: "تو داخل تورنمنت هستی ✅",
     viewLeaderboard: "دیدن جدول تورنمنت",
+    knockoutTitle: "مسیر مرحله حذفی",
+    knockoutSeeAll: "دیدن همه بازی‌ها",
+    knockoutNotStarted: "مرحله حذفی هنوز شروع نشده",
     congratsTitle: "تبریک! 🎉",
     congratsBody:
       "ثبت‌نامت توی تورنمنت انجام شد. حالا برو نتیجهٔ بازی‌ها رو پیش‌بینی کن!",
     startPredicting: "شروع پیش‌بینی",
     redirecting: "در حال انتقال به صفحهٔ خانه…",
+  },
+
+  // knockout bracket (live results from football-data.org)
+  knockout: {
+    title: "جدول حذفی",
+    subtitle: "نتایج زندهٔ مرحله حذفی",
+    empty: "مسابقات مرحله حذفی هنوز شروع نشده‌اند",
+    unavailable: "دریافت اطلاعات ممکن نشد. کمی بعد دوباره امتحان کنید.",
+    live: "زنده",
+    finished: "پایان",
+    source: "بر اساس داده‌های زندهٔ football-data.org",
   },
 
   // bracket

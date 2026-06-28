@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Medal, Table2, Trophy, User } from "lucide-react";
+import { GitBranch, Home, Medal, Trophy, User } from "lucide-react";
 import { t } from "@/lib/i18n";
 
 // Two tabs on each side of the raised center Tournament button.
 const LEFT = [
   { href: "/", label: t.nav.home, Icon: Home },
-  { href: "/standings", label: t.nav.standings, Icon: Table2 },
+  { href: "/knockout", label: t.nav.knockout, Icon: GitBranch },
 ];
 const RIGHT = [
   { href: "/leaderboard", label: t.nav.leaderboard, Icon: Medal },
