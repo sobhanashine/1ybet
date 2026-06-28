@@ -1,7 +1,9 @@
 import { fetchKnockoutSlots, type KnockoutSlot } from "@/lib/football-api";
 import { teamFa } from "@/lib/teams-fa";
 import { t } from "@/lib/i18n";
+import { isLiveWindow } from "@/lib/time";
 import TeamFlag from "@/components/TeamFlag";
+import KnockoutAutoRefresh from "@/components/KnockoutAutoRefresh";
 import { GitBranch, Trophy, ArrowLeft, Check } from "lucide-react";
 import { toPersianDigits, formatJalaliDate, formatTime } from "@/lib/format";
 
@@ -299,12 +301,19 @@ export default async function KnockoutPage() {
 
   const hasData = allSlots.length > 0;
 
+  // Auto-refresh only while a knockout match is plausibly in progress, so a
+  // finished result fills into the bracket without a manual reload.
+  const liveActive = allSlots.some(
+    (s) => s.status !== "FINISHED" && isLiveWindow(s.kickoffAt),
+  );
+
   // Final shown prominently at the top once both finalists are known.
   const finalSlot = sortByKickoff(byStage.get("FINAL") ?? [])[0] ?? null;
   const finalReady = finalSlot?.homeTeam && finalSlot?.awayTeam;
 
   return (
     <div className="space-y-5">
+      <KnockoutAutoRefresh active={liveActive} />
       <div className="flex items-center gap-2">
         <GitBranch className="h-5 w-5 text-pitch-700" aria-hidden />
         <div>
