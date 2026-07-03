@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { db } from "./db";
 import { matches, predictions, users } from "./db/schema";
 import { sendEmail, predictionResultEmailHtml } from "./email";
@@ -44,6 +44,16 @@ async function upsertFromApi(): Promise<{ fetched: number; upserted: number }> {
           homeScore: m.homeScore,
           awayScore: m.awayScore,
           winnerTeam: m.winnerTeam,
+          // If the API delivers a corrected regulation score (e.g. it initially
+          // returned 0-0 before updating), clear scoredAt so that
+          // scoreFinishedMatches() re-scores all predictions against the new
+          // result on the next sync — preventing the silent wrong-score bug.
+          scoredAt: sql`CASE
+            WHEN excluded.home_score IS DISTINCT FROM matches.home_score
+              OR excluded.away_score IS DISTINCT FROM matches.away_score
+            THEN NULL::timestamptz
+            ELSE matches.scored_at
+          END`,
         },
       });
     upserted++;
