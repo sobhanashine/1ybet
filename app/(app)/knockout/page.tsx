@@ -4,6 +4,7 @@ import { t } from "@/lib/i18n";
 import { isLiveWindow } from "@/lib/time";
 import TeamFlag from "@/components/TeamFlag";
 import KnockoutAutoRefresh from "@/components/KnockoutAutoRefresh";
+import KnockoutAutoScroll from "@/components/KnockoutAutoScroll";
 import { GitBranch, Trophy, ArrowLeft, Check } from "lucide-react";
 import { toPersianDigits, formatJalaliDate, formatTime } from "@/lib/format";
 
@@ -74,6 +75,24 @@ function resolveNextMatch(
     .filter((s) => stageIndex(s.stage) > here && LADDER_STAGES.includes(s.stage))
     .sort((a, b) => stageIndex(a.stage) - stageIndex(b.stage))[0];
   return next ?? null;
+}
+
+/**
+ * The soonest non-finished match on the main ladder — used to auto-scroll the
+ * user to the action they can take next. THIRD_PLACE is intentionally excluded:
+ * the consolation match has no bearing on the championship path the user is
+ * tracking, and on a typical WC weekend it shares a kickoff with the FINAL
+ * (earlier kickoff would otherwise beat the championship). Returns null when
+ * every match is finished.
+ */
+function findNextMatch(slots: KnockoutSlot[]): KnockoutSlot | null {
+  return (
+    [...slots]
+      .filter(
+        (s) => s.status !== "FINISHED" && LADDER_STAGES.includes(s.stage),
+      )
+      .sort((a, b) => a.kickoffAt.getTime() - b.kickoffAt.getTime())[0] ?? null
+  );
 }
 
 // ── Sub-components ───────────────────────────────────────────────────────────
@@ -182,7 +201,7 @@ function MatchCard({
   const awayLost = decided && !!slot.awayTeam && !awayWon;
 
   return (
-    <div className="card overflow-hidden">
+    <div className="card overflow-hidden" data-knockout-match={slot.extId}>
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 py-2.5">
         <TeamCell
           team={slot.homeTeam}
@@ -314,6 +333,7 @@ export default async function KnockoutPage() {
   return (
     <div className="space-y-5">
       <KnockoutAutoRefresh active={liveActive} />
+      <KnockoutAutoScroll extId={findNextMatch(allSlots)?.extId ?? null} />
       <div className="flex items-center gap-2">
         <GitBranch className="h-5 w-5 text-pitch-700" aria-hidden />
         <div>
