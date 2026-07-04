@@ -17,6 +17,7 @@ type ApiMatch = {
     fullTime: ApiScorePair;
     halfTime: ApiScorePair;
     regularTime?: ApiScorePair | null;
+    extraTime?: ApiScorePair | null;
   };
 };
 
@@ -57,17 +58,39 @@ function mapStatus(s: string): NormalizedMatch["status"] {
 }
 
 /**
- * Regulation result: prefer `regularTime` (goals after 90 min), which is set
- * for knockout matches that went to extra time / penalties. Fall back to
- * `fullTime` for group matches where `regularTime` is absent.
+ * Regulation (90-minute) result only — never extra time or penalties.
+ *
+ * football-data.org exposes three possible layouts for KO matches:
+ *   A) regularTime: {home, away}  — directly the 90-min score (preferred)
+ *   B) regularTime: null, extraTime: {home, away}
+ *      — fullTime includes ET goals; derive regulation = fullTime − extraTime
+ *   C) neither field present (group matches, or API not yet updated)
+ *      — fall back to fullTime (correct for group; may be stale for KO)
  */
 function regulationScore(m: ApiMatch): { home: number | null; away: number | null } {
   if (m.status !== "FINISHED") return { home: null, away: null };
+
+  // Layout A: regularTime is populated — use it directly.
   const rt = m.score.regularTime;
   if (rt && rt.home != null && rt.away != null) {
     return { home: rt.home, away: rt.away };
   }
-  return { home: m.score.fullTime.home, away: m.score.fullTime.away };
+
+  // Layout B: match went to ET/penalties and regularTime is null.
+  // Derive regulation score by subtracting extraTime goals from fullTime.
+  const et = m.score.extraTime;
+  const ft = m.score.fullTime;
+  const etDuration = m.score.duration; // "EXTRA_TIME" | "PENALTY_SHOOTOUT"
+  if (
+    (etDuration === "EXTRA_TIME" || etDuration === "PENALTY_SHOOTOUT") &&
+    et && et.home != null && et.away != null &&
+    ft.home != null && ft.away != null
+  ) {
+    return { home: ft.home - et.home, away: ft.away - et.away };
+  }
+
+  // Layout C: fallback (group matches, or API data not yet complete).
+  return { home: ft.home, away: ft.away };
 }
 
 export function normalize(m: ApiMatch): NormalizedMatch | null {
