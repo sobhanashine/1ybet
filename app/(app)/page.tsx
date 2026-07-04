@@ -10,6 +10,7 @@ import EmailReminderBanner from "@/components/EmailReminderBanner";
 import { FirstVisitTournamentGate } from "@/components/FirstVisitTournamentGate";
 import { t } from "@/lib/i18n";
 import { toPersianDigits, formatJalaliDate, tehranDayKey } from "@/lib/format";
+import { CalendarDays } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -50,17 +51,16 @@ export default async function HomePage() {
   const days = groupByDay(allMatches);
   const nextMatchId = allMatches.find((m) => m.status !== "FINISHED")?.id;
 
+  // Show points even when 0 once the user is in the tournament — they’ve
+  // staked in, so the rank pill is meaningful even before scoring starts.
+  const pointsLabel =
+    userRank > 0 || totalPoints > 0 ? toPersianDigits(totalPoints) : "۰";
+
   // Only poll the live-scores endpoint when a match is plausibly in progress.
   // On any other day the provider does nothing, so there's zero polling overhead.
   const liveActive = allMatches.some(
     (m) => m.status !== "FINISHED" && isLiveWindow(m.kickoffAt),
   );
-
-  const stats = [
-    { label: t.profile.totalPoints, value: totalPoints > 0 || userRank > 0 ? toPersianDigits(totalPoints) : "۰" },
-    { label: t.tournament.rankLabel, value: userRank > 0 ? toPersianDigits(userRank) : "—" },
-    { label: "پیش‌بینی‌ها", value: toPersianDigits(totalPredicted) },
-  ];
 
   return (
     <div className="space-y-6">
@@ -68,40 +68,59 @@ export default async function HomePage() {
           tournament page once. Members (userRank > 0) are never redirected. */}
       <FirstVisitTournamentGate isMember={userRank > 0} />
 
-      {/* Welcome / stats */}
-      <div className="card p-5">
-        <div className="mb-4">
-          <span className="text-xs font-semibold text-pitch-700">{t.auth.welcome}</span>
-          <h1 className="mt-1 text-2xl font-extrabold text-ink">{user.displayName} 👋</h1>
-        </div>
-        <div className="grid grid-cols-3 divide-x divide-x-reverse divide-line border-t border-line pt-4">
-          {stats.map((s) => (
-            <div key={s.label} className="px-2 text-center">
-              <span className="block text-3xl font-black text-pitch-700 tnum">{s.value}</span>
-              <span className="mt-1 block text-[11px] font-semibold text-muted">{s.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <section aria-labelledby="home-welcome-heading" className="card p-5">
+        <span className="text-[11px] font-semibold text-pitch-700">
+          {t.auth.welcome}
+        </span>
+        <h1
+          id="home-welcome-heading"
+          className="mt-1 text-[clamp(1.5rem,5vw,1.875rem)] font-extrabold leading-tight text-ink"
+        >
+          {user.displayName} <span aria-hidden>👋</span>
+        </h1>
 
-      {/* Promote the email-reminder opt-in to users who haven't added an email */}
+        {/* dt/dd pairs carry the label/value semantics; the grid places a
+            single divider between cells, RTL-aware via divide-x-reverse. */}
+        <dl className="mt-4 grid grid-cols-3 divide-x divide-x-reverse divide-line border-t border-line pt-4">
+          <Stat value={pointsLabel} label={t.profile.totalPoints} tone="accent" />
+          <Stat
+            value={userRank > 0 ? toPersianDigits(userRank) : "—"}
+            label={t.tournament.rankLabel}
+          />
+          <Stat
+            value={toPersianDigits(totalPredicted)}
+            label={t.profile.predicted}
+          />
+        </dl>
+      </section>
+
       <EmailReminderBanner hasEmail={!!user.email} />
 
-      <div className="space-y-7">
-        <h2 className="section-label px-0.5">{t.nav.fixtures}</h2>
+      <section aria-labelledby="home-fixtures-heading" className="space-y-7">
+        <h2 id="home-fixtures-heading" className="section-label px-0.5">
+          {t.nav.fixtures}
+        </h2>
 
         {days.length === 0 ? (
-          <div className="card p-8 text-center">
-            <p className="text-sm text-muted">{t.leaderboard.empty}</p>
-          </div>
+          <EmptyFixtures />
         ) : (
           <LiveScoresProvider active={liveActive}>
             {days.map(([day, ms]) => (
-              <section key={day} className="space-y-3">
-                <h3 className="flex items-center gap-3 px-0.5 text-sm font-bold text-ink-dim" suppressHydrationWarning>
-                  {formatJalaliDate(ms[0].kickoffAt)}
-                  <span className="h-px flex-1 bg-line" />
-                </h3>
+              <div key={day} className="space-y-3">
+                <div className="flex items-center gap-3 px-0.5">
+                  <h3
+                    className="m-0 text-sm font-bold text-ink-dim"
+                    suppressHydrationWarning
+                  >
+                    {formatJalaliDate(ms[0].kickoffAt)}
+                  </h3>
+                  <span aria-hidden className="h-px flex-1 bg-line" />
+                  <span className="text-[11px] font-semibold text-muted">
+                    {ms.length === 1
+                      ? "۱ بازی"
+                      : `${toPersianDigits(ms.length)} بازی`}
+                  </span>
+                </div>
                 <div className="space-y-3">
                   {ms.map((m) => (
                     <MatchCard
@@ -112,11 +131,52 @@ export default async function HomePage() {
                     />
                   ))}
                 </div>
-              </section>
+              </div>
             ))}
           </LiveScoresProvider>
         )}
-      </div>
+      </section>
+    </div>
+  );
+}
+
+/** One label/value stat inside the welcome-card description list. The grid
+ *  wrapper handles dividers; this cell renders the pair + spacing only. */
+function Stat({
+  value,
+  label,
+  tone,
+}: {
+  value: string;
+  label: string;
+  tone?: "accent";
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1 px-2">
+      <dd
+        className={`text-2xl font-black ${
+          tone === "accent" ? "text-pitch-700" : "text-ink"
+        }`}
+      >
+        {value}
+      </dd>
+      <dt className="text-[10.5px] font-semibold text-muted">{label}</dt>
+    </div>
+  );
+}
+
+/** Friendly no-fixtures state. Used when the schedule is empty
+ *  (pre-tournament, or all matches finished with no live ones planned). */
+function EmptyFixtures() {
+  return (
+    <div className="card flex flex-col items-center gap-3 p-10 text-center">
+      <span
+        aria-hidden
+        className="flex h-12 w-12 items-center justify-center rounded-full bg-pitch-50 text-pitch-700"
+      >
+        <CalendarDays className="h-6 w-6" strokeWidth={1.8} />
+      </span>
+      <p className="text-sm text-ink-dim">{t.leaderboard.empty}</p>
     </div>
   );
 }
