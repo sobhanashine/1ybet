@@ -60,23 +60,30 @@ function Row({ match }: { match: AdminMatch }) {
           <option value="LIVE">در حال انجام</option>
           <option value="FINISHED">تمام‌شده</option>
         </select>
-        <input
-          type="number"
-          min={0}
-          value={home}
-          onChange={(e) => setHome(e.target.value)}
-          disabled={status !== "FINISHED"}
-          className="field h-9 w-12 px-0 disabled:opacity-50"
-        />
-        <span className="text-muted">-</span>
-        <input
-          type="number"
-          min={0}
-          value={away}
-          onChange={(e) => setAway(e.target.value)}
-          disabled={status !== "FINISHED"}
-          className="field h-9 w-12 px-0 disabled:opacity-50"
-        />
+        <div className="flex flex-col gap-1">
+          {status === "FINISHED" && (
+            <span className="text-[10px] text-muted text-center">نتیجه ۹۰ دقیقه</span>
+          )}
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min={0}
+              value={home}
+              onChange={(e) => setHome(e.target.value)}
+              disabled={status !== "FINISHED"}
+              className="field h-9 w-12 px-0 disabled:opacity-50"
+            />
+            <span className="text-muted">-</span>
+            <input
+              type="number"
+              min={0}
+              value={away}
+              onChange={(e) => setAway(e.target.value)}
+              disabled={status !== "FINISHED"}
+              className="field h-9 w-12 px-0 disabled:opacity-50"
+            />
+          </div>
+        </div>
         <button
           onClick={save}
           disabled={pending}

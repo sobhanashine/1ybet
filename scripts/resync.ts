@@ -34,11 +34,19 @@ function normalize(m: any) {
   if (!m.homeTeam?.name || !m.awayTeam?.name) return null;
   const finished = m.status === "FINISHED";
   const rt = m.score?.regularTime;
-  const reg =
-    finished && rt && rt.home != null && rt.away != null
-      ? { home: rt.home, away: rt.away }
+  const et = m.score?.extraTime;
+  const ft = m.score?.fullTime;
+  const etDuration = m.score?.duration;
+  // Layout A: regularTime is set directly.
+  // Layout B: regularTime null but extraTime available — derive regulation = fullTime − extraTime.
+  // Layout C: fallback to fullTime (group stage / stale data).
+  const reg = finished && rt && rt.home != null && rt.away != null
+    ? { home: rt.home, away: rt.away }
+    : finished && (etDuration === "EXTRA_TIME" || etDuration === "PENALTY_SHOOTOUT") &&
+      et && et.home != null && et.away != null && ft?.home != null && ft?.away != null
+      ? { home: ft.home - et.home, away: ft.away - et.away }
       : finished
-        ? { home: m.score.fullTime.home, away: m.score.fullTime.away }
+        ? { home: ft?.home ?? null, away: ft?.away ?? null }
         : { home: null, away: null };
   let winnerTeam: string | null = null;
   if (finished) {
