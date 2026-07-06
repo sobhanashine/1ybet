@@ -126,6 +126,25 @@ This supersedes the nav order and `/knockout` rendering above. The bottom nav is
 ### Vercel Analytics
 - `@vercel/analytics` (^2) wired via `import { Analytics } from "@vercel/analytics/next"` rendered in the root `app/layout.tsx` `<body>`. Use the **`/next`** export subpath (App Router), not `/react`.
 
+## Home polish + knockout auto-scroll (added 2026-07)
+A small UI / UX pass on the two highest-traffic surfaces. Built off `dev`. Shipped as `feat/polish-ui` → fast-forwarded to `dev` → fast-forwarded to `main`.
+
+### Home page polish (`app/(app)/page.tsx`)
+- **Semantic regions.** The welcome card and the fixtures list are now top-level `<section aria-labelledby="...">` elements with a single `<h1>` (greeting) and a single `<h2>` (fixtures list) — screen-reader heading nav works across the page.
+- **Stats row is a `<dl>`.** The three label/value cells are `<dd>` (value) + `<dt>` (label) inside flex-column wrappers, sitting in a `grid-cols-3` with a single `divide-x divide-x-reverse divide-line`. One RTL-aware divider between adjacent cells; no per-cell `border-s`, so the leading and trailing outer edges stay clean. The accent tone (`pitch-700`) is opt-in via a `tone="accent"` prop on the points `<Stat>`; everything else reads in `ink`.
+- **Day headers are real `<h3>`.** Each day's date renders as an `<h3>` so screen readers keep a coherent `h1 → h2 → h3` ladder, with a hairline rule and a match-count chip ("۱ بازی" / "X بازی") inline. Day-group `<section>` was demoted to `<div>` so we don't double-region the fixtures area.
+- **`pointsLabel` helper.** The "show points even when 0 once the user is in the tournament" rule is now a single named local with a comment, replacing the prior inline ternary.
+- **Empty state is iconified.** When the schedule is empty (pre-tournament or fully finished), `EmptyFixtures` shows a circular `pitch-50` chip with a `CalendarDays` icon + dual-tone copy instead of raw text.
+- **Fluid greeting.** `text-[clamp(1.5rem,5vw,1.875rem)]` keeps the welcome line from jumping sizes on small phones vs phablets.
+- **`tnum` class dropped.** Removed redundant `tnum` markings on stat values — the global `font-feature-settings: "ss01"` in `app/globals.css` already applies tabular digits project-wide. Don't reintroduce `.tnum` on numeric nodes; the system-level rule is now the single source of truth (DESIGN.md "Tabular Alignment Rule" stands — the rule is global, the class no longer needs to be applied per element).
+
+### Knockout auto-scroll (`app/(app)/knockout/page.tsx` + new `components/KnockoutAutoScroll.tsx`)
+- **New client component** `components/KnockoutAutoScroll.tsx` — on mount, queries the DOM for `[data-knockout-match="<extId>"]` and `scrollIntoView({ behavior: "smooth", block: "center" })` with a 300 ms delay (so the live-refresh settles first). Mirrors the home-page MatchCard auto-scroll pattern for consistency.
+- **Server tags.** Every knockout `<MatchCard>` carries `data-knockout-match={slot.extId}` on its outer div (set in the page, not in the shared card — the card itself stays agnostic of which surface it's on).
+- **`findNextMatch` helper.** Picks the soonest non-finished match on the **main ladder** (`THIRD_PLACE` excluded — consolation can share a kickoff day with the championship and would otherwise out-rank it). If the FINAL slot is rendered twice (featured + round section), `querySelector` returns the first hit; harmless because the featured FINAL is at the top of the page and the scroll is a no-op there.
+- **`CSS.escape` on `extId`.** External ids from the API are numeric today, but the escape is defensive in case the schema ever widens — cheap, prevents attribute-selector injection / parse errors.
+- **Refresh-safe.** When `KnockoutAutoRefresh` calls `router.refresh()` and the next match changes, the `useEffect` re-fires (extId is the dep) and scrolls to the new target. When the bracket is fully finished or `extId` is null, the effect short-circuits — no scroll.
+
 ## Sending email / Telegram to users
 - Scripts: `scripts/announce-guide.ts` (guide-video broadcast) and `scripts/announce-video.ts` follow the same dual-channel (email + Telegram) pattern with `--telegram-only` / `--email-only`, `--only <id>`, `--admins`. Newer **Telegram-only** one-offs are simpler — `scripts/remind-join-tournament.ts`, `scripts/remind-tournament-starting-soon.ts` (`--all` = every telegram user vs. default non-members) and `scripts/announce-analyze-standings.ts` (feature announcement to all telegram users). **Default to dry-run** (print recipients, send nothing); pass `--send` to deliver. Always dry-run first and confirm content + counts with the user — this is irreversible outward messaging to real people.
 - Reachability is small: most users have a `telegram_id`, few have a real `email` (some `email` values are the literal string `"NULL"` — filter on `includes("@")`).
