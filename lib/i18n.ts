@@ -211,6 +211,15 @@ export const fa = {
       "یه ویدیوی کوتاه آماده کردیم که نشون می‌ده چطور توی تورنمنت ثبت‌نام کنی و شرایطش چیه. الان می‌بینیش؟",
     guidePopupYes: "بله، نشونم بده",
     guidePopupNo: "نه، نمایش نده",
+    resultsPopupTitle: "نتایج نهایی تورنمنت اعلام شد 🏆",
+    resultsPopupBody: "رتبه و امتیاز نهایی‌ات را در جدول تورنمنت ببین.",
+    resultsPopupWinner: "تبریک به {winner}، برنده نهایی تورنمنت! 🎉",
+    resultsPopupPaymentTitle: "پرداخت ورودی تورنمنت",
+    resultsPopupPaymentBody:
+      "اگر هنوز ورودی ۱۰۰٬۰۰۰ تومانی خودت را پرداخت نکرده‌ای، آن را به کارت برنده واریز کن.",
+    resultsPopupCopyCard: "کپی شماره کارت",
+    resultsPopupCopied: "شماره کارت کپی شد",
+    resultsPopupCta: "دیدن نتایج نهایی",
     // how-to + in-page registration (the tournament page is now the join surface)
     howTitle: "چطور وارد تورنمنت بشم؟",
     how1: "ثبت‌نام کن (ورودی هر نفر ۱۰۰٬۰۰۰ تومان)",

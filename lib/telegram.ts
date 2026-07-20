@@ -1,6 +1,10 @@
 import "server-only";
 
-export async function sendTelegramMessage(telegramId: string, text: string): Promise<boolean> {
+export async function sendTelegramMessage(
+  telegramId: string,
+  text: string,
+  replyMarkup?: Record<string, unknown>,
+): Promise<boolean> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) {
     console.error("sendTelegramMessage: TELEGRAM_BOT_TOKEN not configured");
@@ -16,6 +20,7 @@ export async function sendTelegramMessage(telegramId: string, text: string): Pro
         chat_id: telegramId,
         text,
         parse_mode: "HTML",
+        ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
       }),
     });
     if (!res.ok) {

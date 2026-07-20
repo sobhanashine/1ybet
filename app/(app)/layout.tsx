@@ -3,6 +3,8 @@ import { getCurrentUser } from "@/lib/auth";
 import BottomNav from "@/components/BottomNav";
 import StickyWidget from "@/components/StickyWidget";
 import GuideVideoPopup from "@/components/GuideVideoPopup";
+import TournamentResultsPopup from "@/components/TournamentResultsPopup";
+import { getStartMatch, getTournamentLeaderboard, isMember } from "@/lib/tournament";
 
 export default async function AppLayout({
   children,
@@ -13,6 +15,10 @@ export default async function AppLayout({
   if (!user) redirect("/login");
   if (!user.displayName) redirect("/onboarding");
 
+  const [startMatch, member] = await Promise.all([getStartMatch(), isMember(user.id)]);
+  const winner = startMatch
+    ? (await getTournamentLeaderboard(startMatch.kickoffAt))[0] ?? null
+    : null;
   const initialHasEmail = !!user.email;
 
   return (
@@ -26,6 +32,11 @@ export default async function AppLayout({
       <StickyWidget initialHasEmail={initialHasEmail} />
 
       <GuideVideoPopup />
+
+      <TournamentResultsPopup
+        winnerName={winner?.displayName ?? null}
+        isTournamentMember={member}
+      />
 
       <BottomNav />
     </div>

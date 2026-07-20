@@ -62,8 +62,9 @@ async function upsertFromApi(): Promise<{ fetched: number; upserted: number }> {
 }
 
 /**
- * Score predictions for FINISHED matches that have a regulation score and
- * unscored predictions. Returns how many matches/predictions were scored.
+ * Score predictions for FINISHED matches that have a regulation score and no
+ * score-completion marker. A cleared marker means football-data.org corrected
+ * the regulation result, so every prediction must be recalculated.
  */
 export async function scoreFinishedMatches(): Promise<{
   matchesScored: number;
@@ -85,7 +86,7 @@ export async function scoreFinishedMatches(): Promise<{
   let predictionsScored = 0;
 
   for (const m of finished) {
-    const unscored = await db
+    const matchPredictions = await db
       .select({
         prediction: predictions,
         email: users.email,
@@ -94,9 +95,9 @@ export async function scoreFinishedMatches(): Promise<{
       })
       .from(predictions)
       .innerJoin(users, eq(predictions.userId, users.id))
-      .where(and(eq(predictions.matchId, m.id), eq(predictions.scored, false)));
+      .where(eq(predictions.matchId, m.id));
 
-    if (unscored.length === 0) {
+    if (matchPredictions.length === 0) {
       if (!m.scoredAt) {
         await db
           .update(matches)
@@ -106,7 +107,8 @@ export async function scoreFinishedMatches(): Promise<{
       continue;
     }
 
-    for (const p of unscored) {
+    for (const p of matchPredictions) {
+      const isNewlyScored = !p.prediction.scored;
       const basePts = scorePrediction(
         p.prediction.predHome,
         p.prediction.predAway,
@@ -123,7 +125,9 @@ export async function scoreFinishedMatches(): Promise<{
       const homeFa = teamFa(m.homeTeam);
       const awayFa = teamFa(m.awayTeam);
 
-      if (p.telegramId) {
+      // Corrected results are settled silently: the user has already received
+      // a result notification, but their stored points still need to change.
+      if (isNewlyScored && p.telegramId) {
         try {
           let message = "";
           if (basePts === 10) {
@@ -153,7 +157,7 @@ ${message}`;
         } catch (err) {
           console.error("Failed to send prediction result Telegram message:", err);
         }
-      } else if (p.email) {
+      } else if (isNewlyScored && p.email) {
         try {
           const html = predictionResultEmailHtml({
             displayName: p.displayName || "کاربر",
