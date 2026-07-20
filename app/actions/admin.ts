@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { eq, isNotNull } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { matches, users, pushSubscriptions } from "@/lib/db/schema";
+import { matches, users, pushSubscriptions, tournamentMembers } from "@/lib/db/schema";
+import type { TournamentPaymentStatus } from "@/lib/tournament-payment";
 import { getCurrentUser } from "@/lib/auth";
 import { runSync, rescoreMatch } from "@/lib/sync";
 import { runReminders } from "@/lib/reminders";
@@ -78,6 +79,32 @@ export async function saveMatchResult(
   revalidatePath("/");
   revalidatePath("/tournament");
   return { ok: true, info: "ذخیره شد" };
+}
+
+export async function setTournamentPaymentStatus(
+  userId: number,
+  status: TournamentPaymentStatus,
+): Promise<AdminResult> {
+  if (!(await requireAdmin())) return { ok: false, error: "Unauthorized" };
+  if (!Number.isInteger(userId) || !["PENDING", "PAID", "UNPAID"].includes(status)) {
+    return { ok: false, error: "وضعیت پرداخت نامعتبر است" };
+  }
+
+  const updated = await db
+    .update(tournamentMembers)
+    .set({
+      paymentStatus: status,
+      paymentRespondedAt: status === "PENDING" ? null : new Date(),
+    })
+    .where(eq(tournamentMembers.userId, userId))
+    .returning({ userId: tournamentMembers.userId });
+
+  if (updated.length === 0) {
+    return { ok: false, error: "شرکت‌کننده پیدا نشد" };
+  }
+
+  revalidatePath("/admin");
+  return { ok: true, info: "وضعیت پرداخت ذخیره شد" };
 }
 
 export async function broadcast(

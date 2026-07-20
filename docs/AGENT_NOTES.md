@@ -151,5 +151,11 @@ A small UI / UX pass on the two highest-traffic surfaces. Built off `dev`. Shipp
 - **Email caveat**: `RESEND_FROM` is `onboarding@resend.dev` (Resend's free sender), which only delivers to the Resend **account owner's** address. To email everyone, verify a domain at resend.com/domains and set `RESEND_FROM` to it. Telegram has no such limit.
 - **Telegram network caveat**: `api.telegram.org` is often **blocked from the user's machine** (Iran) — sends time out with `ConnectTimeoutError`. It works only when the user has a VPN/proxy active. Resend and Supabase remain reachable. If a Telegram send times out, ask the user to enable their VPN and retry, rather than assuming the token/code is wrong.
 
+### Tournament entry-payment tracking (added 2026-07)
+- `tournament_members.payment_status` tracks `PENDING | PAID | UNPAID`; `payment_responded_at` records the latest response. These are participant self-reports, not bank verification.
+- The admin page shows totals and every participant, including Telegram reachability, and allows an admin-authenticated manual correction through `setTournamentPaymentStatus()`.
+- `npm run tournament:payment-status` targets tournament members only, intentionally excludes Arash (`Arash` / `@arashkind92`), lists unreachable members, and is dry-run by default. Append `-- --send` only after approval to deliver the inline-button question.
+- Payment callback data is HMAC-signed with `TELEGRAM_BOT_TOKEN` and bound to the recipient's Telegram id. The webhook verifies the signature and membership before updating the database.
+
 ## Git workflow used here
 Feature branch off `dev` → PR to `dev` → check PR is `CLEAN`/`MERGEABLE` (GitGuardian + Vercel preview must pass) → merge to `dev`, delete the feature branch → merge `dev` into `main`. **Never delete `dev` or `main`.** Commit messages end with the `Co-Authored-By: Claude` trailer; PR bodies end with the Claude Code trailer.

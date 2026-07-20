@@ -28,6 +28,12 @@ export const matchStatus = pgEnum("match_status", [
   "FINISHED",
 ]);
 
+export const tournamentPaymentStatus = pgEnum("tournament_payment_status", [
+  "PENDING",
+  "PAID",
+  "UNPAID",
+]);
+
 // --- users ---
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -144,6 +150,8 @@ export const tournamentMembers = pgTable("tournament_members", {
     .primaryKey()
     .references(() => users.id, { onDelete: "cascade" }),
   joinedAt: timestamp("joined_at", { withTimezone: true }).notNull().defaultNow(),
+  paymentStatus: tournamentPaymentStatus("payment_status").notNull().default("PENDING"),
+  paymentRespondedAt: timestamp("payment_responded_at", { withTimezone: true }),
 });
 
 // --- streaks & badges ---

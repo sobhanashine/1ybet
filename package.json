@@ -12,7 +12,8 @@
     "db:push": "drizzle-kit push",
     "seed": "tsx scripts/seed.ts",
     "bot:setup": "tsx scripts/set-webhook.ts",
-    "email:test": "tsx scripts/test-reminder-email.ts"
+    "email:test": "tsx scripts/test-reminder-email.ts",
+    "tournament:payment-status": "tsx scripts/ask-tournament-payment-status.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
