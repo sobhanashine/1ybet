@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
-import { desc } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { matches } from "@/lib/db/schema";
+import { matches, tournamentMembers, users } from "@/lib/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { getPollBreakdown, PRIZE_POOL_POLL } from "@/lib/polls";
 import AdminTools from "@/components/AdminTools";
 import AdminMatchEditor from "@/components/AdminMatchEditor";
 import AdminPollResults from "@/components/AdminPollResults";
+import AdminTournamentPayments from "@/components/AdminTournamentPayments";
 import { t } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +17,7 @@ export default async function AdminPage() {
   if (!user) redirect("/login");
   if (!user.isAdmin) redirect("/");
 
-  const [allMatches, pollBreakdown] = await Promise.all([
+  const [allMatches, pollBreakdown, paymentMembers] = await Promise.all([
     db
       .select({
         id: matches.id,
@@ -30,6 +31,19 @@ export default async function AdminPage() {
       .from(matches)
       .orderBy(desc(matches.kickoffAt)),
     getPollBreakdown(PRIZE_POOL_POLL),
+    db
+      .select({
+        userId: tournamentMembers.userId,
+        name: users.displayName,
+        phone: users.phone,
+        telegramUsername: users.telegramUsername,
+        telegramId: users.telegramId,
+        status: tournamentMembers.paymentStatus,
+        respondedAt: tournamentMembers.paymentRespondedAt,
+      })
+      .from(tournamentMembers)
+      .innerJoin(users, eq(users.id, tournamentMembers.userId))
+      .orderBy(asc(tournamentMembers.joinedAt)),
   ]);
 
   return (
@@ -39,6 +53,18 @@ export default async function AdminPage() {
       <AdminTools />
 
       <AdminPollResults data={pollBreakdown} />
+
+      <AdminTournamentPayments
+        members={paymentMembers.map((member) => ({
+          userId: member.userId,
+          name: member.name ?? t.poll.adminNoVotes,
+          phone: member.phone,
+          telegramUsername: member.telegramUsername,
+          hasTelegram: Boolean(member.telegramId),
+          status: member.status,
+          respondedAt: member.respondedAt,
+        }))}
+      />
 
       <section className="space-y-3">
         <h2 className="section-label">{t.nav.fixtures}</h2>

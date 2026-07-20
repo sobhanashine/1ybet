@@ -20,19 +20,19 @@ export default function StickyWidget({ initialHasEmail }: Props) {
   useEffect(() => {
     // Check localStorage to see if user has already dismissed this widget
     const isDismissed = localStorage.getItem("sticky_widget_dismissed") === "true";
-    if (isDismissed) {
-      setStep("none");
-      setDismissed(true);
-      return;
-    }
+    // Defer the client-only reveal so the effect synchronizes with storage
+    // without causing a synchronous cascading render.
+    const revealTimer = window.setTimeout(() => {
+      if (!isDismissed && !initialHasEmail) {
+        setStep("email");
+        setDismissed(false);
+      } else {
+        setStep("none");
+        setDismissed(true);
+      }
+    }, 0);
 
-    if (!initialHasEmail) {
-      setStep("email");
-      setDismissed(false);
-    } else {
-      setStep("none");
-      setDismissed(true);
-    }
+    return () => window.clearTimeout(revealTimer);
   }, [initialHasEmail]);
 
   if (dismissed || step === "none") return null;
